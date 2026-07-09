@@ -1,2 +1,2 @@
-# Insider Threat Behavioral Intelligence System
+# AI Textile Waste Intelligence Platform
 Infosys Springboard Internship Project.

@@ -10,6 +10,20 @@ import EditProfile from "./pages/users/EditProfile";
 import ChangePassword from "./pages/users/ChangePassword";
 import UserList from "./pages/users/UserList";
 import UserDetails from "./pages/users/UserDetails";
+import CreateManufacturerProfile from "./pages/manufacturers/CreateManufacturerProfile";
+import ManufacturerProfile from "./pages/manufacturers/ManufacturerProfile";
+import EditManufacturerProfile from "./pages/manufacturers/EditManufacturerProfile";
+import ManufacturerList from "./pages/manufacturers/ManufacturerList";
+import ManufacturerDetails from "./pages/manufacturers/ManufacturerDetails";
+
+import AddInventory from "./pages/inventory/AddInventory";
+import MyInventory from "./pages/inventory/MyInventory";
+import EditInventory from "./pages/inventory/EditInventory";
+import InventoryDetails from "./pages/inventory/InventoryDetails";
+import InventoryList from "./pages/inventory/InventoryList";
+
+import DatasetList from "./pages/dataset/DatasetList";
+import DatasetDetails from "./pages/dataset/DatasetDetails";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -93,6 +107,113 @@ function App() {
           </ProtectedRoute>
         }
       />
+      {/* Manufacturer Routes */}
+
+<Route
+    path="/manufacturer/create"
+    element={
+        <ProtectedRoute>
+            <CreateManufacturerProfile />
+        </ProtectedRoute>
+    }
+/>
+
+<Route
+    path="/manufacturer/profile"
+    element={
+        <ProtectedRoute>
+            <ManufacturerProfile />
+        </ProtectedRoute>
+    }
+/>
+
+<Route
+    path="/manufacturer/edit"
+    element={
+        <ProtectedRoute>
+            <EditManufacturerProfile />
+        </ProtectedRoute>
+    }
+/>
+
+<Route
+    path="/manufacturers"
+    element={
+        <ProtectedRoute>
+            <ManufacturerList />
+        </ProtectedRoute>
+    }
+/>
+
+<Route
+    path="/manufacturers/:id"
+    element={
+        <ProtectedRoute>
+            <ManufacturerDetails />
+        </ProtectedRoute>
+    }
+/>
+<Route
+    path="/inventory/add"
+    element={
+        <ProtectedRoute>
+            <AddInventory />
+        </ProtectedRoute>
+    }
+/>
+
+<Route
+    path="/inventory/my"
+    element={
+        <ProtectedRoute>
+            <MyInventory />
+        </ProtectedRoute>
+    }
+/>
+
+<Route
+    path="/inventory/edit/:id"
+    element={
+        <ProtectedRoute>
+            <EditInventory />
+        </ProtectedRoute>
+    }
+/>
+
+<Route
+    path="/inventory/:id"
+    element={
+        <ProtectedRoute>
+            <InventoryDetails />
+        </ProtectedRoute>
+    }
+/>
+
+<Route
+    path="/inventory"
+    element={
+        <ProtectedRoute>
+            <InventoryList />
+        </ProtectedRoute>
+    }
+/>
+<Route
+    path="/dataset"
+    element={
+        <ProtectedRoute>
+            <DatasetList />
+        </ProtectedRoute>
+    }
+/>
+
+<Route
+    path="/dataset/:id"
+    element={
+        <ProtectedRoute>
+            <DatasetDetails />
+        </ProtectedRoute>
+    }
+/>
 
       {/* 404 */}
       <Route

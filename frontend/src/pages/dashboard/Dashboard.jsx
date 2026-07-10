@@ -1,59 +1,168 @@
+import { Link } from "react-router-dom";
+
 import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
 
 import useAuth from "../../hooks/useAuth";
 
 const Dashboard = () => {
-  const { user } = useAuth();
 
-  return (
-    <>
-      <Navbar />
+    const { user } = useAuth();
 
-      <div
-        style={{
-          display: "flex",
-        }}
-      >
-        <Sidebar />
+    return (
 
-        <div
-          style={{
-            flex: 1,
-            padding: "30px",
-          }}
-        >
-          <h1>Welcome, {user?.name} 👋</h1>
+        <>
+            <Navbar />
 
-          <hr />
+            <div
+                style={{
+                    display: "flex"
+                }}
+            >
 
-          <h3>User Details</h3>
+                <Sidebar />
 
-          <p>
-            <strong>Name:</strong> {user?.name}
-          </p>
+                <div
+                    style={{
+                        flex: 1,
+                        padding: "30px"
+                    }}
+                >
 
-          <p>
-            <strong>Email:</strong> {user?.email}
-          </p>
+                    <h1>
+                        Welcome, {user?.name} 👋
+                    </h1>
 
-          <p>
-            <strong>Role:</strong> {user?.role}
-          </p>
+                    <hr />
 
-          <br />
+                    <h3>User Details</h3>
 
-          <h3>Quick Overview</h3>
+                    <p>
+                        <strong>Name:</strong> {user?.name}
+                    </p>
 
-          <p>
-            This is your dashboard. From here you can
-            manage your profile and access features
-            based on your role.
-          </p>
-        </div>
-      </div>
-    </>
-  );
+                    <p>
+                        <strong>Email:</strong> {user?.email}
+                    </p>
+
+                    <p>
+                        <strong>Role:</strong> {user?.role}
+                    </p>
+
+                    <br />
+
+                    <h3>Quick Actions</h3>
+
+                    {/* Profile */}
+
+                    <Link to="/profile">
+                        <button>
+                            My Profile
+                        </button>
+                    </Link>
+
+                    <br /><br />
+
+                    {/* Manufacturer */}
+
+                    {
+                        user?.role === "Manufacturer" && (
+                            <>
+
+                                <Link to="/manufacturer/profile">
+                                    <button>
+                                        Manufacturer Profile
+                                    </button>
+                                </Link>
+
+                                <br /><br />
+
+                                <Link to="/inventory/add">
+                                    <button>
+                                        Add Inventory
+                                    </button>
+                                </Link>
+
+                                <br /><br />
+
+                                <Link to="/inventory/my">
+                                    <button>
+                                        My Inventory
+                                    </button>
+                                </Link>
+                                <br /><br />
+
+<Link to="/dataset">
+    <button>
+        Sustainability Dataset
+    </button>
+</Link>
+
+                            </>
+                        )
+                    }
+
+                    {/* Recycler */}
+
+                    {
+                        user?.role === "Recycler" && (
+                            <>
+
+                                <p>
+                                    Recycler dashboard features will be added in the next milestone.
+                                </p>
+
+                            </>
+                        )
+                    }
+
+                    {/* Admin */}
+
+                    {
+                        user?.role === "Admin" && (
+                            <>
+
+                                <Link to="/users">
+                                    <button>
+                                        Manage Users
+                                    </button>
+                                </Link>
+
+                                <br /><br />
+
+                                <Link to="/manufacturers">
+                                    <button>
+                                        Manage Manufacturers
+                                    </button>
+                                </Link>
+
+                                <br /><br />
+
+                                <Link to="/inventory">
+                                    <button>
+                                        View All Inventory
+                                    </button>
+                                </Link>
+                                <br /><br />
+
+<Link to="/dataset">
+    <button>
+        Manage Sustainability Dataset
+    </button>
+</Link>
+
+                            </>
+                        )
+                    }
+
+                </div>
+
+            </div>
+
+        </>
+
+    );
+
 };
 
 export default Dashboard;

@@ -1,55 +1,155 @@
 import { Link } from "react-router-dom";
-import useAuth from "../hooks/useAuth";
 
 const Sidebar = () => {
-  const { user } = useAuth();
 
-  return (
-    <div
-      style={{
-        width: "250px",
-        minHeight: "calc(100vh - 70px)",
-        background: "#F3F4F6",
-        padding: "20px",
-        boxSizing: "border-box",
-      }}
-    >
-      <h3>Menu</h3>
+    const role = localStorage.getItem("role");
 
-      <ul
-        style={{
-          listStyle: "none",
-          padding: 0,
-        }}
-      >
-        <li style={{ marginBottom: "15px" }}>
-          <Link to="/dashboard">Dashboard</Link>
-        </li>
+    return (
 
-        <li style={{ marginBottom: "15px" }}>
-          <Link to="/profile">My Profile</Link>
-        </li>
+        <div
+            style={{
+                width: "250px",
+                minHeight: "100vh",
+                background: "#f4f4f4",
+                padding: "20px"
+            }}
+        >
 
-        <li style={{ marginBottom: "15px" }}>
-          <Link to="/profile/edit">Edit Profile</Link>
-        </li>
+            <h3>Dashboard</h3>
 
-        <li style={{ marginBottom: "15px" }}>
-          <Link to="/change-password">
-            Change Password
-          </Link>
-        </li>
+            <hr />
 
-        {user?.role === "Admin" && (
-          <li style={{ marginBottom: "15px" }}>
-            <Link to="/users">
-              User Management
+            <ul
+                style={{
+                    listStyle: "none",
+                    padding: 0
+                }}
+            >
+
+                <li>
+                    <Link to="/dashboard">
+                        Home
+                    </Link>
+                </li>
+
+                <br />
+
+                <li>
+                    <Link to="/profile">
+                        User Profile
+                    </Link>
+                </li>
+
+                <br />
+
+                <li>
+                    <Link to="/profile/edit">
+                        Edit User Profile
+                    </Link>
+                </li>
+
+                <br />
+
+                <li>
+                    <Link to="/change-password">
+                        Change Password
+                    </Link>
+                </li>
+
+                {
+                    role === "Manufacturer" && (
+                        <>
+
+                            <hr />
+
+                            <h4>Manufacturer</h4>
+
+                            <li>
+                                <Link to="/manufacturer/create">
+                                    Create Profile
+                                </Link>
+                            </li>
+
+                            <br />
+
+                            <li>
+                                <Link to="/manufacturer/profile">
+                                    View Profile
+                                </Link>
+                            </li>
+
+                            <br />
+
+                            <li>
+                                <Link to="/manufacturer/edit">
+                                    Edit Profile
+                                </Link>
+                            </li>
+                            <li>
+    <Link to="/inventory/add">
+        Add Inventory
+    </Link>
+</li>
+
+<li>
+    <Link to="/inventory/my">
+        My Inventory
+    </Link>
+</li>
+
+                        </>
+                    )
+                }
+
+                {
+                    role === "Admin" && (
+                        <>
+
+                            <hr />
+
+                            <h4>Administration</h4>
+
+                            <li>
+                                <Link to="/users">
+                                    User Management
+                                </Link>
+                            </li>
+
+                            <br />
+
+                            <li>
+                                <Link to="/manufacturers">
+                                    Manufacturer Management
+                                </Link>
+                            </li>
+                            <li>
+    <Link to="/inventory">
+        All Inventory
+    </Link>
+</li>
+
+                        </>
+                    )
+                }
+                {
+    (user?.role === "Admin" ||
+     user?.role === "Manufacturer") && (
+
+        <li>
+            <Link to="/dataset">
+                Sustainability Dataset
             </Link>
-          </li>
-        )}
-      </ul>
-    </div>
-  );
+        </li>
+
+    )
+}
+
+            </ul>
+
+        </div>
+
+    );
+
 };
 
 export default Sidebar;

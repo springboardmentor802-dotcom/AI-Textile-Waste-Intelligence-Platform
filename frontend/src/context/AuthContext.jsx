@@ -4,97 +4,138 @@ import { loginUser, getCurrentUser } from "../api/userApi";
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
 
-  const [loading, setLoading] = useState(true);
+    const [user, setUser] = useState(null);
 
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const initializeAuth = async () => {
-      const token = localStorage.getItem("access_token");
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-      if (!token) {
-        setLoading(false);
-        return;
-      }
+    useEffect(() => {
 
-      try {
-        const currentUser = await getCurrentUser();
+        const initializeAuth = async () => {
 
-        setUser(currentUser);
+            const token = localStorage.getItem("access_token");
 
-        setIsAuthenticated(true);
-      } catch (error) {
-        console.error(error);
+            if (!token) {
+                setLoading(false);
+                return;
+            }
+
+            try {
+
+                const currentUser = await getCurrentUser();
+
+                setUser(currentUser);
+
+                setIsAuthenticated(true);
+
+                localStorage.setItem(
+                    "user",
+                    JSON.stringify(currentUser)
+                );
+
+                localStorage.setItem(
+                    "role",
+                    currentUser.role
+                );
+
+            } catch (error) {
+
+                console.error(error);
+
+                localStorage.removeItem("access_token");
+                localStorage.removeItem("user");
+                localStorage.removeItem("role");
+
+                setUser(null);
+
+                setIsAuthenticated(false);
+
+            }
+
+            setLoading(false);
+
+        };
+
+        initializeAuth();
+
+    }, []);
+
+    const login = async (credentials) => {
+
+        try {
+
+            const data = await loginUser(credentials);
+
+            localStorage.setItem(
+                "access_token",
+                data.access_token
+            );
+
+            const currentUser = await getCurrentUser();
+
+            setUser(currentUser);
+
+            setIsAuthenticated(true);
+
+            localStorage.setItem(
+                "user",
+                JSON.stringify(currentUser)
+            );
+
+            localStorage.setItem(
+                "role",
+                currentUser.role
+            );
+
+            return {
+                success: true
+            };
+
+        } catch (error) {
+
+            return {
+                success: false,
+                message:
+                    error.response?.data?.detail ||
+                    "Login Failed"
+            };
+
+        }
+
+    };
+
+    const logout = () => {
 
         localStorage.removeItem("access_token");
+        localStorage.removeItem("user");
+        localStorage.removeItem("role");
 
         setUser(null);
 
         setIsAuthenticated(false);
-      }
 
-      setLoading(false);
     };
 
-    initializeAuth();
-  }, []);
+    return (
 
-  const login = async (credentials) => {
-    try {
-      const data = await loginUser(credentials);
+        <AuthContext.Provider
+            value={{
+                user,
+                loading,
+                isAuthenticated,
+                login,
+                logout
+            }}
+        >
+            {children}
+        </AuthContext.Provider>
 
-      localStorage.setItem(
-        "access_token",
-        data.access_token
-      );
+    );
 
-      const currentUser = await getCurrentUser();
-
-      setUser(currentUser);
-
-      setIsAuthenticated(true);
-
-      return {
-        success: true
-      };
-
-    } catch (error) {
-
-      return {
-        success: false,
-        message:
-          error.response?.data?.detail ||
-          "Login Failed"
-      };
-    }
-  };
-
-  const logout = () => {
-
-    localStorage.removeItem("access_token");
-
-    setUser(null);
-
-    setIsAuthenticated(false);
-  };
-
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        loading,
-        isAuthenticated,
-        login,
-        logout
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
 };
 
-// export const useAuth = () => {
-//   return useContext(AuthContext);
-// };
+export const useAuth = () => {
+    return useContext(AuthContext);
+};

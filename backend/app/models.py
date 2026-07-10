@@ -1,8 +1,13 @@
 import enum
-from sqlalchemy import Column, Integer, String, Enum as SQLEnum
+from datetime import datetime
+from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Enum as SQLEnum
+from sqlalchemy.orm import relationship
 from app.database import Base
 
-# Strict roles definition for Textile Waste Platform
+# ==========================================
+# 🔐 USER ACCOUNT ENUMS & MODELS
+# ==========================================
+
 class UserRole(str, enum.Enum):
     RECYCLING_OPERATOR = "Recycling_Operator"
     SUSTAINABILITY_MANAGER = "Sustainability_Manager"
@@ -17,13 +22,14 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     role = Column(SQLEnum(UserRole), default=UserRole.MANUFACTURER, nullable=False)
 
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Enum as SQLEnum
-from sqlalchemy.orm import relationship
-import enum
-from datetime import datetime
-from app.database import Base
+    # FIXED: Back-reference added here to sync perfectly with Inventory model
+    inventory_items = relationship("Inventory", back_populates="owner", cascade="all, delete-orphan")
 
-# Section 2 ke specifications ke mutabik Enums
+
+# ==========================================
+# 📦 TEXTILE INVENTORY ENUMS & MODELS
+# ==========================================
+
 class FabricTypeEnum(str, enum.Enum):
     cotton = "Cotton"
     polyester = "Polyester"
@@ -49,12 +55,11 @@ class StatusEnum(str, enum.Enum):
     processed = "Processed"
     diverted = "Diverted"
 
-# Main Inventory Table Definition for SQL
 class Inventory(Base):
     __tablename__ = "inventory"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False) # Linked to Users table
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     batch_id = Column(String, unique=True, index=True, nullable=False)
     fabric_type = Column(SQLEnum(FabricTypeEnum), nullable=False)
     source = Column(String, nullable=False)
@@ -64,5 +69,5 @@ class Inventory(Base):
     collection_date = Column(DateTime, default=datetime.utcnow, nullable=False)
     status = Column(SQLEnum(StatusEnum), default=StatusEnum.pending, nullable=False)
 
-    # Relationship setup
+    # Relationship setup matching perfectly with User model
     owner = relationship("User", back_populates="inventory_items")

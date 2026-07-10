@@ -1,11 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from typing import List
 from app.database import get_db
-from app.models import User
-from app.schemas import UserCreate, UserLogin, UserResponse  # Token hata diya taaki custom response validation issue na kare
-from app.auth import get_password_hash, verify_password, create_access_token
+from app.models import User, Inventory, FabricTypeEnum, ConditionEnum, StatusEnum
+from app.schemas import UserCreate, UserLogin, UserResponse, InventoryCreate, InventoryUpdate
+from app.auth import get_password_hash, verify_password, create_access_token, get_current_user
 
-router = APIRouter(prefix="/auth", tags=["User Authentication"])
+# Single router definition for the whole file
+router = APIRouter(prefix="/auth", tags=["Authentication & Inventory"])
+
+# ==========================================
+# 🔐 USER AUTHENTICATION ENDPOINTS
+# ==========================================
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
@@ -23,13 +29,12 @@ def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
         hashed_password=hashed_password,
         role=user_data.role
     )
-    
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
     return new_user
 
-@router.post("/login")  # response_model hata diya taaki role field smoothly frontend tak pass ho sake
+@router.post("/login")
 def login_user(login_data: UserLogin, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == login_data.email).first()
     if not user:
@@ -45,43 +50,35 @@ def login_user(login_data: UserLogin, db: Session = Depends(get_db)):
             detail="Invalid email or password.",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
-    # Enum se string value extract karne ke liye .value ka use kiya hai ya fallback seedha string check
+
     role_value = user.role.value if hasattr(user.role, 'value') else str(user.role)
 
     token_claims = {
-        "sub": user.email,
+        "sub": str(user.id),  # standard practice id tracking ke liye
         "role": role_value
     }
     access_token = create_access_token(data=token_claims)
     
-    # Yahan token ke sath role explicitly return ho raha hai
     return {
         "access_token": access_token, 
         "token_type": "bearer",
         "role": role_value
     }
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from typing import List
-from app.database import get_db # Tumhara DB session generator
-from app.models import Inventory, FabricTypeEnum, ConditionEnum, StatusEnum
-from app.schemas import InventoryCreate, InventoryUpdate
-from app.auth import get_current_user # Tumhara Auth logic middleware
-
-router = APIRouter(prefix="/inventory", tags=["Inventory Management"])
+# ==========================================
+# 📦 TEXTILE INVENTORY ENDPOINTS
+# ==========================================
 
 # 1. Create - Waste Registration
-@router.post("/", status_code=status.HTTP_201_CREATED)
-def register_waste(payload: InventoryCreate, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+@router.post("/inventory/", status_code=status.HTTP_201_CREATED)
+def register_waste(payload: InventoryCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     # Batch ID uniqueness check
     existing_batch = db.query(Inventory).filter(Inventory.batch_id == payload.batch_id).first()
     if existing_batch:
         raise HTTPException(status_code=400, detail="Waste Batch ID already exists!")
     
     new_item = Inventory(
-        user_id=current_user.id, # Custom auth logic ke field ke mutabik adjust karein (e.g., current_user.id)
+        user_id=current_user.id,
         batch_id=payload.batch_id,
         fabric_type=payload.fabric_type,
         source=payload.source,
@@ -90,15 +87,14 @@ def register_waste(payload: InventoryCreate, db: Session = Depends(get_db), curr
         condition=payload.condition,
         collection_date=payload.collection_date
     )
-    
     db.add(new_item)
     db.commit()
     db.refresh(new_item)
     return {"message": "Waste item registered successfully", "id": new_item.id}
 
 # 2. Read - Get All Inventory Items
-@router.get("/")
-def get_inventory(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+@router.get("/inventory/")
+def get_inventory(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     # Admin & Sustainability Manager can see everything, others see only their own entries
     if current_user.role in ["Admin", "Sustainability Manager"]:
         items = db.query(Inventory).all()
@@ -108,8 +104,8 @@ def get_inventory(db: Session = Depends(get_db), current_user: dict = Depends(ge
     return {"data": items}
 
 # 3. Update - Batch Management / Monitoring
-@router.put("/{item_id}")
-def update_inventory(item_id: int, payload: InventoryUpdate, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+@router.put("/inventory/{item_id}")
+def update_inventory(item_id: int, payload: InventoryUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     item = db.query(Inventory).filter(Inventory.id == item_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Inventory item not found")
@@ -128,8 +124,8 @@ def update_inventory(item_id: int, payload: InventoryUpdate, db: Session = Depen
     return {"message": "Inventory updated successfully"}
 
 # 4. Delete - Remove Waste Record
-@router.delete("/{item_id}")
-def delete_inventory(item_id: int, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+@router.delete("/inventory/{item_id}")
+def delete_inventory(item_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     item = db.query(Inventory).filter(Inventory.id == item_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Inventory item not found")

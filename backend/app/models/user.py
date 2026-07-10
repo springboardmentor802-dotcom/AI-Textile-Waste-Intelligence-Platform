@@ -4,6 +4,7 @@ from sqlalchemy import String
 from sqlalchemy import DateTime
 
 from datetime import datetime
+from sqlalchemy.orm import relationship
 
 from app.database.base import Base
 
@@ -23,3 +24,15 @@ class User(Base):
     role = Column(String, nullable=False)
 
     created_at = Column(DateTime, default=datetime.utcnow)
+
+
+
+
+
+
+manufacturer = relationship(
+    "Manufacturer",
+    back_populates="user",
+    uselist=False,
+    cascade="all, delete-orphan"
+)

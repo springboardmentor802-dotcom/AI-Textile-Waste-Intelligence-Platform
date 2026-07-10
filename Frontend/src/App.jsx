@@ -1,20 +1,18 @@
-import { useState } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Login from './pages/Login';
+import Register from './pages/Register';
 
 function App() {
-  const [message, setMessage] = useState('');
-
-  async function callBackend() {
-    const response = await fetch('http://localhost:8000/');
-    const data = await response.json();
-    setMessage(data.message);
-  }
-
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>Textile Waste Intelligence Platform</h1>
-      <button onClick={callBackend}>Call Backend</button>
-      {message && <p>Backend says: {message}</p>}
-    </div>
+    <BrowserRouter>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

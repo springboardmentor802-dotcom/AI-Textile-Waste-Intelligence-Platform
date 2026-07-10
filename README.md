@@ -454,7 +454,6 @@ View Dataset
 
 Recycler
 
-(Future Module)
 ```
 
 Unauthorized users receive:

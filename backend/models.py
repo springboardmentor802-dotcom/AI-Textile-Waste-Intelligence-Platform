@@ -1,0 +1,2 @@
+class WasteInventory:
+    pass

@@ -1,0 +1,4 @@
+batch_id,fabric_type,source,quantity,color,condition,collection_date
+TW001,Cotton,Factory A,100,Blue,Good,2026-07-10
+TW002,Polyester,Factory B,200,Red,Fair,2026-07-10
+TW003,Wool,Factory C,150,Black,Good,2026-07-10

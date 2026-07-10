@@ -1,21 +1,16 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.config import settings
 from app.database import engine, Base
+from app.models.user import User
+from app.routers import auth, users
 
-# Import all models so SQLAlchemy knows about them
-# This must happen before create_all
-from app.models import User
-
-# Create FastAPI app instance
 app = FastAPI(
-    title="Textile Waste Intelligence Platform",
+    title=settings.APP_NAME,
     description="AI-powered textile waste classification and sustainability analytics",
-    version="1.0.0"
+    version=settings.APP_VERSION,
 )
 
-# CORS middleware
-# This allows your React frontend (running on port 3000)
-# to make requests to this backend (running on port 8000)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -25,25 +20,25 @@ app.add_middleware(
 )
 
 
-# Create all database tables on startup
-# If tables already exist, this does nothing (safe to run multiple times)
 @app.on_event("startup")
 async def startup():
     Base.metadata.create_all(bind=engine)
-    print("Database tables created successfully")
+    print("✅ Database tables created successfully")
 
 
-# Root endpoint to verify the API is running
+app.include_router(auth.router)
+app.include_router(users.router)
+
+
 @app.get("/")
 async def root():
     return {
-        "message": "Textile Waste Intelligence Platform API",
+        "message": settings.APP_NAME,
         "status": "running",
-        "version": "1.0.0"
+        "version": settings.APP_VERSION,
     }
 
 
-# Health check endpoint
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}

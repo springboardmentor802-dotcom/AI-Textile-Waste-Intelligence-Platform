@@ -56,3 +56,13 @@
 .auth-switch a:hover {
   text-decoration: underline;
 }
+
+.auth-error {
+  color: #c62828;
+  background-color: #ffebee;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  text-align: center;
+  margin-top: 0.5rem;
+}

@@ -37,7 +37,7 @@ function Dashboard({ onLogout }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-emerald-100 bg-gradient-to-br from-white to-emerald-50/20">
               <h3 className="text-lg font-bold text-emerald-800 mb-3">📦 Log New Textile Waste Shipment</h3>
-              <p className="text-gray-600 text-sm mb-4">Fabric type, weight, degradation scores aur composition parameters batch entry ke liye ready hain.</p>
+              <p className="text-gray-600 text-sm mb-4"><p>Ensure fabric type, weight parameters, degradation metrics, and raw material composition scores are ready for batch logging.</p></p>
               <button className="px-4 py-2 bg-emerald-600 text-white text-xs font-semibold rounded-lg hover:bg-emerald-700 transition">
                 + Create Batch Entry
               </button>
@@ -69,7 +69,8 @@ function Dashboard({ onLogout }) {
         {role === 'Admin' && (
           <div className="bg-amber-50 border border-amber-200 p-6 rounded-2xl">
             <h3 className="text-lg font-bold text-amber-800 mb-2">🛡️ System Administration Panel</h3>
-            <p className="text-amber-700 text-sm">User system privileges, database connection strings aur cross-origin permission logs yahan se manage honge.</p>
+            <p className="text-amber-700 text-sm">{/* ✅ Ab isse replace kar do */}
+<p>Configure user system privileges, manage database connection strings, and monitor cross-origin permission logs from this panel.</p></p>
           </div>
         )}
       </main>

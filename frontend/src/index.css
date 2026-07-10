@@ -1,0 +1,141 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
+body {
+
+  font-family:
+  "Inter",
+  "Segoe UI",
+  sans-serif;
+
+  background:#F8FAFC;
+
+  color:#0F172A;
+
+}
+
+
+
+button {
+
+  font-family:inherit;
+
+}
+
+
+
+input,
+select,
+textarea {
+
+  font-family:inherit;
+
+}
+
+
+
+::-webkit-scrollbar {
+
+  width:8px;
+
+}
+
+
+
+::-webkit-scrollbar-track {
+
+  background:#F1F5F9;
+
+}
+
+
+
+::-webkit-scrollbar-thumb {
+
+  background:#94A3B8;
+
+  border-radius:20px;
+
+}
+
+
+
+/* Common Card Design */
+
+
+.card {
+
+  background:#FFFFFF;
+
+  border:1px solid #E2E8F0;
+
+  border-radius:18px;
+
+  box-shadow:
+  0 10px 25px rgba(15,23,42,0.05);
+
+}
+
+
+
+/* Primary Button */
+
+
+.primary-btn {
+
+  background:#2563EB;
+
+  color:white;
+
+  border:none;
+
+  padding:12px 20px;
+
+  border-radius:10px;
+
+  cursor:pointer;
+
+  transition:0.3s;
+
+}
+
+
+
+.primary-btn:hover {
+
+  background:#1D4ED8;
+
+}
+
+
+
+/* Green Sustainability Button */
+
+
+.eco-btn {
+
+  background:#15803D;
+
+  color:white;
+
+  border:none;
+
+  padding:12px 20px;
+
+  border-radius:10px;
+
+  cursor:pointer;
+
+}
+
+
+
+.eco-btn:hover {
+
+  background:#166534;
+
+}

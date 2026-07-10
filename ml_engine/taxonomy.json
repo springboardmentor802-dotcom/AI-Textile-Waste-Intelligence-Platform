@@ -1,0 +1,30 @@
+{
+  "garment_type": [
+    "T-Shirt",
+    "Shirt",
+    "Pants",
+    "Jeans",
+    "Dress",
+    "Jacket",
+    "Sweater",
+    "Skirt",
+    "Shorts",
+    "Other"
+  ],
+  "material_type": [
+    "Cotton",
+    "Polyester",
+    "Poly-Cotton Blend",
+    "Denim",
+    "Wool",
+    "Silk",
+    "Mixed/Unknown"
+  ],
+  "waste_status": [
+    "Recyclable",
+    "Reusable",
+    "Degraded",
+    "Contaminated",
+    "Pending"
+  ]
+}

@@ -51,6 +51,14 @@ Infosys Springboard Internship Project - AI Textile Waste Intelligence Platform
 - Pushed authentication updates to GitHub.
 - Started preparation for Login API and Role-Based Access Control.
 
+## Day 6 - Frontend Backend Integration
+
+- Connected React frontend with Flask backend.
+- Integrated User Registration API.
+- Integrated Login API.
+- Integrated Waste Inventory Management API.
+- Verified successful storage of inventory records in SQLite database.
+- Tested complete frontend → backend → database workflow.
 ---
 
 ## Technologies Used

@@ -1,45 +1,192 @@
+import { useState } from "react";
+
 function App() {
+
+  // Registration States
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("Administrator");
+
+  // Inventory States
+  const [batchId, setBatchId] = useState("");
+  const [fabricType, setFabricType] = useState("");
+  const [source, setSource] = useState("");
+  const [quantity, setQuantity] = useState("");
+  const [color, setColor] = useState("");
+  const [condition, setCondition] = useState("");
+  const [collectionDate, setCollectionDate] = useState("");
+
+  // Register User
+  const registerUser = async () => {
+
+    const response = await fetch(
+      "http://127.0.0.1:5000/register",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          full_name: fullName,
+          email: email,
+          password: password,
+          role: role
+        })
+      }
+    );
+
+    const data = await response.json();
+    alert(data.message);
+  };
+
+  // Add Inventory
+  const addInventory = async () => {
+
+    const response = await fetch(
+      "http://127.0.0.1:5000/add_inventory",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          batch_id: batchId,
+          fabric_type: fabricType,
+          source: source,
+          quantity: quantity,
+          color: color,
+          condition: condition,
+          collection_date: collectionDate
+        })
+      }
+    );
+
+    const data = await response.json();
+    alert(data.message);
+  };
+
   return (
     <div style={{ textAlign: "center", padding: "20px" }}>
+
       <h1>Textile Waste Intelligence Platform</h1>
-      <h2>Milestone 1 - Authentication & Inventory Management</h2>
 
       <hr />
 
-      <h3>Login Module</h3>
-      <input type="email" placeholder="Email" /><br /><br />
-      <input type="password" placeholder="Password" /><br /><br />
-      <button>Login</button>
+      <h2>Registration Module</h2>
 
-      <hr />
+      <input
+        type="text"
+        placeholder="Full Name"
+        value={fullName}
+        onChange={(e) => setFullName(e.target.value)}
+      />
 
-      <h3>Registration Module</h3>
-      <input type="text" placeholder="Full Name" /><br /><br />
-      <input type="email" placeholder="Email" /><br /><br />
-      <input type="password" placeholder="Password" /><br /><br />
+      <br /><br />
 
-      <select>
+      <input
+        type="email"
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+
+      <br /><br />
+
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+
+      <br /><br />
+
+      <select
+        value={role}
+        onChange={(e) => setRole(e.target.value)}
+      >
         <option>Administrator</option>
         <option>Manufacturer</option>
         <option>Recycling Operator</option>
       </select>
 
       <br /><br />
-      <button>Register</button>
+
+      <button onClick={registerUser}>
+        Register
+      </button>
 
       <hr />
 
-      <h3>Waste Inventory Management</h3>
+      <h2>Waste Inventory Module</h2>
 
-      <input type="text" placeholder="Waste Batch ID" /><br /><br />
-      <input type="text" placeholder="Fabric Type" /><br /><br />
-      <input type="text" placeholder="Source" /><br /><br />
-      <input type="number" placeholder="Quantity" /><br /><br />
-      <input type="text" placeholder="Color" /><br /><br />
-      <input type="text" placeholder="Condition" /><br /><br />
-      <input type="date" /><br /><br />
+      <input
+        type="text"
+        placeholder="Batch ID"
+        value={batchId}
+        onChange={(e) => setBatchId(e.target.value)}
+      />
 
-      <button>Add Inventory</button>
+      <br /><br />
+
+      <input
+        type="text"
+        placeholder="Fabric Type"
+        value={fabricType}
+        onChange={(e) => setFabricType(e.target.value)}
+      />
+
+      <br /><br />
+
+      <input
+        type="text"
+        placeholder="Source"
+        value={source}
+        onChange={(e) => setSource(e.target.value)}
+      />
+
+      <br /><br />
+
+      <input
+        type="number"
+        placeholder="Quantity"
+        value={quantity}
+        onChange={(e) => setQuantity(e.target.value)}
+      />
+
+      <br /><br />
+
+      <input
+        type="text"
+        placeholder="Color"
+        value={color}
+        onChange={(e) => setColor(e.target.value)}
+      />
+
+      <br /><br />
+
+      <input
+        type="text"
+        placeholder="Condition"
+        value={condition}
+        onChange={(e) => setCondition(e.target.value)}
+      />
+
+      <br /><br />
+
+      <input
+        type="date"
+        value={collectionDate}
+        onChange={(e) => setCollectionDate(e.target.value)}
+      />
+
+      <br /><br />
+
+      <button onClick={addInventory}>
+        Add Inventory
+      </button>
+
     </div>
   );
 }

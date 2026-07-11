@@ -1,8 +1,10 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify
+from flask_cors import CORS
 import sqlite3
 import bcrypt
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route("/")
 def home():
@@ -128,6 +130,43 @@ def login():
         "message": "Invalid Password"
     }), 401
 
+@app.route("/add_inventory", methods=["POST"])
+def add_inventory():
 
+    data = request.get_json()
+
+    batch_id = data["batch_id"]
+    fabric_type = data["fabric_type"]
+    source = data["source"]
+    quantity = data["quantity"]
+    color = data["color"]
+    condition = data["condition"]
+    collection_date = data["collection_date"]
+
+    conn = sqlite3.connect("textile_waste.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    INSERT INTO waste_inventory
+    (batch_id, fabric_type, source, quantity, color, condition, collection_date)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+    """,
+    (
+        batch_id,
+        fabric_type,
+        source,
+        quantity,
+        color,
+        condition,
+        collection_date
+    ))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "message": "Inventory Added Successfully"
+    })
+    
 if __name__ == "__main__":
     app.run(debug=True)

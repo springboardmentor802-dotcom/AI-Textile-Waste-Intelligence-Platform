@@ -83,6 +83,50 @@ def register():
 
     finally:
         conn.close()
+        
+@app.route("/login", methods=["POST"])
+def login():
+
+    data = request.json
+
+    email = data["email"]
+    password = data["password"]
+
+    conn = sqlite3.connect("textile_waste.db")
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT full_name, email, password, role FROM users WHERE email=?",
+        (email,)
+    )
+
+    user = cursor.fetchone()
+
+    conn.close()
+
+    if user is None:
+        return jsonify({
+            "message": "User Not Found"
+        }), 404
+
+    full_name = user[0]
+    stored_password = user[2]
+    role = user[3]
+
+    if bcrypt.checkpw(
+        password.encode("utf-8"),
+        stored_password.encode("utf-8")
+    ):
+
+        return jsonify({
+            "message": "Login Successful",
+            "full_name": full_name,
+            "role": role
+        })
+
+    return jsonify({
+        "message": "Invalid Password"
+    }), 401
 
 
 if __name__ == "__main__":

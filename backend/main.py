@@ -5,8 +5,9 @@ from app.database.database import engine
 from app.database.base import Base
 
 from app.models.user import User
+from app.models.inventory import Inventory
 
-from app.api.auth import router as auth_router
+from app.api.router import api_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -21,7 +22,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth_router)
+app.include_router(api_router)
 
 
 @app.get("/")

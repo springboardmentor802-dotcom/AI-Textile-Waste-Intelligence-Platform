@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function App() {
 
@@ -16,7 +16,7 @@ function App() {
   const [color, setColor] = useState("");
   const [condition, setCondition] = useState("");
   const [collectionDate, setCollectionDate] = useState("");
-
+  const [inventoryData, setInventoryData] = useState([]);
   // Register User
   const registerUser = async () => {
 
@@ -64,7 +64,21 @@ function App() {
 
     const data = await response.json();
     alert(data.message);
+    fetchInventory();
   };
+  const fetchInventory = async () => {
+  const response = await fetch(
+    "http://127.0.0.1:5000/inventory"
+  );
+
+  const data = await response.json();
+
+  setInventoryData(data);
+};
+
+useEffect(() => {
+  fetchInventory();
+}, []);
 
   return (
     <div style={{ textAlign: "center", padding: "20px" }}>
@@ -186,7 +200,39 @@ function App() {
       <button onClick={addInventory}>
         Add Inventory
       </button>
+<hr />
 
+<h2>Inventory Records</h2>
+
+<table
+  border="1"
+  style={{
+    margin: "auto",
+    borderCollapse: "collapse"
+  }}
+>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Batch ID</th>
+      <th>Fabric Type</th>
+      <th>Source</th>
+      <th>Quantity</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {inventoryData.map((item) => (
+      <tr key={item[0]}>
+        <td>{item[0]}</td>
+        <td>{item[1]}</td>
+        <td>{item[2]}</td>
+        <td>{item[3]}</td>
+        <td>{item[4]}</td>
+      </tr>
+    ))}
+  </tbody>
+</table>
     </div>
   );
 }

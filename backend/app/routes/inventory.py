@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.textile_inventory import TextileInventory
+from app.utils.auth_dependency import get_current_user
 
 
 router = APIRouter(
@@ -11,10 +12,12 @@ router = APIRouter(
 )
 
 
-
 # GET ALL INVENTORY
 @router.get("/")
-def get_inventory(db: Session = Depends(get_db)):
+def get_inventory(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
 
     items = db.query(TextileInventory).all()
 
@@ -24,8 +27,11 @@ def get_inventory(db: Session = Depends(get_db)):
 
 # ADD INVENTORY
 @router.post("/")
-def add_inventory(item: dict, db: Session = Depends(get_db)):
-
+def add_inventory(
+    item: dict,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
 
     new_item = TextileInventory(
 
@@ -57,8 +63,9 @@ def add_inventory(item: dict, db: Session = Depends(get_db)):
 # DELETE INVENTORY
 @router.delete("/{item_id}")
 def delete_inventory(
-    item_id:int,
-    db:Session = Depends(get_db)
+    item_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
 ):
 
     item = db.query(TextileInventory).filter(
@@ -79,7 +86,7 @@ def delete_inventory(
 
 
     return {
-        "message":"Inventory deleted successfully"
+        "message": "Inventory deleted successfully"
     }
 
 
@@ -88,11 +95,11 @@ def delete_inventory(
 # UPDATE INVENTORY
 @router.put("/{item_id}")
 def update_inventory(
-    item_id:int,
-    item:dict,
-    db:Session=Depends(get_db)
+    item_id: int,
+    item: dict,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
 ):
-
 
     inventory = db.query(TextileInventory).filter(
         TextileInventory.textile_id == item_id

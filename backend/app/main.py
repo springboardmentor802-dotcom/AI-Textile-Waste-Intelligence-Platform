@@ -1,3 +1,5 @@
+
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 
 from app.database import Base, engine
@@ -17,7 +19,13 @@ app = FastAPI(
     description="Backend API for textile waste classification and management",
     version="1.0"
 )
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 # Register routes
 app.include_router(users.router)
 app.include_router(inventory.router)

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./UploadWaste.css";
+import { createUpload } from "../../services/uploadService";
 
 function UploadWaste() {
 
@@ -27,14 +28,36 @@ function UploadWaste() {
   };
 
 
-  const analyzeWaste = () => {
+const analyzeWaste = async () => {
+
+  if (!image) return;
+
+  try {
+
+    const uploadData = {
+      image_path: image.name,
+      predicted_class: "Cotton",
+      confidence: 0.94,
+      uploaded_by: 1,
+    };
+
+    await createUpload(uploadData);
 
     setResult({
       material: "Cotton",
       confidence: "94%",
     });
 
-  };
+    alert("Upload saved successfully!");
+
+  } catch (error) {
+
+    console.error(error);
+    alert("Failed to save upload.");
+
+  }
+
+};
 
 
   return (

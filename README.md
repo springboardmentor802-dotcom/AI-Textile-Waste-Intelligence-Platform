@@ -1,108 +1,94 @@
-# \# AI Textile Waste Intelligence Platform
+# AI Textile Waste Intelligence Platform
 
-# 
+## Infosys Springboard Internship Project
 
-# Infosys Springboard Internship Project
+### Individual Contribution - Sreevarshini-140
 
-# 
+---
 
-# \## Individual Contribution - Sreevarshini-140
+## Project Overview
 
-# 
+The AI Textile Waste Intelligence Platform is a smart waste management system designed to analyze, classify, and manage textile waste using web technologies and AI-based solutions.
 
-# \## Work Completed
+The platform enables textile industries, recyclers, NGOs, and administrators to manage textile inventory, upload waste information, and generate future AI-driven recommendations.
 
-# 
+---
 
-# \- Set up frontend development environment using React and Vite.
+# Work Completed
 
-# \- Created the application structure with reusable components.
+## Frontend Development
 
-# \- Implemented Navbar and Sidebar components.
+- Set up frontend development environment using React and Vite.
+- Created scalable application structure with reusable components.
+- Implemented:
+  - Navbar
+  - Sidebar
+  - Dashboard Cards
+  - Tables
+  - Layout components
 
-# \- Developed authentication flow and protected routes.
+### Developed Frontend Pages:
 
-# \- Designed and implemented major frontend pages:
+- Login
+- Dashboard
+- Inventory
+- Upload Waste
+- Analytics
+- Recommendations
+- Profile
+- Settings
 
-# &#x20; - Login
+### Frontend Features:
 
-# &#x20; - Dashboard
+- Implemented React Router navigation.
+- Created protected routes.
+- Designed responsive dashboard layout.
+- Developed authentication workflow.
+- Integrated application navigation structure.
 
-# &#x20; - Inventory
+---
 
-# &#x20; - Upload Waste
+# Backend Development
 
-# &#x20; - Analytics
+## FastAPI Backend Setup
 
-# &#x20; - Recommendations
+- Created backend architecture using Python FastAPI.
+- Configured backend dependencies and requirements.
+- Implemented SQLAlchemy ORM integration.
+- Connected backend with MySQL database.
 
-# &#x20; - Profile
+---
 
-# &#x20; - Settings
+# Database Implementation
 
-# \- Implemented routing and layout management.
+Implemented database structure for:
 
-# \- Created initial backend structure using Python.
+- Users
+- Textile Inventory
+- Waste Uploads
+- Recommendations
 
-# \- Configured backend dependencies and requirements.
+Created SQLAlchemy models for managing application data.
 
-# \- Installed required development libraries.
+---
 
-# \- Designed project workflow for textile waste intelligence management.
+# Authentication and Security
 
-# 
+Implemented secure JWT-based authentication system.
 
-# \## Current Progress
+Features:
 
-# 
+- User login authentication.
+- Password hashing using bcrypt.
+- Password verification.
+- JWT token generation.
+- OAuth2 password flow integration.
+- Protected backend APIs using Bearer token authentication.
 
-# \- Frontend UI implementation completed.
+Secured APIs:
 
-# \- Authentication workflow completed.
+- Inventory APIs
+- Waste Upload APIs
+- Recommendation APIs
 
-# \- Dashboard and application navigation completed.
-
-# \- Backend foundation created.
-
-# \- Project structure prepared for database and AI integration.
-
-# 
-
-# \## Remaining Tasks
-
-# 
-
-# \- Integrate SQL database with backend.
-
-# \- Connect frontend with backend APIs.
-
-# \- Add textile waste datasets.
-
-# \- Implement AI-based textile waste classification model.
-
-# \- Develop recommendation and analytics modules.
-
-# \- Complete end-to-end testing.
-
-# 
-
-# \## Technologies Used
-
-# 
-
-# \- React.js
-
-# \- Vite
-
-# \- JavaScript
-
-# \- CSS
-
-# \- Python
-
-# \- FastAPI
-
-# \- SQL
-
-# \- Git \& GitHub
-
+Authentication flow:

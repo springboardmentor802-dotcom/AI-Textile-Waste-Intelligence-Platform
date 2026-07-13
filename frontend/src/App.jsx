@@ -218,6 +218,9 @@ useEffect(() => {
       <th>Fabric Type</th>
       <th>Source</th>
       <th>Quantity</th>
+      <th>Color</th>
+      <th>Condition</th>
+      <th>Collection Date</th>
     </tr>
   </thead>
 
@@ -229,6 +232,9 @@ useEffect(() => {
         <td>{item[2]}</td>
         <td>{item[3]}</td>
         <td>{item[4]}</td>
+        <td>{item[5]}</td>
+        <td>{item[6]}</td>
+        <td>{item[7]}</td>
       </tr>
     ))}
   </tbody>

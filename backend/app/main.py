@@ -1,4 +1,4 @@
-
+from app.routes import auth
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 
@@ -31,6 +31,7 @@ app.include_router(users.router)
 app.include_router(inventory.router)
 app.include_router(uploads.router)
 app.include_router(recommendations.router)
+app.include_router(auth.router)
 
 
 @app.get("/")

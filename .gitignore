@@ -1,3 +1,6 @@
+# Datasets
+datasets/TFD/
+datasets/TIPS/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

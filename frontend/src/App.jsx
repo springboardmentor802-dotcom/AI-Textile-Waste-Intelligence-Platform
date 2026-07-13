@@ -80,7 +80,18 @@ useEffect(() => {
   fetchInventory();
 }, []);
 
-  return (
+const totalRecords = inventoryData.length;
+
+const totalQuantity = inventoryData.reduce(
+  (sum, item) => sum + Number(item[4]),
+  0
+);
+
+const uniqueFabricTypes = new Set(
+  inventoryData.map((item) => item[2])
+).size;
+
+return (
     <div style={{ textAlign: "center", padding: "20px" }}>
 
       <h1>Textile Waste Intelligence Platform</h1>
@@ -200,6 +211,53 @@ useEffect(() => {
       <button onClick={addInventory}>
         Add Inventory
       </button>
+<hr />
+
+<h2>Dashboard</h2>
+
+<div
+  style={{
+    display: "flex",
+    justifyContent: "center",
+    gap: "20px",
+    marginBottom: "20px",
+    flexWrap: "wrap"
+  }}
+>
+  <div
+    style={{
+      border: "1px solid white",
+      padding: "20px",
+      minWidth: "180px"
+    }}
+  >
+    <h3>Total Records</h3>
+    <h2>{totalRecords}</h2>
+  </div>
+
+  <div
+    style={{
+      border: "1px solid white",
+      padding: "20px",
+      minWidth: "180px"
+    }}
+  >
+    <h3>Total Quantity</h3>
+    <h2>{totalQuantity}</h2>
+  </div>
+
+  <div
+    style={{
+      border: "1px solid white",
+      padding: "20px",
+      minWidth: "180px"
+    }}
+  >
+    <h3>Fabric Types</h3>
+    <h2>{uniqueFabricTypes}</h2>
+  </div>
+</div>
+
 <hr />
 
 <h2>Inventory Records</h2>

@@ -90,7 +90,21 @@ const totalQuantity = inventoryData.reduce(
 const uniqueFabricTypes = new Set(
   inventoryData.map((item) => item[2])
 ).size;
+const deleteInventory = async (id) => {
 
+  const response = await fetch(
+    `http://127.0.0.1:5000/delete_inventory/${id}`,
+    {
+      method: "DELETE"
+    }
+  );
+
+  const data = await response.json();
+
+  alert(data.message);
+
+  fetchInventory();
+};
 return (
     <div style={{ textAlign: "center", padding: "20px" }}>
 
@@ -279,6 +293,7 @@ return (
       <th>Color</th>
       <th>Condition</th>
       <th>Collection Date</th>
+      <th>Action</th>
     </tr>
   </thead>
 
@@ -293,6 +308,17 @@ return (
         <td>{item[5]}</td>
         <td>{item[6]}</td>
         <td>{item[7]}</td>
+        <td>
+  <button
+    onClick={() => {
+  if (window.confirm("Are you sure you want to delete this inventory record?")) {
+    deleteInventory(item[0]);
+  }
+}}
+  >
+    Delete
+  </button>
+</td>
       </tr>
     ))}
   </tbody>

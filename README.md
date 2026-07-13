@@ -53,12 +53,15 @@ Infosys Springboard Internship Project - AI Textile Waste Intelligence Platform
 
 ## Day 6 - Frontend Backend Integration
 
-- Connected React frontend with Flask backend.
-- Integrated User Registration API.
-- Integrated Login API.
-- Integrated Waste Inventory Management API.
-- Verified successful storage of inventory records in SQLite database.
+- Connected React frontend with Flask backend APIs.
+- Implemented User Registration functionality from frontend.
+- Implemented Login functionality from frontend.
+- Integrated Waste Inventory Management module with backend.
+- Successfully stored inventory records in SQLite database.
+- Verified data retrieval through Inventory API endpoint.
 - Tested complete frontend → backend → database workflow.
+- Fixed CORS issues for React-Flask communication.
+
 ---
 
 ## Technologies Used

@@ -3,7 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import engine, Base
 from app.models.user import User
-from app.routers import auth, users
+from app.models.textile_batch import TextileBatch
+from app.routers import auth, users, textile
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -28,6 +29,7 @@ async def startup():
 
 app.include_router(auth.router)
 app.include_router(users.router)
+app.include_router(textile.router)
 
 
 @app.get("/")

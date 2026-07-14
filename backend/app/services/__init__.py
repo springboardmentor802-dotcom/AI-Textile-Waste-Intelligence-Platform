@@ -9,3 +9,10 @@ from app.services.auth_service import (
     deactivate_user,
     activate_user,
 )
+from app.services.textile_service import (
+    create_textile_batch,
+    get_all_batches,
+    get_single_batch,
+    update_textile_batch,
+    delete_textile_batch,
+)

@@ -70,6 +70,22 @@ Infosys Springboard Internship Project - AI Textile Waste Intelligence Platform
 - Displayed Unique Fabric Types.
 - Connected dashboard statistics with live inventory data.
 - Verified automatic updates when new inventory records are added.
+## Day 8 - Inventory Record Deletion
+
+- Implemented Delete Inventory API in Flask.
+- Added Delete button for each inventory record.
+- Added confirmation popup before deletion.
+- Successfully removed records from SQLite database.
+- Updated inventory table automatically after deletion.
+- Verified dashboard statistics update after record deletion.
+## Day 9 - JWT Authentication
+
+- Installed PyJWT library.
+- Implemented JWT token generation during login.
+- Added token payload with user email and role.
+- Configured token expiration.
+- Verified JWT token generation successfully.
+- Integrated authentication workflow with backend APIs.
 ---
 
 ## Technologies Used

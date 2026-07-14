@@ -6,6 +6,7 @@ function App() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
   const [role, setRole] = useState("Administrator");
 
   // Inventory States
@@ -39,7 +40,30 @@ function App() {
     const data = await response.json();
     alert(data.message);
   };
+  const loginUser = async () => {
 
+  const response = await fetch(
+    "http://127.0.0.1:5000/login",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email: loginEmail,
+        password: loginPassword
+      })
+    }
+  );
+
+  const data = await response.json();
+
+  if (data.token) {
+    localStorage.setItem("token", data.token);
+  }
+
+  alert(data.message);
+};
   // Add Inventory
   const addInventory = async () => {
 
@@ -153,12 +177,38 @@ return (
       <br /><br />
 
       <button onClick={registerUser}>
-        Register
-      </button>
+  Register
+</button>
 
-      <hr />
+<hr />
 
-      <h2>Waste Inventory Module</h2>
+<h2>Login Module</h2>
+
+<input
+  type="email"
+  placeholder="Email"
+  value={loginEmail}
+  onChange={(e) => setLoginEmail(e.target.value)}
+/>
+
+<br /><br />
+
+<input
+  type="password"
+  placeholder="Password"
+  value={loginPassword}
+  onChange={(e) => setLoginPassword(e.target.value)}
+/>
+
+<br /><br />
+
+<button onClick={loginUser}>
+  Login
+</button>
+
+<hr />
+
+<h2>Waste Inventory Module</h2>
 
       <input
         type="text"

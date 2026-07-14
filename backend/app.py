@@ -2,6 +2,8 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import sqlite3
 import bcrypt
+import jwt
+import datetime
 
 app = Flask(__name__)
 CORS(app)
@@ -120,10 +122,21 @@ def login():
         stored_password.encode("utf-8")
     ):
 
+        token = jwt.encode(
+            {
+                "email": email,
+                "role": role,
+                "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+            },
+            "secret_key",
+            algorithm="HS256"
+        )
+
         return jsonify({
             "message": "Login Successful",
             "full_name": full_name,
-            "role": role
+            "role": role,
+            "token": token
         })
 
     return jsonify({
@@ -167,6 +180,22 @@ def add_inventory():
     return jsonify({
         "message": "Inventory Added Successfully"
     })
-    
+@app.route("/delete_inventory/<int:id>", methods=["DELETE"])
+def delete_inventory(id):
+
+    conn = sqlite3.connect("textile_waste.db")
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "DELETE FROM waste_inventory WHERE id=?",
+        (id,)
+    )
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "message": "Inventory Deleted Successfully"
+    })   
 if __name__ == "__main__":
     app.run(debug=True)

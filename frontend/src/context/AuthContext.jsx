@@ -6,9 +6,7 @@ const AuthContext = createContext(null);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
+  if (!context) throw new Error("useAuth must be used within AuthProvider");
   return context;
 };
 
@@ -48,16 +46,11 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem("user", JSON.stringify(userData));
     setToken(access_token);
     setUser(userData);
-    const dashboardPath = ROLE_DASHBOARD_MAP[userData.role] || "/login";
-    navigate(dashboardPath);
+    navigate(ROLE_DASHBOARD_MAP[userData.role] || "/login");
   };
 
   const logout = () => {
-    try {
-      logoutUser();
-    } catch {
-      // ignore
-    }
+    try { logoutUser(); } catch { /* ignore */ }
     localStorage.removeItem("access_token");
     localStorage.removeItem("user");
     setToken(null);
@@ -65,26 +58,13 @@ export const AuthProvider = ({ children }) => {
     navigate("/login");
   };
 
-  const getDashboardPath = () => {
-    if (!user) return "/login";
-    return ROLE_DASHBOARD_MAP[user.role] || "/login";
-  };
+  const getDashboardPath = () =>
+    user ? ROLE_DASHBOARD_MAP[user.role] || "/login" : "/login";
 
   if (loading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-          backgroundColor: "#f0fdf4",
-          fontSize: "16px",
-          color: "#059669",
-          fontFamily: "Segoe UI, sans-serif",
-        }}
-      >
-        Loading...
+      <div style={loadingStyle}>
+        <div style={spinnerStyle} />
       </div>
     );
   }
@@ -96,4 +76,14 @@ export const AuthProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
+};
+
+const loadingStyle = {
+  display: "flex", justifyContent: "center", alignItems: "center",
+  height: "100vh", backgroundColor: "#f0fdf4",
+};
+const spinnerStyle = {
+  width: 40, height: 40, border: "4px solid #d1fae5",
+  borderTop: "4px solid #059669", borderRadius: "50%",
+  animation: "spin 0.8s linear infinite",
 };

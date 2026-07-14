@@ -9,254 +9,174 @@ const ROLES = [
   "Textile Manufacturer",
 ];
 
-const Register = () => {
+export default function Register() {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    full_name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    role: "",
+  const [form, setForm] = useState({
+    full_name:"", email:"", password:"", confirmPassword:"", role:"",
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setForm({ ...form, [e.target.name]: e.target.value });
     setError("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (
-      !formData.full_name ||
-      !formData.email ||
-      !formData.password ||
-      !formData.role
-    ) {
-      setError("All fields are required.");
-      return;
+    if (!form.full_name || !form.email || !form.password || !form.role) {
+      setError("All fields are required."); return;
     }
-    if (formData.password.length < 8) {
-      setError("Password must be at least 8 characters.");
-      return;
+    if (form.password.length < 8) {
+      setError("Password must be at least 8 characters."); return;
     }
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match.");
-      return;
+    if (form.password !== form.confirmPassword) {
+      setError("Passwords do not match."); return;
     }
     setLoading(true);
     try {
       await registerUser({
-        full_name: formData.full_name,
-        email: formData.email,
-        password: formData.password,
-        role: formData.role,
+        full_name: form.full_name,
+        email: form.email,
+        password: form.password,
+        role: form.role,
       });
-      setSuccess("Account created successfully! Redirecting to login...");
+      setSuccess("Account created! Redirecting to login...");
       setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
-      const message =
-        err?.response?.data?.detail || "Registration failed. Please try again.";
-      setError(message);
+      setError(err?.response?.data?.detail || "Registration failed.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={styles.page}>
-      <div style={styles.card}>
-        <div style={styles.logoSection}>
-          <div style={styles.logoIcon}>♻</div>
-          <h1 style={styles.appName}>TextileWaste AI</h1>
-          <p style={styles.tagline}>Intelligent Waste Management Platform</p>
+    <div style={S.page}>
+      <div style={S.left}>
+        <div style={S.brand}>
+          <span style={S.brandIcon}>♻</span>
+          <h1 style={S.brandName}>TextileWaste AI</h1>
+          <p style={S.brandDesc}>
+            Join the platform and start managing textile waste intelligently
+          </p>
+          <div style={S.roles}>
+            {ROLES.map((r) => (
+              <div key={r} style={S.roleChip}>{r}</div>
+            ))}
+          </div>
         </div>
+      </div>
 
-        <h2 style={styles.title}>Create Account</h2>
-        <p style={styles.subtitle}>Join the platform to get started</p>
+      <div style={S.right}>
+        <div style={S.card}>
+          <h2 style={S.title}>Create Account</h2>
+          <p style={S.subtitle}>Join the platform today</p>
 
-        {error && <div style={styles.errorBox}>{error}</div>}
-        {success && <div style={styles.successBox}>{success}</div>}
+          {error && <div style={S.errorBox}>{error}</div>}
+          {success && <div style={S.successBox}>{success}</div>}
 
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <div style={styles.fieldGroup}>
-            <label style={styles.label}>Full Name</label>
-            <input
-              type="text"
-              name="full_name"
-              value={formData.full_name}
-              onChange={handleChange}
-              placeholder="Enter your full name"
-              style={styles.input}
-              required
-            />
-          </div>
+          <form onSubmit={handleSubmit} style={S.form}>
+            {[
+              { label:"Full Name", name:"full_name", type:"text", placeholder:"Your full name" },
+              { label:"Email Address", name:"email", type:"email", placeholder:"you@example.com" },
+            ].map(({ label, name, type, placeholder }) => (
+              <div key={name} style={S.field}>
+                <label style={S.label}>{label}</label>
+                <input
+                  type={type} name={name} value={form[name]}
+                  onChange={handleChange} placeholder={placeholder}
+                  style={S.input} required
+                />
+              </div>
+            ))}
 
-          <div style={styles.fieldGroup}>
-            <label style={styles.label}>Email Address</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="you@example.com"
-              style={styles.input}
-              required
-            />
-          </div>
+            <div style={S.field}>
+              <label style={S.label}>Role</label>
+              <select name="role" value={form.role}
+                onChange={handleChange} style={S.input} required>
+                <option value="">Select your role</option>
+                {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
+              </select>
+            </div>
 
-          <div style={styles.fieldGroup}>
-            <label style={styles.label}>Role</label>
-            <select
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              style={styles.input}
-              required
-            >
-              <option value="">Select your role</option>
-              {ROLES.map((role) => (
-                <option key={role} value={role}>
-                  {role}
-                </option>
-              ))}
-            </select>
-          </div>
+            {[
+              { label:"Password", name:"password", placeholder:"Minimum 8 characters" },
+              { label:"Confirm Password", name:"confirmPassword", placeholder:"Re-enter password" },
+            ].map(({ label, name, placeholder }) => (
+              <div key={name} style={S.field}>
+                <label style={S.label}>{label}</label>
+                <input
+                  type="password" name={name} value={form[name]}
+                  onChange={handleChange} placeholder={placeholder}
+                  style={S.input} required
+                />
+              </div>
+            ))}
 
-          <div style={styles.fieldGroup}>
-            <label style={styles.label}>Password</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Minimum 8 characters"
-              style={styles.input}
-              required
-            />
-          </div>
+            <button type="submit" style={S.btn} disabled={loading}>
+              {loading ? "Creating Account..." : "Create Account"}
+            </button>
+          </form>
 
-          <div style={styles.fieldGroup}>
-            <label style={styles.label}>Confirm Password</label>
-            <input
-              type="password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              placeholder="Re-enter your password"
-              style={styles.input}
-              required
-            />
-          </div>
-
-          <button type="submit" style={styles.button} disabled={loading}>
-            {loading ? "Creating Account..." : "Create Account"}
-          </button>
-        </form>
-
-        <p style={styles.bottomText}>
-          Already have an account?{" "}
-          <Link to="/login" style={styles.link}>
-            Sign In
-          </Link>
-        </p>
+          <p style={S.foot}>
+            Already have an account?{" "}
+            <Link to="/login" style={S.link}>Sign In</Link>
+          </p>
+        </div>
       </div>
     </div>
   );
-};
+}
 
-const styles = {
-  page: {
-    minHeight: "100vh",
-    backgroundColor: "#f0fdf4",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "24px",
-    fontFamily: "'Segoe UI', sans-serif",
+const S = {
+  page: { display:"flex", minHeight:"100vh", fontFamily:"'Segoe UI',sans-serif" },
+  left: {
+    flex:1, background:"linear-gradient(135deg,#065f46 0%,#0891b2 100%)",
+    display:"flex", alignItems:"center", justifyContent:"center", padding:"48px",
+  },
+  brand: { color:"#fff", maxWidth:380 },
+  brandIcon: { fontSize:56 },
+  brandName: { fontSize:32, fontWeight:800, margin:"16px 0 8px" },
+  brandDesc: { fontSize:16, opacity:0.85, lineHeight:1.6, marginBottom:32 },
+  roles: { display:"flex", flexDirection:"column", gap:10 },
+  roleChip: {
+    backgroundColor:"rgba(255,255,255,0.15)", borderRadius:8,
+    padding:"10px 16px", fontSize:14, fontWeight:500,
+  },
+  right: {
+    flex:1, backgroundColor:"#f0fdf4",
+    display:"flex", alignItems:"center", justifyContent:"center", padding:"48px 24px",
   },
   card: {
-    backgroundColor: "#ffffff",
-    borderRadius: "16px",
-    padding: "48px 40px",
-    width: "100%",
-    maxWidth: "440px",
-    boxShadow: "0 10px 40px rgba(0,0,0,0.08)",
+    backgroundColor:"#fff", borderRadius:20, padding:"40px",
+    width:"100%", maxWidth:440, boxShadow:"0 8px 40px rgba(0,0,0,0.08)",
   },
-  logoSection: { textAlign: "center", marginBottom: "32px" },
-  logoIcon: { fontSize: "48px", marginBottom: "8px" },
-  appName: {
-    fontSize: "22px",
-    fontWeight: "700",
-    color: "#065f46",
-    margin: "0 0 4px 0",
-  },
-  tagline: { fontSize: "13px", color: "#6b7280", margin: 0 },
-  title: {
-    fontSize: "24px",
-    fontWeight: "700",
-    color: "#111827",
-    margin: "0 0 4px 0",
-    textAlign: "center",
-  },
-  subtitle: {
-    fontSize: "14px",
-    color: "#6b7280",
-    textAlign: "center",
-    margin: "0 0 24px 0",
-  },
+  title: { fontSize:26, fontWeight:700, color:"#111827", margin:"0 0 6px" },
+  subtitle: { fontSize:15, color:"#6b7280", margin:"0 0 24px" },
   errorBox: {
-    backgroundColor: "#fef2f2",
-    border: "1px solid #fecaca",
-    color: "#dc2626",
-    borderRadius: "8px",
-    padding: "12px 16px",
-    fontSize: "14px",
-    marginBottom: "16px",
+    backgroundColor:"#fef2f2", border:"1px solid #fecaca",
+    color:"#dc2626", borderRadius:8, padding:"12px 16px",
+    fontSize:14, marginBottom:16,
   },
   successBox: {
-    backgroundColor: "#f0fdf4",
-    border: "1px solid #bbf7d0",
-    color: "#059669",
-    borderRadius: "8px",
-    padding: "12px 16px",
-    fontSize: "14px",
-    marginBottom: "16px",
+    backgroundColor:"#f0fdf4", border:"1px solid #bbf7d0",
+    color:"#059669", borderRadius:8, padding:"12px 16px",
+    fontSize:14, marginBottom:16,
   },
-  form: { display: "flex", flexDirection: "column", gap: "16px" },
-  fieldGroup: { display: "flex", flexDirection: "column", gap: "6px" },
-  label: { fontSize: "14px", fontWeight: "600", color: "#374151" },
+  form: { display:"flex", flexDirection:"column", gap:14 },
+  field: { display:"flex", flexDirection:"column", gap:5 },
+  label: { fontSize:14, fontWeight:600, color:"#374151" },
   input: {
-    padding: "12px 14px",
-    borderRadius: "8px",
-    border: "1.5px solid #d1d5db",
-    fontSize: "15px",
-    color: "#111827",
-    outline: "none",
-    backgroundColor: "#f9fafb",
-    width: "100%",
+    padding:"11px 14px", borderRadius:8, border:"1.5px solid #d1d5db",
+    fontSize:15, color:"#111827", backgroundColor:"#f9fafb",
+    outline:"none", width:"100%",
   },
-  button: {
-    backgroundColor: "#059669",
-    color: "#ffffff",
-    border: "none",
-    borderRadius: "8px",
-    padding: "13px",
-    fontSize: "16px",
-    fontWeight: "600",
-    cursor: "pointer",
-    marginTop: "8px",
-    width: "100%",
+  btn: {
+    backgroundColor:"#059669", color:"#fff", border:"none",
+    borderRadius:8, padding:13, fontSize:16, fontWeight:600,
+    cursor:"pointer", width:"100%", marginTop:4,
   },
-  bottomText: {
-    textAlign: "center",
-    fontSize: "14px",
-    color: "#6b7280",
-    marginTop: "24px",
-  },
-  link: { color: "#059669", fontWeight: "600", textDecoration: "none" },
+  foot: { textAlign:"center", fontSize:14, color:"#6b7280", marginTop:20 },
+  link: { color:"#059669", fontWeight:600, textDecoration:"none" },
 };
-
-export default Register;

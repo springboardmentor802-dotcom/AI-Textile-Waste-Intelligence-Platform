@@ -7,30 +7,15 @@ export const ProtectedRoute = ({ children, allowedRoles }) => {
 
   if (loading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-          backgroundColor: "#f0fdf4",
-          fontSize: "16px",
-          color: "#059669",
-          fontFamily: "Segoe UI, sans-serif",
-        }}
-      >
-        Loading...
+      <div style={{ display:"flex", justifyContent:"center",
+        alignItems:"center", height:"100vh", backgroundColor:"#f0fdf4" }}>
+        <div style={{ width:40, height:40, border:"4px solid #d1fae5",
+          borderTop:"4px solid #059669", borderRadius:"50%" }} />
       </div>
     );
   }
-
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (allowedRoles && !allowedRoles.includes(user.role)) {
+  if (!user) return <Navigate to="/login" replace />;
+  if (allowedRoles && !allowedRoles.includes(user.role))
     return <Navigate to="/unauthorized" replace />;
-  }
-
   return children;
 };

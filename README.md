@@ -108,16 +108,20 @@ Completed:
 - User Registration API
 - Login API
 - Password Hashing (bcrypt)
+- JWT Authentication
 - Role-Based Authentication
 - Frontend Authentication Integration
 - Frontend ↔ Backend Integration
 - Backend ↔ Database Integration
 - Inventory Records Dashboard
 - Inventory Records Table
+- Inventory Record Deletion
 
-In Progress:
-- Inventory Record Management Enhancements
-- Dashboard Improvements
+Next Phase:
+- Textile Image Analysis Engine
+- Material Classification Workflows
+- Waste Categorization Models
+- Recyclability Assessment System
 
 ## GitHub Branch
 24A31A05IZ

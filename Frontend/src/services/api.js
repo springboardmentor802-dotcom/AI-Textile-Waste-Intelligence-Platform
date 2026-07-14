@@ -66,3 +66,65 @@ export async function getAdminData() {
   }
   return data;
 }
+
+function getAuthHeaders() {
+  const token = localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`,
+  };
+}
+
+export async function createInventoryItem(item) {
+  const response = await fetch(`${API_BASE_URL}/inventory`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(item),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.detail || 'Failed to create inventory item');
+  }
+  return data;
+}
+
+export async function getInventoryList() {
+  const response = await fetch(`${API_BASE_URL}/inventory`, {
+    method: 'GET',
+    headers: getAuthHeaders(),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.detail || 'Failed to fetch inventory');
+  }
+  return data;
+}
+
+export async function updateInventoryItem(id, updates) {
+  const response = await fetch(`${API_BASE_URL}/inventory/${id}`, {
+    method: 'PUT',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(updates),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.detail || 'Failed to update inventory item');
+  }
+  return data;
+}
+
+export async function deleteInventoryItem(id) {
+  const response = await fetch(`${API_BASE_URL}/inventory/${id}`, {
+    method: 'DELETE',
+    headers: getAuthHeaders(),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.detail || 'Failed to delete inventory item');
+  }
+  return data;
+}

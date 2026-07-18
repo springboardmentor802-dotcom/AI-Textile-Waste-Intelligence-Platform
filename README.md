@@ -92,19 +92,22 @@ Secured APIs:
 - Recommendation APIs
 
 Authentication flow:
+
+```text
 React Login Page
-|
-↓
+        |
+        ↓
 FastAPI Authentication API
-|
-↓
+        |
+        ↓
 User Verification
-|
-↓
+        |
+        ↓
 JWT Token Generation
-|
-↓
+        |
+        ↓
 Protected API Access
+```
 
 
 ---
@@ -125,6 +128,7 @@ The Ten Fabrics Dataset (TFD) was selected for textile material recognition and 
 - Image Type: RGB Images
 
 ## Fabric Classes
+```text
 001
 002
 003
@@ -135,7 +139,7 @@ The Ten Fabrics Dataset (TFD) was selected for textile material recognition and 
 008
 009
 010
-
+```
 
 ## Exploratory Data Analysis Completed
 
@@ -174,17 +178,18 @@ Implemented an image preprocessing pipeline using TensorFlow.
 
 ## Preprocessing Configuration
 
-json
+```json
 {
     "image_size": [224, 224],
     "normalization": "pixel values scaled between 0 and 1",
     "batch_size": 32
 }
-CNN-Based Fabric Classification Model
+```
+# CNN-Based Fabric Classification Model
 
 Developed a Convolutional Neural Network (CNN) model for textile material recognition.
 
-Model Architecture
+## Model Architecture
 Input Image
 (224 × 224 × 3)
 

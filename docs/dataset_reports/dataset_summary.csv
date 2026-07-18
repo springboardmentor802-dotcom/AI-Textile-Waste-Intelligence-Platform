@@ -1,0 +1,8 @@
+Property,Value
+Dataset Name,Ten Fabrics Dataset (TFD)
+Number of Classes,10
+Total Images,2969
+Image Dimensions,"(256, 256)"
+Image Channels,Counter({'RGB': 2969})
+Corrupted Images,0
+Duplicate Images,0

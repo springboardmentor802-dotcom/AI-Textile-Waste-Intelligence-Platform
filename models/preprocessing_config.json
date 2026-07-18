@@ -1,0 +1,27 @@
+{
+    "dataset": "Ten Fabrics Dataset (TFD)",
+    "classes": 10,
+    "class_mapping": {
+        "001": 0,
+        "002": 1,
+        "003": 2,
+        "004": 3,
+        "005": 4,
+        "006": 5,
+        "007": 6,
+        "008": 7,
+        "009": 8,
+        "010": 9
+    },
+    "image_size": [
+        224,
+        224
+    ],
+    "normalization": "pixel values scaled between 0 and 1",
+    "split": {
+        "training": 0.7,
+        "validation": 0.15,
+        "testing": 0.15
+    },
+    "batch_size": 32
+}

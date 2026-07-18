@@ -4,7 +4,9 @@ from pydantic import BaseModel
 
 from app.database import get_db
 from app.models.waste_upload import WasteUpload
+
 from app.utils.auth_dependency import get_current_user
+from app.utils.role_dependency import require_role
 
 
 router = APIRouter(
@@ -21,6 +23,11 @@ class WasteUploadCreate(BaseModel):
 
 
 
+# ==========================
+# GET UPLOADS
+# Allowed: All roles
+# ==========================
+
 @router.get("/")
 def get_uploads(
     db: Session = Depends(get_db),
@@ -33,11 +40,25 @@ def get_uploads(
 
 
 
+# ==========================
+# CREATE UPLOAD
+# Allowed:
+# Admin, Industry, Recycler
+# ==========================
+
 @router.post("/")
 def create_upload(
+
     upload: WasteUploadCreate,
+
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+
+    current_user: dict = Depends(
+        require_role(
+            ["Admin", "Industry", "Recycler"]
+        )
+    )
+
 ):
 
     new_upload = WasteUpload(
@@ -49,6 +70,7 @@ def create_upload(
         confidence=upload.confidence,
 
         uploaded_by=upload.uploaded_by
+
     )
 
 

@@ -3,7 +3,9 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.textile_inventory import TextileInventory
+
 from app.utils.auth_dependency import get_current_user
+from app.utils.role_dependency import require_role
 
 
 router = APIRouter(
@@ -12,7 +14,11 @@ router = APIRouter(
 )
 
 
+# ============================
 # GET ALL INVENTORY
+# Allowed: All Roles
+# ============================
+
 @router.get("/")
 def get_inventory(
     db: Session = Depends(get_db),
@@ -25,12 +31,18 @@ def get_inventory(
 
 
 
+# ============================
 # ADD INVENTORY
+# Allowed: Admin, Industry
+# ============================
+
 @router.post("/")
 def add_inventory(
     item: dict,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(
+        require_role(["Admin", "Industry"])
+    )
 ):
 
     new_item = TextileInventory(
@@ -43,7 +55,7 @@ def add_inventory(
 
         condition_status=item["status"],
 
-        uploaded_by=1
+        uploaded_by=current_user.get("user_id", 1)
 
     )
 
@@ -60,12 +72,22 @@ def add_inventory(
 
 
 
+# ============================
 # DELETE INVENTORY
+# Allowed: Admin only
+# ============================
+
 @router.delete("/{item_id}")
 def delete_inventory(
+
     item_id: int,
+
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+
+    current_user: dict = Depends(
+        require_role(["Admin"])
+    )
+
 ):
 
     item = db.query(TextileInventory).filter(
@@ -74,6 +96,7 @@ def delete_inventory(
 
 
     if not item:
+
         raise HTTPException(
             status_code=404,
             detail="Inventory item not found"
@@ -92,14 +115,26 @@ def delete_inventory(
 
 
 
+# ============================
 # UPDATE INVENTORY
+# Allowed: Admin, Industry
+# ============================
+
 @router.put("/{item_id}")
 def update_inventory(
+
     item_id: int,
+
     item: dict,
+
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+
+    current_user: dict = Depends(
+        require_role(["Admin", "Industry"])
+    )
+
 ):
+
 
     inventory = db.query(TextileInventory).filter(
         TextileInventory.textile_id == item_id

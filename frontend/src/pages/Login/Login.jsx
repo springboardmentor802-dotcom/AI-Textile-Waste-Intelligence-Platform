@@ -2,8 +2,10 @@ import { useState } from "react";
 import { FaUser, FaLock } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import axios from "axios";
+
+import API from "../../api/axios";
 import "./Login.css";
+
 
 function Login() {
 
@@ -13,23 +15,31 @@ function Login() {
   const [error, setError] = useState("");
 
   const navigate = useNavigate();
+
   const { login } = useAuth();
 
 
+
   const handleSubmit = async (e) => {
+
     e.preventDefault();
 
     setError("");
 
+
     try {
 
-      const response = await axios.post(
-        "http://127.0.0.1:8000/auth/login",
-        null,
+      const response = await API.post(
+        "/auth/login",
+
+        new URLSearchParams({
+          username: username,
+          password: password,
+        }),
+
         {
-          params: {
-            username,
-            password,
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
           },
         }
       );
@@ -37,27 +47,38 @@ function Login() {
 
       const user = response.data;
 
+      console.log("LOGIN RESPONSE:", user);
+
+
 
       // Check selected role with database role
-      if (user.role !== role) {
+      if (
+        user.role.toLowerCase() !== role.toLowerCase()
+      ) {
 
         setError(
           "Selected role does not match account role"
         );
 
         return;
+
       }
 
 
-      // Save user session
+
+      // Save user data
       login(user);
 
 
-      // Navigate to dashboard
+
+      // Go to dashboard
       navigate("/dashboard");
 
 
+
     } catch (error) {
+
+      console.log(error.response);
 
       setError(
         "Invalid username or password"
@@ -68,8 +89,11 @@ function Login() {
   };
 
 
+
   return (
+
     <div className="login-page">
+
 
       <div className="login-left">
 
@@ -105,9 +129,11 @@ function Login() {
 
           </ul>
 
+
         </div>
 
       </div>
+
 
 
 
@@ -129,7 +155,7 @@ function Login() {
 
           {error && (
 
-            <p style={{ color: "red" }}>
+            <p style={{color:"red"}}>
               {error}
             </p>
 
@@ -149,7 +175,7 @@ function Login() {
 
               <div className="input-box">
 
-                <FaUser className="input-icon" />
+                <FaUser className="input-icon"/>
 
 
                 <input
@@ -160,7 +186,7 @@ function Login() {
 
                   value={username}
 
-                  onChange={(e) =>
+                  onChange={(e)=>
                     setUsername(e.target.value)
                   }
 
@@ -184,7 +210,7 @@ function Login() {
 
               <div className="input-box">
 
-                <FaLock className="input-icon" />
+                <FaLock className="input-icon"/>
 
 
                 <input
@@ -195,7 +221,7 @@ function Login() {
 
                   value={password}
 
-                  onChange={(e) =>
+                  onChange={(e)=>
                     setPassword(e.target.value)
                   }
 
@@ -221,7 +247,7 @@ function Login() {
 
                 value={role}
 
-                onChange={(e) =>
+                onChange={(e)=>
                   setRole(e.target.value)
                 }
 
@@ -269,6 +295,7 @@ function Login() {
             </button>
 
 
+
           </form>
 
 
@@ -279,7 +306,9 @@ function Login() {
 
 
     </div>
+
   );
+
 }
 
 

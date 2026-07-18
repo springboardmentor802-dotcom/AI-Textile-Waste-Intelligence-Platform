@@ -39,3 +39,5 @@ def create_access_token(data: dict):
         SECRET_KEY,
         algorithm=ALGORITHM
     )
+def get_password_hash(password):
+    return pwd_context.hash(password)

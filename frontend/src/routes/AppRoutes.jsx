@@ -1,5 +1,6 @@
+
+
 import { Routes, Route } from "react-router-dom";
-import ProtectedRoute from "./ProtectedRoute";
 
 import Login from "../pages/Login/Login";
 import Dashboard from "../pages/Dashboard/Dashboard";
@@ -9,43 +10,111 @@ import Analytics from "../pages/Analytics/Analytics";
 import Recommendations from "../pages/Recommendations/Recommendations";
 import Profile from "../pages/Profile/Profile";
 import Settings from "../pages/Settings/Settings";
+import Unauthorized from "../pages/Unauthorized";
 
 import MainLayout from "../layouts/MainLayout";
+import RoleGuard from "../components/RoleGuard";
 
 
 function AppRoutes() {
-  return (
-    <Routes>
 
-      <Route path="/" element={<Login />} />
+    return (
+        <Routes>
+
+            {/* Public Route */}
+            <Route 
+                path="/" 
+                element={<Login />} 
+            />
 
 
-      <Route
-        element={
-          <ProtectedRoute>
-            <MainLayout />
-          </ProtectedRoute>
-        }
-      >
+            <Route
+    element={<MainLayout />}
+>
 
-        <Route path="/dashboard" element={<Dashboard />} />
+                {/* Dashboard - all logged users */}
+                <Route
+                    path="/dashboard"
+                    element={<Dashboard />}
+                />
 
-        <Route path="/inventory" element={<Inventory />} />
 
-        <Route path="/upload-waste" element={<UploadWaste />} />
+                {/* Inventory - Admin and Industry */}
+                <Route
+                    path="/inventory"
+                    element={
+                        <RoleGuard permission="VIEW_INVENTORY">
+                            <Inventory />
+                        </RoleGuard>
+                    }
+                />
 
-        <Route path="/analytics" element={<Analytics />} />
 
-        <Route path="/recommendations" element={<Recommendations />} />
+                {/* Upload Waste - Industry and NGO */}
+                <Route
+                    path="/upload-waste"
+                    element={
+                        <RoleGuard permission="UPLOAD_WASTE">
+                            <UploadWaste />
+                        </RoleGuard>
+                    }
+                />
 
-        <Route path="/profile" element={<Profile />} />
 
-        <Route path="/settings" element={<Settings />} />
+                {/* Analytics */}
+                <Route
+                    path="/analytics"
+                    element={
+                        <RoleGuard permission="VIEW_ANALYTICS">
+                            <Analytics />
+                        </RoleGuard>
+                    }
+                />
 
-      </Route>
 
-    </Routes>
-  );
+                {/* Recommendations */}
+                <Route
+                    path="/recommendations"
+                    element={
+                        <RoleGuard permission="VIEW_RECOMMENDATIONS">
+                            <Recommendations />
+                        </RoleGuard>
+                    }
+                />
+
+
+                {/* Profile */}
+                <Route
+                    path="/profile"
+                    element={<Profile />}
+                />
+
+
+                {/* Settings */}
+                <Route
+                    path="/settings"
+                    element={<Settings />}
+                />
+
+            </Route>
+
+
+            {/* Unauthorized Page */}
+            <Route
+                path="/unauthorized"
+                element={<Unauthorized />}
+            />
+
+
+            {/* Unknown URL */}
+            <Route
+                path="*"
+                element={<Login />}
+            />
+
+        </Routes>
+    );
 }
+
 
 export default AppRoutes;

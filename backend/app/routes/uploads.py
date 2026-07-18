@@ -15,23 +15,43 @@ router = APIRouter(
 )
 
 
+
 class WasteUploadCreate(BaseModel):
+
     image_path: str
+
     predicted_class: str
+
     confidence: float
+
     uploaded_by: int
+
+    material: str | None = None
+
+    material_type: str | None = None
+
+    recycling_method: str | None = None
+
+    environmental_impact: str | None = None
+
+    biodegradable: bool | None = None
+
+    reusable: bool | None = None
+
 
 
 
 # ==========================
 # GET UPLOADS
-# Allowed: All roles
 # ==========================
 
 @router.get("/")
 def get_uploads(
+
     db: Session = Depends(get_db),
+
     current_user: dict = Depends(get_current_user)
+
 ):
 
     uploads = db.query(WasteUpload).all()
@@ -40,10 +60,10 @@ def get_uploads(
 
 
 
+
+
 # ==========================
 # CREATE UPLOAD
-# Allowed:
-# Admin, Industry, Recycler
 # ==========================
 
 @router.post("/")
@@ -55,11 +75,16 @@ def create_upload(
 
     current_user: dict = Depends(
         require_role(
-            ["Admin", "Industry", "Recycler"]
+            [
+                "Admin",
+                "Industry",
+                "Recycler"
+            ]
         )
     )
 
 ):
+
 
     new_upload = WasteUpload(
 
@@ -69,7 +94,20 @@ def create_upload(
 
         confidence=upload.confidence,
 
-        uploaded_by=upload.uploaded_by
+        uploaded_by=upload.uploaded_by,
+
+
+        material=upload.material,
+
+        material_type=upload.material_type,
+
+        recycling_method=upload.recycling_method,
+
+        environmental_impact=upload.environmental_impact,
+
+        biodegradable=upload.biodegradable,
+
+        reusable=upload.reusable
 
     )
 

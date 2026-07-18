@@ -1,11 +1,12 @@
 from fastapi import FastAPI
 from app.api import prediction
+from app.api import analytics
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routes import users, inventory, uploads, recommendations, auth
 
 from app.database import Base, engine
-
+from app.api import prediction, analytics
 from app.models.user import User
 from app.models.textile_inventory import TextileInventory
 from app.models.waste_upload import WasteUpload
@@ -29,7 +30,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
+app.include_router(
+    analytics.router
+)
 app.include_router(
     prediction.router
 )

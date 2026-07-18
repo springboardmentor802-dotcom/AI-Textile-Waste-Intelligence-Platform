@@ -1,0 +1,11 @@
+Predicted Class,Material,Material Type,Recyclability Score,Waste Category,Recommended Recycling Method,Environmental Impact
+001,Cotton,Natural Fiber,100,Highly Recyclable,Mechanical Recycling,Low
+002,Polyester,Synthetic Fiber,55,Moderately Recyclable,Chemical Recycling,Medium
+003,Wool,Natural Fiber,100,Highly Recyclable,Mechanical Recycling,Low
+004,Silk,Natural Fiber,100,Highly Recyclable,Reuse / Upcycling,Low
+005,Nylon,Synthetic Fiber,55,Moderately Recyclable,Chemical Recycling,Medium
+006,Denim,Natural Fiber,100,Highly Recyclable,Mechanical Recycling,Low
+007,Linen,Natural Fiber,100,Highly Recyclable,Mechanical Recycling,Low
+008,Rayon,Semi-Synthetic Fiber,70,Moderately Recyclable,Chemical Recycling,Medium
+009,Acrylic,Synthetic Fiber,0,Low Recyclability,Energy Recovery,High
+010,Blended Fabric,Mixed Fiber,10,Low Recyclability,Specialized Recycling,High

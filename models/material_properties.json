@@ -1,0 +1,82 @@
+{
+    "001": {
+        "material": "Cotton",
+        "material_type": "Natural Fiber",
+        "reusable": true,
+        "biodegradable": true,
+        "recycling_method": "Mechanical Recycling",
+        "environmental_impact": "Low"
+    },
+    "002": {
+        "material": "Polyester",
+        "material_type": "Synthetic Fiber",
+        "reusable": true,
+        "biodegradable": false,
+        "recycling_method": "Chemical Recycling",
+        "environmental_impact": "Medium"
+    },
+    "003": {
+        "material": "Wool",
+        "material_type": "Natural Fiber",
+        "reusable": true,
+        "biodegradable": true,
+        "recycling_method": "Mechanical Recycling",
+        "environmental_impact": "Low"
+    },
+    "004": {
+        "material": "Silk",
+        "material_type": "Natural Fiber",
+        "reusable": true,
+        "biodegradable": true,
+        "recycling_method": "Reuse / Upcycling",
+        "environmental_impact": "Low"
+    },
+    "005": {
+        "material": "Nylon",
+        "material_type": "Synthetic Fiber",
+        "reusable": true,
+        "biodegradable": false,
+        "recycling_method": "Chemical Recycling",
+        "environmental_impact": "Medium"
+    },
+    "006": {
+        "material": "Denim",
+        "material_type": "Natural Fiber",
+        "reusable": true,
+        "biodegradable": true,
+        "recycling_method": "Mechanical Recycling",
+        "environmental_impact": "Low"
+    },
+    "007": {
+        "material": "Linen",
+        "material_type": "Natural Fiber",
+        "reusable": true,
+        "biodegradable": true,
+        "recycling_method": "Mechanical Recycling",
+        "environmental_impact": "Low"
+    },
+    "008": {
+        "material": "Rayon",
+        "material_type": "Semi-Synthetic Fiber",
+        "reusable": true,
+        "biodegradable": "Partially",
+        "recycling_method": "Chemical Recycling",
+        "environmental_impact": "Medium"
+    },
+    "009": {
+        "material": "Acrylic",
+        "material_type": "Synthetic Fiber",
+        "reusable": false,
+        "biodegradable": false,
+        "recycling_method": "Energy Recovery",
+        "environmental_impact": "High"
+    },
+    "010": {
+        "material": "Blended Fabric",
+        "material_type": "Mixed Fiber",
+        "reusable": false,
+        "biodegradable": false,
+        "recycling_method": "Specialized Recycling",
+        "environmental_impact": "High"
+    }
+}

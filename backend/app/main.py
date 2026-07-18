@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from app.api import prediction
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routes import users, inventory, uploads, recommendations, auth
@@ -29,7 +30,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
+app.include_router(
+    prediction.router
+)
 app.include_router(users.router)
 app.include_router(inventory.router)
 app.include_router(uploads.router)

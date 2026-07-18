@@ -1,0 +1,72 @@
+{
+    "001": {
+        "material": "Cotton",
+        "recyclability": "High",
+        "recycling_method": "Mechanical Recycling",
+        "recommended_action": "Reuse or recycle into new textile products",
+        "environmental_impact": "Low"
+    },
+    "002": {
+        "material": "Polyester",
+        "recyclability": "Medium",
+        "recycling_method": "Chemical Recycling",
+        "recommended_action": "Recycle into polyester fibers",
+        "environmental_impact": "Medium"
+    },
+    "003": {
+        "material": "Wool",
+        "recyclability": "High",
+        "recycling_method": "Mechanical Recycling",
+        "recommended_action": "Reuse for insulation or textile products",
+        "environmental_impact": "Low"
+    },
+    "004": {
+        "material": "Silk",
+        "recyclability": "Medium",
+        "recycling_method": "Reuse or Upcycling",
+        "recommended_action": "Repurpose into premium textile products",
+        "environmental_impact": "Low"
+    },
+    "005": {
+        "material": "Nylon",
+        "recyclability": "Medium",
+        "recycling_method": "Chemical Recycling",
+        "recommended_action": "Recycle into industrial materials",
+        "environmental_impact": "Medium"
+    },
+    "006": {
+        "material": "Denim",
+        "recyclability": "High",
+        "recycling_method": "Mechanical Recycling",
+        "recommended_action": "Convert into recycled fabric or insulation",
+        "environmental_impact": "Low"
+    },
+    "007": {
+        "material": "Linen",
+        "recyclability": "High",
+        "recycling_method": "Mechanical Recycling",
+        "recommended_action": "Reuse or recycle into textile fibers",
+        "environmental_impact": "Low"
+    },
+    "008": {
+        "material": "Rayon",
+        "recyclability": "Medium",
+        "recycling_method": "Chemical Recycling",
+        "recommended_action": "Process into regenerated fibers",
+        "environmental_impact": "Medium"
+    },
+    "009": {
+        "material": "Acrylic",
+        "recyclability": "Low",
+        "recycling_method": "Energy Recovery",
+        "recommended_action": "Recover energy where recycling is unavailable",
+        "environmental_impact": "High"
+    },
+    "010": {
+        "material": "Blended Fabric",
+        "recyclability": "Low",
+        "recycling_method": "Specialized Recycling",
+        "recommended_action": "Separate fibers before recycling",
+        "environmental_impact": "High"
+    }
+}

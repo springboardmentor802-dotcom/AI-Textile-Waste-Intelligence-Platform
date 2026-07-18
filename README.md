@@ -190,6 +190,8 @@ Implemented an image preprocessing pipeline using TensorFlow.
 Developed a Convolutional Neural Network (CNN) model for textile material recognition.
 
 ## Model Architecture
+
+```text
 Input Image
 (224 × 224 × 3)
 
@@ -216,38 +218,52 @@ Softmax Output
         ↓
 
 10 Fabric Classes
-Model Configuration
-Framework: TensorFlow / Keras
-Input Size: 224 × 224 RGB Images
-Number of Classes: 10
-Total Parameters: 11.17 Million
-Model Format: Keras (.keras)
-Model Performance Evaluation
+```
+
+## Model Configuration
+
+- Framework: TensorFlow / Keras
+- Input Size: 224 × 224 RGB Images
+- Number of Classes: 10
+- Total Parameters: 11.17 Million
+- Model Format: Keras (.keras)
+
+---
+
+# Model Performance Evaluation
 
 The trained CNN model was evaluated using the unseen test dataset.
 
-Performance Results
-Metric	Score
-Test Accuracy	100%
-Precision	1.00
-Recall	1.00
-F1-Score	1.00
-Test Images Evaluated	446
-Evaluation Methods
-Training accuracy and loss curves.
-Classification report.
-Confusion matrix analysis.
+## Performance Results
+
+| Metric | Score |
+|--------|-------|
+| Test Accuracy | 100% |
+| Precision | 1.00 |
+| Recall | 1.00 |
+| F1-Score | 1.00 |
+| Test Images Evaluated | 446 |
+
+## Evaluation Methods
+
+- Training accuracy and loss curves.
+- Classification report.
+- Confusion matrix analysis.
 
 The confusion matrix showed no misclassification between the ten fabric categories.
 
-Model Artifacts
+---
+
+# Model Artifacts
 
 Generated AI model files:
 
+```text
 models/
 
 ├── preprocessing_config.json
 ├── fabric_classifier.keras
 └── fabric_classifier_best.keras
+```
 
 Large model files are managed using Git Large File Storage (Git LFS).

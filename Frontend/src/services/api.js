@@ -128,3 +128,16 @@ export async function deleteInventoryItem(id) {
   }
   return data;
 }
+export async function getDashboardStats() {
+  const items = await getInventoryList();
+  const totalItems = items.length;
+  const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
+  const materialCounts = {};
+  items.forEach((item) => {
+    materialCounts[item.fabric_type] = (materialCounts[item.fabric_type] || 0) + 1;
+  });
+  const materialBreakdown = Object.entries(materialCounts)
+    .map(([name, count]) => ({ name, count, percent: Math.round((count / totalItems) * 100) || 0 }))
+    .sort((a, b) => b.count - a.count);
+  return { totalItems, totalQuantity, materialBreakdown };
+}

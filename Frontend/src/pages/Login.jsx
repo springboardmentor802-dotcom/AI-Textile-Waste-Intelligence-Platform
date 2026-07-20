@@ -12,7 +12,6 @@ function Login() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
-
     try {
       await loginUser(email, password);
       navigate('/dashboard');
@@ -22,37 +21,55 @@ function Login() {
   }
 
   return (
-    <div className="auth-container">
-      <h1 className="auth-brand">♻ Textile Waste Intelligence Platform</h1>
-      <h2>Login</h2>
-      <form className="auth-form" onSubmit={handleSubmit}>
-        <label>Email</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@example.com"
-          required
-        />
+    <div className="auth-page">
+      <div className="auth-blob auth-blob-tl" />
+      <div className="auth-blob auth-blob-br" />
 
-        <label>Password</label>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="••••••••"
-          required
-        />
+      <div className="auth-wrapper">
+        <div className="auth-card">
+          <h1 className="auth-title">
+            Textile Waste
+            <span>Intelligence Platform</span>
+          </h1>
 
-        {error && <p className="auth-error">{error}</p>}
+          <p className="auth-subtitle">
+            AI-powered platform for smarter textile waste management and sustainability.
+          </p>
 
-        <button type="submit">Login</button>
-      </form>
-      <p className="auth-switch">
-        Don't have an account? <Link to="/register">Register</Link>
-      </p>
+          <form className="auth-form" onSubmit={handleSubmit}>
+            <label>Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              required
+            />
+
+            <label>Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+              required
+            />
+
+            {error && <p className="auth-error">{error}</p>}
+
+            <button type="submit" className="auth-submit">
+              Sign In
+            </button>
+          </form>
+
+          <div className="auth-switch-divider" />
+          <p className="auth-switch">
+            Don&apos;t have an account? <Link to="/register">Create an account</Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
 
-export default Login; 
+export default Login;

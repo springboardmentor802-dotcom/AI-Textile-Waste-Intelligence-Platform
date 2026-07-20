@@ -86,6 +86,24 @@ Infosys Springboard Internship Project - AI Textile Waste Intelligence Platform
 - Configured token expiration.
 - Verified JWT token generation successfully.
 - Integrated authentication workflow with backend APIs.
+
+## Day 10 - Milestone 2: Dataset Analysis & Data Preprocessing
+
+- Selected the Textile Fabric Quality Classification Dataset.
+- Added dataset to the project under the datasets folder.
+- Performed Exploratory Data Analysis (EDA) using Pandas.
+- Analyzed dataset containing 25,750 records and 23 columns.
+- Examined dataset structure, data types, and statistical summary.
+- Identified missing values across numerical and categorical features.
+- Detected 750 duplicate records in the dataset.
+- Analyzed the distribution of the target column (fabric_quality).
+- Removed duplicate records from the dataset.
+- Filled missing numerical values using the median.
+- Filled missing categorical values using the mode.
+- Generated a cleaned dataset (`fabric_quality_dataset_cleaned.csv`) for machine learning.
+- Created reusable Python scripts:
+  - `ml/eda.py`
+  - `ml/preprocessing.py`
 ---
 
 ## Technologies Used
@@ -116,10 +134,19 @@ Completed:
 - Inventory Records Dashboard
 - Inventory Records Table
 - Inventory Record Deletion
+- Dataset Selection
+- Exploratory Data Analysis (EDA)
+- Data Cleaning & Preprocessing
+- Duplicate Record Removal
+- Missing Value Handling
 
 Next Phase:
+- Feature Encoding
+- Train-Test Split
+- Machine Learning Model Training
+- Model Evaluation
+- Material Classification Workflow
 - Textile Image Analysis Engine
-- Material Classification Workflows
 - Waste Categorization Models
 - Recyclability Assessment System
 

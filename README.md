@@ -104,6 +104,18 @@ Infosys Springboard Internship Project - AI Textile Waste Intelligence Platform
 - Created reusable Python scripts:
   - `ml/eda.py`
   - `ml/preprocessing.py`
+
+  ## Day 11 - Machine Learning Model Development
+
+- Loaded the encoded dataset for machine learning.
+- Split the dataset into training (80%) and testing (20%) sets.
+- Trained a Random Forest Classifier.
+- Evaluated model performance using:
+  - Accuracy
+  - Classification Report
+  - Confusion Matrix
+- Achieved approximately **87.70% accuracy** on the test dataset.
+- Saved the trained model as `fabric_quality_model.pkl` for backend integration.
 ---
 
 ## Technologies Used

@@ -105,7 +105,7 @@ Infosys Springboard Internship Project - AI Textile Waste Intelligence Platform
   - `ml/eda.py`
   - `ml/preprocessing.py`
 
-  ## Day 11 - Machine Learning Model Development
+## Day 11 - Machine Learning Model Development
 
 - Loaded the encoded dataset for machine learning.
 - Split the dataset into training (80%) and testing (20%) sets.
@@ -153,6 +153,11 @@ Completed:
 - Data Cleaning & Preprocessing
 - Duplicate Record Removal
 - Missing Value Handling
+- Feature Engineering
+- Train-Test Split
+- Random Forest Model Training
+- Model Evaluation
+- Trained Model Generation
 
 Next Phase:
 - Feature Encoding
@@ -179,5 +184,6 @@ Completed:
 - Data Cleaning & Preprocessing
 
 Current Task:
-- Feature Engineering & Encoding
-- Machine Learning Model Development
+- Flask Model Integration
+- Prediction API Development
+- Frontend Prediction Module

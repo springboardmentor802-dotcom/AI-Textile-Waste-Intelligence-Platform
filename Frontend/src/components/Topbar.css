@@ -1,0 +1,51 @@
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem 1rem 2.25rem;
+  background: #ffffff;
+  border-bottom: 1px solid #e7efe4;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.topbar h1 {
+  font-size: 1.15rem;
+  color: #1e3a24;
+  margin: 0;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.topbar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topbar-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #2e7d32;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.78rem;
+}
+
+.topbar-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1e3a24;
+}
+
+.topbar-role {
+  font-size: 0.72rem;
+  color: #8a9188;
+}

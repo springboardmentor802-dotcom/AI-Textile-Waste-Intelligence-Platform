@@ -107,11 +107,13 @@ Infosys Springboard Internship Project - AI Textile Waste Intelligence Platform
 ---
 
 ## Technologies Used
+
 - React.js
 - Vite
 - Python
 - Flask
 - SQLite
+- Pandas
 - Git
 - GitHub
 - bcrypt
@@ -154,4 +156,16 @@ Next Phase:
 24A31A05IZ
 
 ## Status
-Milestone 1 Completed Successfully
+
+✅ Milestone 1 Completed Successfully
+
+🚀 Milestone 2 In Progress
+
+Completed:
+- Dataset Selection
+- Exploratory Data Analysis (EDA)
+- Data Cleaning & Preprocessing
+
+Current Task:
+- Feature Engineering & Encoding
+- Machine Learning Model Development

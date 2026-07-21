@@ -116,6 +116,17 @@ Infosys Springboard Internship Project - AI Textile Waste Intelligence Platform
   - Confusion Matrix
 - Achieved approximately **87.70% accuracy** on the test dataset.
 - Saved the trained model as `fabric_quality_model.pkl` for backend integration.
+
+## Day 12 - Machine Learning Integration
+
+- Improved the feature engineering pipeline by saving Label Encoders for all categorical features.
+- Retrained the Random Forest model using the updated encoded dataset.
+- Verified the model performance with approximately **87.70% accuracy**.
+- Integrated the trained Machine Learning model into the Flask backend.
+- Loaded the saved Label Encoders into the backend.
+- Created the initial Prediction API (`/predict`).
+- Successfully verified JSON request handling for prediction requests.
+- Started backend integration for AI-based fabric quality prediction.
 ---
 
 ## Technologies Used
@@ -126,6 +137,8 @@ Infosys Springboard Internship Project - AI Textile Waste Intelligence Platform
 - Flask
 - SQLite
 - Pandas
+- Scikit-learn
+- Joblib
 - Git
 - GitHub
 - bcrypt
@@ -160,14 +173,10 @@ Completed:
 - Trained Model Generation
 
 Next Phase:
-- Feature Encoding
-- Train-Test Split
-- Machine Learning Model Training
-- Model Evaluation
-- Material Classification Workflow
-- Textile Image Analysis Engine
-- Waste Categorization Models
-- Recyclability Assessment System
+- Implement Prediction Logic
+- Connect Prediction API with React Frontend
+- End-to-End Testing
+- Final Project Integration
 
 ## GitHub Branch
 24A31A05IZ
@@ -176,14 +185,23 @@ Next Phase:
 
 ✅ Milestone 1 Completed Successfully
 
-🚀 Milestone 2 In Progress
+🚀 Milestone 2 Approximately 90% Completed
 
 Completed:
 - Dataset Selection
 - Exploratory Data Analysis (EDA)
 - Data Cleaning & Preprocessing
+- Feature Engineering
+- Label Encoding
+- Saved Label Encoders
+- Train-Test Split
+- Random Forest Model Training
+- Model Evaluation (87.70% Accuracy)
+- Trained Model Generation
+- Flask Model Integration
+- Initial Prediction API
 
 Current Task:
-- Flask Model Integration
-- Prediction API Development
-- Frontend Prediction Module
+- Implement Prediction Logic
+- Connect Prediction API with React Frontend
+- End-to-End Testing

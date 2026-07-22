@@ -1,72 +1,71 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { FiShieldOff } from "react-icons/fi";
+import Button from "../components/Button";
 
-const Unauthorized = () => {
+export default function Unauthorized() {
   const navigate = useNavigate();
-  const { user, getDashboardPath } = useAuth();
+  const { user, getDashboardPath, logout } = useAuth();
 
   return (
-    <div style={styles.page}>
-      <div style={styles.card}>
-        <div style={styles.icon}>🚫</div>
-        <h1 style={styles.title}>Access Denied</h1>
-        <p style={styles.message}>
-          You do not have permission to view this page.
+    <div style={S.page}>
+      <div style={S.card}>
+        <div style={S.iconWrap}>
+          <FiShieldOff size={32} color="#dc2626" />
+        </div>
+        <h1 style={S.title}>Access Denied</h1>
+        <p style={S.message}>
+          You do not have permission to access this page.
         </p>
         {user && (
-          <p style={styles.role}>
-            Your role: <strong>{user.role}</strong>
-          </p>
+          <div style={S.roleBox}>
+            <span style={S.roleLabel}>Your Role</span>
+            <span style={S.roleValue}>{user.role}</span>
+          </div>
         )}
-        <button
-          style={styles.button}
-          onClick={() => navigate(getDashboardPath())}
-        >
-          Go to My Dashboard
-        </button>
+        <div style={S.actions}>
+          {user && (
+            <Button onClick={() => navigate(getDashboardPath())}>
+              Go to My Dashboard
+            </Button>
+          )}
+          <Button variant="ghost" onClick={logout}>
+            Back to Login
+          </Button>
+        </div>
       </div>
     </div>
   );
-};
+}
 
-const styles = {
+const S = {
   page: {
-    minHeight: "100vh",
-    backgroundColor: "#f0fdf4",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontFamily: "'Segoe UI', sans-serif",
+    minHeight: "100vh", backgroundColor: "#f8fafc",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    fontFamily: "'Inter','Segoe UI',sans-serif", padding: 24,
   },
   card: {
-    backgroundColor: "#ffffff",
-    borderRadius: "16px",
-    padding: "48px 40px",
-    textAlign: "center",
-    maxWidth: "400px",
-    width: "100%",
-    boxShadow: "0 10px 40px rgba(0,0,0,0.08)",
+    backgroundColor: "#fff", borderRadius: 12,
+    padding: "48px 40px", textAlign: "center",
+    maxWidth: 420, width: "100%",
+    boxShadow: "0 4px 24px rgba(0,0,0,0.07)",
+    border: "1px solid #f1f5f9",
   },
-  icon: { fontSize: "64px", marginBottom: "16px" },
-  title: {
-    fontSize: "28px",
-    fontWeight: "700",
-    color: "#111827",
-    margin: "0 0 12px 0",
+  iconWrap: {
+    width: 64, height: 64, borderRadius: "50%",
+    backgroundColor: "#fef2f2", display: "flex",
+    alignItems: "center", justifyContent: "center",
+    margin: "0 auto 20px",
   },
-  message: { fontSize: "16px", color: "#6b7280", margin: "0 0 8px 0" },
-  role: { fontSize: "14px", color: "#374151", margin: "0 0 24px 0" },
-  button: {
-    backgroundColor: "#059669",
-    color: "#fff",
-    border: "none",
-    borderRadius: "8px",
-    padding: "12px 24px",
-    fontSize: "15px",
-    fontWeight: "600",
-    cursor: "pointer",
+  title: { fontSize: 22, fontWeight: 700, color: "#111827", margin: "0 0 10px" },
+  message: { fontSize: 14, color: "#6b7280", margin: "0 0 20px", lineHeight: 1.6 },
+  roleBox: {
+    backgroundColor: "#f9fafb", border: "1px solid #e5e7eb",
+    borderRadius: 8, padding: "10px 16px", marginBottom: 24,
+    display: "flex", justifyContent: "space-between", alignItems: "center",
   },
+  roleLabel: { fontSize: 12, color: "#6b7280", fontWeight: 500 },
+  roleValue: { fontSize: 13, color: "#111827", fontWeight: 600 },
+  actions: { display: "flex", flexDirection: "column", gap: 10 },
 };
-
-export default Unauthorized;

@@ -10,11 +10,12 @@ export const useAuth = () => {
   return context;
 };
 
+// These must exactly match the role values returned by the backend
 const ROLE_DASHBOARD_MAP = {
-  Administrator: "/admin/dashboard",
-  "Recycling Facility Operator": "/operator/dashboard",
-  "Sustainability Manager": "/sustainability/dashboard",
-  "Textile Manufacturer": "/manufacturer/dashboard",
+  "Administrator": "/admin/home",
+  "Recycling Facility Operator": "/operator/home",
+  "Sustainability Manager": "/sustainability/home",
+  "Textile Manufacturer": "/manufacturer/home",
 };
 
 export const AuthProvider = ({ children }) => {
@@ -28,8 +29,9 @@ export const AuthProvider = ({ children }) => {
       const storedToken = localStorage.getItem("access_token");
       const storedUser = localStorage.getItem("user");
       if (storedToken && storedUser) {
+        const parsedUser = JSON.parse(storedUser);
         setToken(storedToken);
-        setUser(JSON.parse(storedUser));
+        setUser(parsedUser);
       }
     } catch {
       localStorage.removeItem("access_token");
@@ -42,11 +44,19 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     const data = await loginUser(credentials);
     const { access_token, user: userData } = data;
+    if (!access_token || !userData) {
+      throw new Error("Invalid response from server.");
+    }
     localStorage.setItem("access_token", access_token);
     localStorage.setItem("user", JSON.stringify(userData));
     setToken(access_token);
     setUser(userData);
-    navigate(ROLE_DASHBOARD_MAP[userData.role] || "/login");
+    const dashboardPath = ROLE_DASHBOARD_MAP[userData.role];
+    if (!dashboardPath) {
+      console.error("Unknown role:", userData.role);
+      throw new Error(`Unknown role: ${userData.role}`);
+    }
+    navigate(dashboardPath, { replace: true });
   };
 
   const logout = () => {
@@ -55,35 +65,31 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("user");
     setToken(null);
     setUser(null);
-    navigate("/login");
+    navigate("/login", { replace: true });
   };
 
-  const getDashboardPath = () =>
-    user ? ROLE_DASHBOARD_MAP[user.role] || "/login" : "/login";
+  const getDashboardPath = () => {
+    if (!user) return "/login";
+    return ROLE_DASHBOARD_MAP[user.role] || "/login";
+  };
 
   if (loading) {
     return (
-      <div style={loadingStyle}>
-        <div style={spinnerStyle} />
+      <div style={{
+        display: "flex", justifyContent: "center",
+        alignItems: "center", height: "100vh",
+        backgroundColor: "#f1f5f9",
+        fontFamily: "'Inter','Segoe UI',sans-serif",
+        fontSize: 14, color: "#6b7280",
+      }}>
+        Loading...
       </div>
     );
   }
 
   return (
-    <AuthContext.Provider
-      value={{ user, token, loading, login, logout, getDashboardPath }}
-    >
+    <AuthContext.Provider value={{ user, token, loading, login, logout, getDashboardPath }}>
       {children}
     </AuthContext.Provider>
   );
-};
-
-const loadingStyle = {
-  display: "flex", justifyContent: "center", alignItems: "center",
-  height: "100vh", backgroundColor: "#f0fdf4",
-};
-const spinnerStyle = {
-  width: 40, height: 40, border: "4px solid #d1fae5",
-  borderTop: "4px solid #059669", borderRadius: "50%",
-  animation: "spin 0.8s linear infinite",
 };

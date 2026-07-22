@@ -37,3 +37,10 @@ Thumbs.db
 # Log Files
 # =========================
 *.log
+
+
+# =========================
+# ML Models
+# =========================
+*.keras
+ml_models/saved_models/

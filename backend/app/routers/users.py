@@ -26,10 +26,37 @@ def list_all_users(
 
 
 @router.get("/me/profile", response_model=UserResponse)
-def get_my_profile(
+def get_my_profile(current_user: User = Depends(get_current_active_user)):
+    return current_user
+
+
+@router.put("/me/profile", response_model=UserResponse)
+def update_profile(
+    update_data: UpdateProfileRequest,
+    db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
+    if update_data.full_name:
+        current_user.full_name = update_data.full_name
+    db.commit()
+    db.refresh(current_user)
     return current_user
+
+
+@router.put("/me/change-password")
+def change_password(
+    password_data: ChangePasswordRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    if not verify_password(password_data.current_password, current_user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password is incorrect",
+        )
+    current_user.hashed_password = hash_password(password_data.new_password)
+    db.commit()
+    return {"message": "Password updated successfully"}
 
 
 @router.get("/{user_id}", response_model=UserResponse)
@@ -39,10 +66,7 @@ def get_user(
     current_user: User = Depends(get_current_active_user),
 ):
     if current_user.id != user_id and current_user.role.value != "Administrator":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied",
-        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
     user = get_user_by_id(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -67,32 +91,17 @@ def activate(
     return activate_user(db, user_id)
 
 
-@router.put("/me/profile", response_model=UserResponse)
-def update_profile(
-    update_data: UpdateProfileRequest,
+@router.delete("/{user_id}")
+def delete_user_account(
+    user_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(require_admin),
 ):
-    if update_data.full_name:
-        current_user.full_name = update_data.full_name
+    user = get_user_by_id(db, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user.id == current_user.id:
+        raise HTTPException(status_code=400, detail="Cannot delete your own account")
+    db.delete(user)
     db.commit()
-    db.refresh(current_user)
-    return current_user
-
-
-@router.put("/me/change-password")
-def change_password(
-    password_data: ChangePasswordRequest,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user),
-):
-    if not verify_password(
-        password_data.current_password, current_user.hashed_password
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Current password is incorrect",
-        )
-    current_user.hashed_password = hash_password(password_data.new_password)
-    db.commit()
-    return {"message": "Password updated successfully"}
+    return {"message": "User deleted successfully"}

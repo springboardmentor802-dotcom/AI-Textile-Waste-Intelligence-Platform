@@ -1,94 +1,119 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import {
+  FiHome, FiPackage, FiUsers, FiBarChart2,
+  FiLogOut, FiFileText, FiTruck,
+  FiUser, FiLock, FiChevronRight, FiCpu,
+} from "react-icons/fi";
+import { getRoleConfig } from "../styles/theme";
 
-const NAV_ITEMS = {
-  Administrator: [
-    { label: "Dashboard", icon: "🏠", path: "/admin/dashboard" },
-    { label: "Inventory", icon: "📦", path: "/admin/inventory" },
-    { label: "Users", icon: "👥", path: "/admin/dashboard" },
-    { label: "Analytics", icon: "📊", path: "/admin/dashboard" },
-    { label: "Settings", icon: "⚙️", path: "/admin/dashboard" },
+const NAV = {
+  "Administrator": [
+    { label: "Home", icon: FiHome, path: "/admin/home" },
+    { label: "Dashboard", icon: FiBarChart2, path: "/admin/dashboard" },
+    { label: "User Management", icon: FiUsers, path: "/admin/users" },
+    { label: "Inventory", icon: FiPackage, path: "/admin/inventory" },
+    { label: "Material Recognition", icon: FiCpu, path: "/admin/material-recognition" },
+    { label: "Profile", icon: FiUser, path: "/admin/profile" },
+    { label: "Change Password", icon: FiLock, path: "/admin/change-password" },
   ],
   "Recycling Facility Operator": [
-    { label: "Dashboard", icon: "🏠", path: "/operator/dashboard" },
-    { label: "Inventory", icon: "📦", path: "/operator/inventory" },
-    { label: "Waste Items", icon: "♻", path: "/operator/dashboard" },
-    { label: "Requests", icon: "📋", path: "/operator/dashboard" },
-    { label: "Reports", icon: "📄", path: "/operator/dashboard" },
+    { label: "Home", icon: FiHome, path: "/operator/home" },
+    { label: "Dashboard", icon: FiBarChart2, path: "/operator/dashboard" },
+    { label: "Inventory", icon: FiPackage, path: "/operator/inventory" },
+    { label: "Collections", icon: FiTruck, path: "/operator/collections" },
+    { label: "Material Recognition", icon: FiCpu, path: "/operator/material-recognition" },
+    { label: "Profile", icon: FiUser, path: "/operator/profile" },
+    { label: "Change Password", icon: FiLock, path: "/operator/change-password" },
   ],
   "Sustainability Manager": [
-    { label: "Dashboard", icon: "🏠", path: "/sustainability/dashboard" },
-    { label: "Inventory", icon: "📦", path: "/sustainability/inventory" },
-    { label: "Analytics", icon: "📊", path: "/sustainability/dashboard" },
-    { label: "Reports", icon: "📄", path: "/sustainability/dashboard" },
-    { label: "Goals", icon: "🎯", path: "/sustainability/dashboard" },
+    { label: "Home", icon: FiHome, path: "/sustainability/home" },
+    { label: "Dashboard", icon: FiBarChart2, path: "/sustainability/dashboard" },
+    { label: "Inventory", icon: FiPackage, path: "/sustainability/inventory" },
+    { label: "Reports", icon: FiFileText, path: "/sustainability/reports" },
+    { label: "Material Recognition", icon: FiCpu, path: "/sustainability/material-recognition" },
+    { label: "Profile", icon: FiUser, path: "/sustainability/profile" },
+    { label: "Change Password", icon: FiLock, path: "/sustainability/change-password" },
   ],
   "Textile Manufacturer": [
-    { label: "Dashboard", icon: "🏠", path: "/manufacturer/dashboard" },
-    { label: "Inventory", icon: "📦", path: "/manufacturer/inventory" },
-    { label: "Products", icon: "👕", path: "/manufacturer/dashboard" },
-    { label: "Analysis", icon: "🔍", path: "/manufacturer/dashboard" },
-    { label: "Recycling", icon: "♻", path: "/manufacturer/dashboard" },
+    { label: "Home", icon: FiHome, path: "/manufacturer/home" },
+    { label: "Dashboard", icon: FiBarChart2, path: "/manufacturer/dashboard" },
+    { label: "Inventory", icon: FiPackage, path: "/manufacturer/inventory" },
+    { label: "Material Recognition", icon: FiCpu, path: "/manufacturer/material-recognition" },
+    { label: "Profile", icon: FiUser, path: "/manufacturer/profile" },
+    { label: "Change Password", icon: FiLock, path: "/manufacturer/change-password" },
   ],
 };
 
-const ROLE_COLORS = {
-  Administrator: "#7c3aed",
-  "Recycling Facility Operator": "#059669",
-  "Sustainability Manager": "#0891b2",
-  "Textile Manufacturer": "#d97706",
-};
-
-export default function Sidebar() {
+export default function Sidebar({ collapsed }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const items = NAV_ITEMS[user?.role] || [];
-  const color = ROLE_COLORS[user?.role] || "#059669";
+
+  const cfg = getRoleConfig(user?.role);
+  const items = NAV[user?.role] || [];
 
   return (
-    <aside style={{ ...S.sidebar, borderTop: `4px solid ${color}` }}>
+    <aside style={{ ...S.sidebar, width: collapsed ? 64 : 240 }}>
       <div style={S.brand}>
-        <span style={S.brandIcon}>♻</span>
-        <div>
-          <div style={S.brandName}>TextileWaste</div>
-          <div style={S.brandSub}>AI Platform</div>
+        <div style={{ ...S.brandMark, backgroundColor: cfg.color }}>
+          TW
         </div>
+        {!collapsed && (
+          <div>
+            <div style={S.brandName}>TextileWaste AI</div>
+            <div style={S.brandSub}>Platform</div>
+          </div>
+        )}
       </div>
 
-      <div style={S.userCard}>
-        <div style={{ ...S.avatar, backgroundColor: color }}>
-          {user?.full_name?.charAt(0)?.toUpperCase() || "U"}
+      {!collapsed && (
+        <div style={S.userCard}>
+          <div style={{ ...S.avatar, backgroundColor: cfg.color }}>
+            {user?.full_name?.charAt(0)?.toUpperCase() || "U"}
+          </div>
+          <div style={S.userMeta}>
+            <div style={S.userName}>{user?.full_name || "User"}</div>
+            <div style={{ ...S.userRole, color: cfg.color }}>
+              {cfg.label}
+            </div>
+          </div>
         </div>
-        <div style={S.userInfo}>
-          <div style={S.userName}>{user?.full_name}</div>
-          <div style={S.userRole}>{user?.role}</div>
-        </div>
-      </div>
+      )}
 
       <nav style={S.nav}>
         {items.map((item) => {
           const active = location.pathname === item.path;
           return (
             <button
-              key={item.label}
+              key={item.path}
               onClick={() => navigate(item.path)}
+              title={collapsed ? item.label : ""}
               style={{
                 ...S.navItem,
-                backgroundColor: active ? color : "transparent",
-                color: active ? "#fff" : "#374151",
+                backgroundColor: active ? "#1d4ed8" : "transparent",
+                color: active ? "#fff" : "#94a3b8",
+                justifyContent: collapsed ? "center" : "flex-start",
               }}
             >
-              <span style={S.navIcon}>{item.icon}</span>
-              {item.label}
+              <item.icon size={16} />
+              {!collapsed && <span style={S.navLabel}>{item.label}</span>}
+              {!collapsed && active && (
+                <FiChevronRight size={13} style={{ marginLeft: "auto" }} />
+              )}
             </button>
           );
         })}
       </nav>
 
-      <button style={S.logoutBtn} onClick={logout}>
-        <span>🚪</span> Logout
+      <button
+        style={{ ...S.logoutBtn, justifyContent: collapsed ? "center" : "flex-start" }}
+        onClick={logout}
+        title={collapsed ? "Logout" : ""}
+      >
+        <FiLogOut size={16} />
+        {!collapsed && <span style={S.navLabel}>Logout</span>}
       </button>
     </aside>
   );
@@ -96,53 +121,108 @@ export default function Sidebar() {
 
 const S = {
   sidebar: {
-    width: 260, minHeight: "100vh", backgroundColor: "#fff",
-    boxShadow: "2px 0 12px rgba(0,0,0,0.06)",
-    display: "flex", flexDirection: "column", padding: "0 0 24px",
+    backgroundColor: "#0f172a",
+    minHeight: "100vh",
+    display: "flex",
+    flexDirection: "column",
+    transition: "width 0.2s ease",
     flexShrink: 0,
+    overflow: "hidden",
   },
   brand: {
-    display: "flex", alignItems: "center", gap: 10,
-    padding: "24px 20px", borderBottom: "1px solid #f3f4f6",
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    padding: "18px 14px",
+    borderBottom: "1px solid #1e293b",
   },
-  brandIcon: { fontSize: 32 },
-  brandName: { fontSize: 16, fontWeight: 700, color: "#065f46" },
-  brandSub: { fontSize: 11, color: "#6b7280" },
+  brandMark: {
+    width: 30,
+    height: 30,
+    borderRadius: 6,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "#fff",
+    fontSize: 11,
+    fontWeight: 800,
+    flexShrink: 0,
+    letterSpacing: "0.5px",
+  },
+  brandName: { fontSize: 13, fontWeight: 700, color: "#f1f5f9" },
+  brandSub: { fontSize: 10, color: "#64748b" },
   userCard: {
-    display: "flex", alignItems: "center", gap: 12,
-    padding: "16px 20px", backgroundColor: "#f9fafb",
-    margin: "12px", borderRadius: 12,
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    padding: "12px 14px",
+    borderBottom: "1px solid #1e293b",
   },
   avatar: {
-    width: 40, height: 40, borderRadius: "50%",
-    display: "flex", alignItems: "center",
-    justifyContent: "center", color: "#fff",
-    fontSize: 18, fontWeight: 700, flexShrink: 0,
+    width: 32,
+    height: 32,
+    borderRadius: "50%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "#fff",
+    fontSize: 13,
+    fontWeight: 700,
+    flexShrink: 0,
   },
-  userInfo: { overflow: "hidden" },
+  userMeta: { overflow: "hidden", minWidth: 0 },
   userName: {
-    fontSize: 14, fontWeight: 600, color: "#111827",
-    whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+    fontSize: 13,
+    fontWeight: 600,
+    color: "#f1f5f9",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
   },
   userRole: {
-    fontSize: 11, color: "#6b7280",
-    whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+    fontSize: 11,
+    fontWeight: 500,
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
   },
   nav: {
-    flex: 1, display: "flex", flexDirection: "column",
-    gap: 4, padding: "12px",
+    flex: 1,
+    display: "flex",
+    flexDirection: "column",
+    gap: 2,
+    padding: "10px 8px",
+    overflowY: "auto",
   },
   navItem: {
-    display: "flex", alignItems: "center", gap: 10,
-    padding: "11px 16px", borderRadius: 8, border: "none",
-    fontSize: 14, fontWeight: 500, cursor: "pointer",
-    textAlign: "left", width: "100%",
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    padding: "9px 10px",
+    borderRadius: 6,
+    border: "none",
+    fontSize: 13,
+    fontWeight: 500,
+    cursor: "pointer",
+    textAlign: "left",
+    width: "100%",
+    transition: "background 0.15s",
+    whiteSpace: "nowrap",
   },
-  navIcon: { fontSize: 18 },
+  navLabel: { flex: 1 },
   logoutBtn: {
-    display: "flex", alignItems: "center", gap: 10,
-    margin: "0 12px", padding: "11px 16px", border: "none",
-    borderRadius: 8, backgroundColor: "#fef2f2",
-    color: "#dc2626", fontSize: 14, fontWeight: 600, cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    margin: "8px",
+    padding: "9px 10px",
+    border: "none",
+    borderRadius: 6,
+    backgroundColor: "#1e293b",
+    color: "#f87171",
+    fontSize: 13,
+    fontWeight: 500,
+    cursor: "pointer",
+    whiteSpace: "nowrap",
   },
 };

@@ -16,3 +16,4 @@ from app.services.textile_service import (
     update_textile_batch,
     delete_textile_batch,
 )
+from app.services.ml_service import load_model, predict_material, is_model_loaded

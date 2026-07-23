@@ -74,30 +74,79 @@ AI_textile_waste_management_system/
 - Frontend environment setup
 - React + Vite configuration
 - Tailwind CSS integration
+- React Router configuration
+
+### Authentication & Authorization
 - Authentication UI
   - Login Page
   - Register Page
   - Forgot Password Page
-- Reusable UI Components
-  - Button
-  - Input
-  - Password Input
-  - Authentication Layout
-- React Router configuration
+- JWT Authentication
+- Password Hashing
+- Login API
+- Register API
+- Protected Routes
+- Role-Based Authentication
+- User Session Management
+
+### Reusable UI Components
+- Button
+- Input
+- Password Input
+- Authentication Layout
+- Dashboard Layout
+- Sidebar
+- Navbar
+- Section Header
+
+### Backend Development
+- FastAPI project architecture
+- MongoDB integration
+- Database configuration
+- Authentication APIs
+- User Management APIs
+- Inventory Management APIs
+- Service Layer Architecture
+- Schema-based Validation
+- CRUD API Implementation
+
+### User Management
+- View Users
+- Role-Based User Access
+- Frontend-Backend Integration
+
+### Inventory Management
+- View Inventory
+- Add Inventory
+- Edit Inventory
+- Delete Inventory
+- Reusable Inventory Form
+- Frontend-Backend Integration
+- MongoDB CRUD Operations
 
 ---
 
 ### 🚧 In Progress
 
-- Backend project architecture
-- MongoDB integration
-- Authentication APIs
-- JWT Authentication
-- Password hashing
-- User management
+### AI Textile Intelligence Module
+- AI Module Architecture
+- Image Upload Pipeline
+- Prediction Database Schema
+- AI Service Integration
+- Fabric Classification Pipeline
 
 ---
 
+### 📌 Next Milestones
+
+- Image Upload API
+- AI Model Integration
+- Fabric Classification
+- Waste Classification
+- Recyclability Prediction
+- Prediction History
+- Analytics Dashboard
+- Reports Module
 ### 📌 Planned Features
 
 - Textile inventory management

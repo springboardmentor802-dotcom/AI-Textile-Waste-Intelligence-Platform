@@ -1,0 +1,138 @@
+@import "tailwindcss";
+
+/* =====================================================
+   Design Tokens
+===================================================== */
+
+:root {
+  /* =========================
+     Brand Colors
+  ========================= */
+  --primary: #3a8d6a;
+  --primary-light: #5faf88;
+  --secondary: #0f766e;
+  --accent: #38bdf8;
+
+  /* =========================
+     Background Colors
+  ========================= */
+  --background: #f8faf9;
+  --surface: #ffffff;
+
+  /* =========================
+     Text Colors
+  ========================= */
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+
+  /* =========================
+     Status Colors
+  ========================= */
+  --success: #16a34a;
+  --warning: #f59e0b;
+  --danger: #dc2626;
+
+  /* =========================
+     Borders
+  ========================= */
+  --border: #d8e2dc;
+
+  /* =========================
+     Border Radius
+  ========================= */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+
+  /* =========================
+     Shadows
+  ========================= */
+  --shadow-sm: 0 2px 6px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.12);
+
+  /* =========================
+     Typography
+  ========================= */
+  --font-family: "Inter", sans-serif;
+
+  /* =========================
+     Animation
+  ========================= */
+  --transition: all 0.3s ease;
+}
+
+/* =====================================================
+   Global Reset
+===================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* =====================================================
+   Base Styles
+===================================================== */
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  background: var(--background);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* =====================================================
+   Form Elements
+===================================================== */
+
+input,
+textarea,
+select,
+button {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-secondary);
+}
+
+/* =====================================================
+   Scrollbar
+===================================================== */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}

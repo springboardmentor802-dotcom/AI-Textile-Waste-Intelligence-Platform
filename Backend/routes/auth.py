@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from database import get_db
@@ -7,13 +8,13 @@ from schemas import RegisterRequest, LoginRequest, UserResponse
 from config import hash_password, verify_password, create_access_token, decode_access_token
 
 router = APIRouter()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
 
-def get_current_user(authorization: str = Header(None), db: Session = Depends(get_db)):
-    if authorization is None or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Not authenticated")
-
-    token = authorization.replace("Bearer ", "")
+def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
     payload = decode_access_token(token)
 
     if payload is None:
@@ -56,15 +57,23 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/login")
-def login(request: LoginRequest, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == request.email).first()
+def login(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(
+        User.email == form_data.username
+    ).first()
+
     if not user:
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    if not verify_password(request.password, user.password_hash):
+    if not verify_password(form_data.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    access_token = create_access_token(data={"user_id": user.id, "email": user.email})
+    access_token = create_access_token(
+        data={"user_id": user.id, "email": user.email}
+    )
 
     return {
         "access_token": access_token,
@@ -79,5 +88,9 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/admin-only")
-def admin_only_route(current_user: User = Depends(require_role(["Administrator"]))):
-    return {"message": f"Welcome, {current_user.full_name}. You have admin access."}
+def admin_only_route(
+    current_user: User = Depends(require_role(["Administrator"]))
+):
+    return {
+        "message": f"Welcome, {current_user.full_name}. You have admin access."
+    }

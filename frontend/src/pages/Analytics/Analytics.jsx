@@ -10,216 +10,331 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
+
 import { useEffect, useState } from "react";
+
 
 import { getAnalytics } from "../../services/analyticsService";
 import { getUploads } from "../../services/uploadService";
 
+
 import "./Analytics.css";
 
 
-function Analytics() {
 
+function Analytics(){
 
-  const [analyticsData, setAnalyticsData] = useState(null);
 
-  const [predictions, setPredictions] = useState([]);
+const [analyticsData,setAnalyticsData]=useState({
 
+total_uploads:0,
 
+recyclable_percentage:0,
 
-  useEffect(() => {
+materials:{},
 
-    loadAnalytics();
+environmental_impact:{}
 
-    loadPredictions();
+});
 
-  }, []);
 
+const [predictions,setPredictions]=useState([]);
 
+const [loading,setLoading]=useState(true);
 
 
-  const loadAnalytics = async () => {
 
-    try {
 
-      const data = await getAnalytics();
 
-      setAnalyticsData(data);
 
-    }
+useEffect(()=>{
 
-    catch(error){
+loadAnalytics();
+loadPredictions();
 
-      console.log(
-        "Analytics error:",
-        error
-      );
+},[]);
 
-    }
 
-  };
 
 
 
 
+const loadAnalytics=async()=>{
 
-  const loadPredictions = async () => {
 
-    try {
+try{
 
-      const data = await getUploads();
 
-      setPredictions(data);
+const data=await getAnalytics();
 
-    }
 
-    catch(error){
+setAnalyticsData(data);
 
-      console.log(
-        "Uploads error:",
-        error
-      );
 
-    }
+}
 
-  };
+catch(error){
 
+console.log(error);
 
+}
 
 
+};
 
 
-  const wasteTrend = [
 
-    {
-      month:"Jan",
-      waste:2000
-    },
 
-    {
-      month:"Feb",
-      waste:3200
-    },
 
-    {
-      month:"Mar",
-      waste:2800
-    },
 
-    {
-      month:"Apr",
-      waste:4500
-    },
 
-    {
-      month:"May",
-      waste:5200
-    },
+const loadPredictions=async()=>{
 
-    {
-      month:"Jun",
-      waste:6100
-    }
 
-  ];
+try{
 
 
+const data=await getUploads();
 
 
+setPredictions(
 
+Array.isArray(data)
 
-  const materialData = analyticsData
+?
 
-  ?
+data
 
-  Object.entries(
-    analyticsData.materials
-  )
+:
 
-  .map(([name,value])=>({
+data?.data || []
 
-    name,
-    value
+);
 
-  }))
 
-  :
+}
 
-  [];
+catch(error){
 
+console.log(error);
 
+}
 
+finally{
 
+setLoading(false);
 
+}
 
-  const environmentalData = analyticsData
 
-  ?
+};
 
-  Object.entries(
-    analyticsData.environmental_impact
-  )
 
-  .map(([name,value])=>({
 
-    name,
-    value
 
-  }))
 
-  :
 
-  [];
 
+if(loading){
 
+return(
 
+<div className="analytics">
 
+<h2>
+Loading Intelligence...
+</h2>
 
+</div>
 
-  const materialRanking = materialData.map(
-    item => ({
+)
 
-      name:item.name,
+}
 
-      percentage:
-      Math.round(
 
-        (
-          item.value /
-          analyticsData.total_uploads
 
-        )
 
-        *
 
-        100
 
-      )
 
-    })
-  );
 
+const materialData=Object.entries(
 
+analyticsData.materials || {}
 
+)
 
+.map(([name,value])=>({
 
+name,
 
-  return (
+value
+
+}));
+
+
+
+
+
+
+
+const environmentalData=Object.entries(
+
+analyticsData.environmental_impact || {}
+
+)
+
+.map(([name,value])=>({
+
+name,
+
+value
+
+}));
+
+
+
+
+
+
+
+const wasteTrend=Object.entries(
+
+predictions.reduce((acc,item)=>{
+
+
+const date=new Date(
+
+item.upload_date
+
+)
+
+.toLocaleDateString();
+
+
+acc[date]=(acc[date] || 0)+1;
+
+
+return acc;
+
+
+},{}) 
+
+)
+
+.map(([date,uploads])=>({
+
+date,
+
+uploads
+
+}));
+
+
+
+
+
+
+
+const materialRanking=materialData
+
+.sort((a,b)=>b.value-a.value)
+
+.map(item=>({
+
+name:item.name,
+
+percentage:
+
+analyticsData.total_uploads
+
+?
+
+Math.round(
+
+(item.value /
+
+analyticsData.total_uploads)*100
+
+)
+
+:
+
+0
+
+}));
+
+
+
+
+
+
+
+const averageConfidence=predictions.length
+
+?
+
+Math.round(
+
+predictions.reduce(
+
+(sum,item)=>{
+
+
+const confidence=
+
+item.confidence < 1
+
+?
+
+item.confidence*100
+
+:
+
+item.confidence;
+
+
+return sum+confidence;
+
+
+},0)
+
+/
+
+predictions.length
+
+)
+
+:
+
+0;
+
+
+
+
+
+
+
+return(
+
 
 
 <div className="analytics">
 
 
 
+
+
 <div className="analytics-header">
 
+
 <h1>
-Waste Analytics Dashboard
+Circular Economy Analytics
 </h1>
 
 
 <p>
-Monitor textile waste intelligence and sustainability performance.
+AI-powered sustainability insights from textile waste analysis.
 </p>
 
 
@@ -236,30 +351,43 @@ Monitor textile waste intelligence and sustainability performance.
 
 
 
+
+
 <div className="analytics-card">
 
 <h3>
-Total AI Uploads
+Total AI Samples
 </h3>
 
-
 <h2>
-
-{
-analyticsData
-?
-analyticsData.total_uploads
-:
-0
-}
-
+{analyticsData.total_uploads}
 </h2>
 
-
 <span>
-AI analyzed textile images
+Processed textile images
 </span>
 
+</div>
+
+
+
+
+
+
+
+<div className="analytics-card">
+
+<h3>
+Recyclable Potential
+</h3>
+
+<h2>
+{analyticsData.recyclable_percentage}%
+</h2>
+
+<span>
+Circular recovery possibility
+</span>
 
 </div>
 
@@ -272,29 +400,17 @@ AI analyzed textile images
 
 <div className="analytics-card">
 
-
 <h3>
-Recyclable Waste
+Material Categories
 </h3>
 
-
 <h2>
-
-{
-analyticsData
-?
-analyticsData.recyclable_percentage
-:
-0
-}%
-
+{materialData.length}
 </h2>
 
-
 <span>
-Recycling potential
+Detected fabric types
 </span>
-
 
 </div>
 
@@ -306,54 +422,19 @@ Recycling potential
 
 
 <div className="analytics-card">
-
-
-<h3>
-Detected Materials
-</h3>
-
-
-<h2>
-
-{
-materialData.length
-}
-
-</h2>
-
-
-<span>
-Material categories
-</span>
-
-
-</div>
-
-
-
-
-
-
-
-
-<div className="analytics-card">
-
 
 <h3>
 AI Accuracy
 </h3>
 
-
 <h2>
-100%
+{averageConfidence}%
 </h2>
-
 
 <span>
-Current model performance
+Average prediction confidence
 </span>
 
-
 </div>
 
 
@@ -369,13 +450,12 @@ Current model performance
 
 
 
-<div className="chart-card full-chart">
+<div className="chart-card">
 
 
 <h2>
-Waste Generated Over Time
+Waste Processing Trend
 </h2>
-
 
 
 <ResponsiveContainer
@@ -387,18 +467,19 @@ height={300}
 <LineChart data={wasteTrend}>
 
 
-<XAxis dataKey="month"/>
+<XAxis dataKey="date"/>
 
 <YAxis/>
+
 
 <Tooltip/>
 
 
 <Line
 
-dataKey="waste"
+dataKey="uploads"
 
-stroke="#1565c0"
+stroke="#1f6f5f"
 
 strokeWidth={3}
 
@@ -408,9 +489,7 @@ strokeWidth={3}
 </LineChart>
 
 
-
 </ResponsiveContainer>
-
 
 
 </div>
@@ -437,7 +516,6 @@ Material Distribution
 </h2>
 
 
-
 <ResponsiveContainer
 width="100%"
 height={300}
@@ -457,27 +535,42 @@ nameKey="name"
 
 outerRadius={100}
 
-label
+label={({name,value})=>
+
+`${name}: ${value}`
+
+}
 
 >
 
 
 {
 
-materialData.map(
+materialData.map((item,index)=>(
 
-(item,index)=>(
 
 <Cell
 
 key={index}
 
+fill={[
+
+"#1f6f5f",
+
+"#d9a441",
+
+"#6b8e7d",
+
+"#94a3b8"
+
+][index % 4]}
+
 />
+
 
 ))
 
 }
-
 
 
 </Pie>
@@ -487,7 +580,6 @@ key={index}
 
 
 </PieChart>
-
 
 
 </ResponsiveContainer>
@@ -512,11 +604,12 @@ Environmental Impact
 </h2>
 
 
-
-
 <ResponsiveContainer
+
 width="100%"
+
 height={300}
+
 >
 
 
@@ -533,27 +626,40 @@ nameKey="name"
 
 outerRadius={100}
 
-label
+label={({name,value})=>
+
+`${name}: ${value}`
+
+}
 
 >
 
 
 {
 
-environmentalData.map(
+environmentalData.map((item,index)=>(
 
-(item,index)=>(
 
 <Cell
 
 key={index}
 
+fill={[
+
+"#1f6f5f",
+
+"#d9a441",
+
+"#6b8e7d"
+
+][index % 3]}
+
 />
+
 
 ))
 
 }
-
 
 
 </Pie>
@@ -565,10 +671,7 @@ key={index}
 </PieChart>
 
 
-
 </ResponsiveContainer>
-
-
 
 
 </div>
@@ -592,6 +695,7 @@ key={index}
 
 
 
+
 <div className="chart-card">
 
 
@@ -603,9 +707,7 @@ Material Intelligence
 
 {
 
-materialRanking.map(
-
-(item,index)=>(
+materialRanking.map((item,index)=>(
 
 
 <div
@@ -615,7 +717,6 @@ className="material-progress"
 key={index}
 
 >
-
 
 
 <div className="material-title">
@@ -650,6 +751,7 @@ width:`${item.percentage}%`
 
 }}
 
+
 />
 
 
@@ -657,15 +759,13 @@ width:`${item.percentage}%`
 
 
 
-
 </div>
+
 
 
 ))
 
-
 }
-
 
 
 
@@ -683,7 +783,7 @@ width:`${item.percentage}%`
 
 
 <h2>
-Sustainability Score
+Circularity Score
 </h2>
 
 
@@ -691,21 +791,11 @@ Sustainability Score
 <div className="score-circle">
 
 
-{
+{Math.round(
 
-analyticsData
-
-?
-
-Math.round(
 analyticsData.recyclable_percentage
-)
 
-:
-
-0
-
-}
+)}
 
 
 </div>
@@ -713,9 +803,8 @@ analyticsData.recyclable_percentage
 
 
 <p>
-Based on recyclable textile analysis
+Overall recycling potential assessment
 </p>
-
 
 
 </div>
@@ -738,8 +827,9 @@ Based on recyclable textile analysis
 
 
 <h2>
-Recent AI Predictions
+Recent AI Analysis
 </h2>
+
 
 
 
@@ -748,16 +838,15 @@ Recent AI Predictions
 
 <thead>
 
-
 <tr>
 
 <th>
-Image
+Material
 </th>
 
 
 <th>
-Material
+Fabric Class
 </th>
 
 
@@ -778,9 +867,7 @@ Status
 
 </tr>
 
-
 </thead>
-
 
 
 
@@ -791,20 +878,20 @@ Status
 
 {
 
-predictions.map(
-
-(item,index)=>(
+predictions.map((item,index)=>(
 
 
 <tr key={index}>
 
 
 <td>
+{item.material}
+</td>
 
-{
-item.image_path
-}
 
+
+<td>
+{item.predicted_class}
 </td>
 
 
@@ -812,34 +899,33 @@ item.image_path
 <td>
 
 {
-item.material
+
+item.confidence < 1
+
 ?
-item.material
+
+Math.round(item.confidence*100)
+
 :
-item.predicted_class
-}
 
-</td>
-
-
-
-<td>
-
-{
 item.confidence
+
 }%
 
 </td>
 
 
 
-
 <td>
 
 {
+
 new Date(
+
 item.upload_date
+
 )
+
 .toLocaleDateString()
 
 }
@@ -848,11 +934,8 @@ item.upload_date
 
 
 
-
 <td>
-
 Analyzed
-
 </td>
 
 
@@ -866,17 +949,14 @@ Analyzed
 }
 
 
-
 </tbody>
-
 
 
 </table>
 
 
-
-
 </div>
+
 
 
 
@@ -893,13 +973,15 @@ Download Analytics Report
 
 
 
+
+
 </div>
 
 
-  );
+);
+
 
 }
-
 
 
 export default Analytics;

@@ -1,351 +1,1050 @@
 import { useState } from "react";
-import axios from "axios";
 import "./UploadWaste.css";
 
+import { predictTextile } from "../../services/predictionService";
 
-function UploadWaste() {
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
-  const [image, setImage] = useState(null);
 
-  const [preview, setPreview] = useState(null);
 
-  const [result, setResult] = useState(null);
+function UploadWaste(){
 
-  const [loading, setLoading] = useState(false);
 
+const [image,setImage]=useState(null);
+const [preview,setPreview]=useState(null);
+const [result,setResult]=useState(null);
+const [loading,setLoading]=useState(false);
 
 
-  const handleImage = (e) => {
 
-    const file = e.target.files[0];
 
-    if (file) {
 
-      setImage(file);
+const handleImage=(e)=>{
 
-      setPreview(
-        URL.createObjectURL(file)
-      );
 
-      setResult(null);
+const file=e.target.files[0];
 
-    }
 
-  };
+if(file){
 
+setImage(file);
 
+setPreview(URL.createObjectURL(file));
 
-  const analyzeWaste = async () => {
+}
 
-    if (!image) return;
 
+};
 
-    try {
 
-      setLoading(true);
 
 
-      const formData = new FormData();
 
-      formData.append(
-        "file",
-        image
-      );
 
 
+const analyzeWaste=async()=>{
 
-      const response = await axios.post(
 
-        "http://127.0.0.1:8000/prediction/",
+if(!image)return;
 
-        formData,
 
-        {
-          headers: {
-            "Content-Type": "multipart/form-data"
-          }
-        }
+try{
 
-      );
 
+setLoading(true);
 
 
-      console.log(
-        "AI Response:",
-        response.data
-      );
+const data=await predictTextile(image);
 
 
 
-      const data = response.data;
+setResult({
 
 
+fabric:data.fabric_prediction.class,
 
-      setResult({
+confidence:data.fabric_prediction.confidence,
 
-        material:
-        data.material_analysis.material,
 
+material:data.material_analysis.material,
 
-        type:
-        data.material_analysis.type,
+type:data.material_analysis.type,
 
+method:data.material_analysis.recyclable_method,
 
-        confidence:
-        data.fabric_prediction.confidence + "%",
+impact:data.material_analysis.environmental_impact,
 
 
-        recyclingMethod:
-        data.material_analysis.recyclable_method,
+biodegradable:data.material_analysis.biodegradable,
 
+reusable:data.material_analysis.reusable,
 
-        impact:
-        data.material_analysis.environmental_impact,
 
 
-        biodegradable:
-        data.material_analysis.biodegradable,
+condition:data.condition_analysis.condition,
 
+defect:data.condition_analysis.defect,
 
-        reusable:
-        data.material_analysis.reusable
+severity:data.condition_analysis.severity,
 
-      });
+contamination:data.condition_analysis.contamination,
 
+affectedArea:data.condition_analysis.affected_area,
 
+visualization:data.condition_analysis.visualization,
 
-    } catch (error) {
 
 
-      console.error(
-        "Prediction error:",
-        error
-      );
+decision:data.decision_analysis.final_decision
 
 
-      alert(
-        "AI analysis failed. Check backend server."
-      );
+});
 
 
-    } finally {
 
-      setLoading(false);
+}
+catch(error){
 
-    }
+console.log(error);
 
-  };
+alert("Prediction Failed");
 
+}
 
+finally{
 
-  return (
+setLoading(false);
 
-    <div className="upload-page">
+}
 
 
-      <div className="upload-header">
 
+};
 
-        <h1>
-          AI Textile Waste Analyzer
-        </h1>
 
 
-        <p>
-          Upload textile waste images for AI-based classification and recyclability assessment.
-        </p>
 
 
-      </div>
 
 
 
 
+// ===============================
+// PDF GENERATION
+// ===============================
 
-      <div className="upload-card">
 
+const downloadReport=()=>{
 
 
-        <input
+if(!result)return;
 
-          type="file"
 
-          accept="image/*"
 
-          onChange={handleImage}
+const pdf=new jsPDF();
 
-        />
 
 
+const pageWidth=pdf.internal.pageSize.width;
 
 
 
-        {preview && (
+// HEADER
 
-          <img
 
-            src={preview}
+pdf.setFontSize(20);
 
-            className="image-preview"
 
-            alt="preview"
+pdf.text(
+"AI Textile Waste Intelligence Platform",
+20,
+20
+);
 
-          />
 
-        )}
 
+pdf.setFontSize(12);
 
 
+pdf.text(
+"Sustainable Textile Waste Analysis Report",
+20,
+30
+);
 
 
 
-        <button
+pdf.text(
+"Generated: "+new Date().toLocaleString(),
+20,
+38
+);
 
-          onClick={analyzeWaste}
 
-          disabled={!image || loading}
 
-        >
 
-          {loading
-            ? "Analyzing..."
-            : "Analyze Waste"
-          }
 
+// IMAGE
 
-        </button>
 
+if(preview){
 
 
+pdf.addImage(
 
+preview,
 
+"JPEG",
 
+150,
 
-        {result && (
+15,
 
+40,
 
-          <div className="result-card">
+40
 
+);
 
-            <h2>
-              AI Prediction
-            </h2>
 
+}
 
 
 
 
-            <p>
-              Material:
 
-              <strong>
-                {result.material}
-              </strong>
 
-            </p>
+// MATERIAL SECTION
 
 
+pdf.setFontSize(16);
 
 
+pdf.text(
+"AI Material Classification",
+20,
+70
+);
 
-            <p>
-              Material Type:
 
-              <strong>
-                {result.type}
-              </strong>
 
-            </p>
+autoTable(pdf,{
 
 
+startY:80,
 
 
+head:[
 
-            <p>
-              Confidence:
+[
+"Parameter",
+"Result"
+]
 
-              <strong>
-                {result.confidence}
-              </strong>
+],
 
-            </p>
 
+body:[
 
 
+[
+"Fabric Class",
+result.fabric
+],
 
 
-            <p>
-              Recycling Method:
+[
+"Material",
+result.material
+],
 
-              <strong>
-                {result.recyclingMethod}
-              </strong>
 
-            </p>
+[
+"Material Type",
+result.type
+],
 
 
+[
+"Confidence",
+result.confidence+"%"
+]
 
 
+]
 
-            <p>
-              Environmental Impact:
+});
 
-              <strong>
-                {result.impact}
-              </strong>
 
-            </p>
 
 
 
 
 
-            <p>
-              Biodegradable:
 
-              <strong>
-                {
-                  result.biodegradable
-                  ? " Yes"
-                  : " No"
-                }
-              </strong>
+// CONDITION
 
-            </p>
 
+pdf.text(
 
+"Computer Vision Inspection",
 
+20,
 
+150
 
-            <p>
-              Reusable:
+);
 
-              <strong>
-                {
-                  result.reusable
-                  ? " Yes"
-                  : " No"
-                }
-              </strong>
 
-            </p>
 
+autoTable(pdf,{
 
 
-          </div>
+startY:160,
 
 
-        )}
+head:[
 
+[
+"Metric",
+"Result"
+]
 
+],
 
 
-      </div>
+body:[
 
 
-    </div>
+[
+"Condition",
+result.condition
+],
 
-  );
+
+[
+"Defect",
+result.defect
+],
+
+
+[
+"Severity",
+result.severity
+],
+
+
+[
+"Contamination",
+result.contamination
+],
+
+
+[
+"Affected Area",
+result.affectedArea+"%"
+]
+
+
+]
+
+});
+
+
+
+
+
+
+
+// ADD OPENCV IMAGE
+
+
+if(result.visualization){
+
+
+
+pdf.addPage();
+
+
+
+pdf.setFontSize(16);
+
+
+pdf.text(
+
+"OpenCV Defect Visualization",
+
+20,
+
+25
+
+);
+
+
+
+pdf.addImage(
+
+"http://127.0.0.1:8000"+result.visualization,
+
+"PNG",
+
+20,
+
+35,
+
+120,
+
+90
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// DECISION PAGE
+
+
+pdf.addPage();
+
+
+
+pdf.setFontSize(16);
+
+
+pdf.text(
+
+"Circular Economy Decision",
+
+20,
+
+25
+
+);
+
+
+
+
+autoTable(pdf,{
+
+
+startY:40,
+
+
+head:[
+
+[
+"Decision",
+"Recommended Process"
+]
+
+],
+
+
+body:[
+
+
+[
+
+result.decision,
+
+
+result.decision==="Reuse"
+
+?
+
+"Direct Reuse"
+
+:
+
+result.method
+
+]
+
+
+]
+
+});
+
+
+
+
+
+
+pdf.text(
+
+"Environmental Assessment",
+
+20,
+
+120
+
+);
+
+
+
+autoTable(pdf,{
+
+
+startY:130,
+
+
+head:[
+
+[
+"Parameter",
+"Value"
+]
+
+],
+
+
+body:[
+
+
+[
+"Environmental Impact",
+result.impact
+],
+
+
+[
+"Reusable",
+result.reusable?"Yes":"No"
+],
+
+
+[
+"Biodegradable",
+result.biodegradable?"Yes":"No"
+]
+
+
+]
+
+
+});
+
+
+
+
+
+pdf.setFontSize(10);
+
+
+pdf.text(
+
+"Generated by AI Textile Waste Intelligence Platform",
+
+20,
+
+280
+
+);
+
+
+
+
+
+pdf.save(
+
+"AI_Textile_Waste_Report.pdf"
+
+);
+
+
+
+};
+
+
+
+
+
+
+
+
+
+return(
+
+<div className="upload-page">
+
+
+
+<div className="hero">
+
+
+<h1>
+AI Textile Waste Analyzer
+</h1>
+
+
+<p>
+Computer vision based textile classification and circularity intelligence
+</p>
+
+
+</div>
+
+
+
+
+
+
+
+<div className="upload-section">
+
+
+<h2>
+Upload Textile Sample
+</h2>
+
+
+<p>
+Upload textile waste image for AI material analysis
+</p>
+
+
+
+
+<label className="upload-box">
+
+
+<input
+
+type="file"
+
+accept="image/*"
+
+onChange={handleImage}
+
+/>
+
+
+
+<div>
+
+<h3>
+＋ Upload Image
+</h3>
+
+
+<span>
+Select textile waste sample
+</span>
+
+</div>
+
+
+</label>
+
+
+
+
+
+{
+
+preview &&
+
+<div className="image-area">
+
+<img src={preview}/>
+
+</div>
+
+
+}
+
+
+
+
+
+
+<button
+
+className="analyze-btn"
+
+disabled={!image||loading}
+
+onClick={analyzeWaste}
+
+>
+
+
+{
+
+loading?
+
+"Analyzing Textile..."
+
+:
+
+"Analyze Sample"
+
+}
+
+
+</button>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+{
+
+result &&
+
+<div className="analysis-result">
+
+
+
+<div className="result-header">
+
+
+<h2>
+AI Analysis Report
+</h2>
+
+
+
+<div className="report-actions">
+
+
+<div className="complete">
+Completed
+</div>
+
+
+
+<button
+
+className="download-btn"
+
+onClick={downloadReport}
+
+>
+
+⬇ Download PDF Report
+
+</button>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+<div className="image-result">
+
+
+<img
+
+src={
+
+result.visualization
+
+?
+
+"http://127.0.0.1:8000"+result.visualization
+
+:
+
+preview
+
+}
+
+/>
+
+
+
+<div>
+
+
+<h3>
+Detected Material
+</h3>
+
+
+<h1>
+{result.material}
+</h1>
+
+
+<p>
+Confidence {result.confidence}%
+</p>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<h2 className="section-title">
+Material Intelligence
+</h2>
+
+
+<div className="info-grid">
+
+
+<div>
+
+<label>
+Fabric Class
+</label>
+
+<strong>
+{result.fabric}
+</strong>
+
+</div>
+
+
+
+<div>
+
+<label>
+Material Type
+</label>
+
+<strong>
+{result.type}
+</strong>
+
+</div>
+
+
+
+<div>
+
+<label>
+Confidence
+</label>
+
+<strong>
+{result.confidence}%
+</strong>
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<h2 className="section-title">
+Textile Condition Assessment
+</h2>
+
+
+<div className="info-grid">
+
+
+<div>
+
+<label>
+Defect
+</label>
+
+<strong>
+{result.defect}
+</strong>
+
+<p>
+Severity {result.severity}
+</p>
+
+</div>
+
+
+
+
+<div>
+
+<label>
+Contamination
+</label>
+
+<strong>
+{result.contamination}
+</strong>
+
+<p>
+Affected Area {result.affectedArea}%
+</p>
+
+</div>
+
+
+
+
+<div>
+
+<label>
+Condition
+</label>
+
+<strong>
+{result.condition}
+</strong>
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<div className="decision-card">
+
+
+<p>
+Circularity Recommendation
+</p>
+
+
+<h1>
+{result.decision}
+</h1>
+
+
+<strong>
+
+{
+
+result.decision==="Reuse"
+
+?
+
+"Direct Reuse"
+
+:
+
+result.method
+
+}
+
+</strong>
+
+
+</div>
+
+
+
+
+
+
+
+<h2 className="section-title">
+Environmental Impact
+</h2>
+
+
+<div className="info-grid">
+
+
+<div>
+
+<label>
+Impact
+</label>
+
+<strong>
+{result.impact}
+</strong>
+
+</div>
+
+
+
+<div>
+
+<label>
+Reusable
+</label>
+
+<strong>
+{result.reusable?"Yes":"No"}
+</strong>
+
+</div>
+
+
+
+<div>
+
+<label>
+Biodegradable
+</label>
+
+<strong>
+{result.biodegradable?"Yes":"No"}
+</strong>
+
+</div>
+
+
+</div>
+
+
+
+
+</div>
+
+
+}
+
+
+
+</div>
+
+
+);
+
 
 }
 

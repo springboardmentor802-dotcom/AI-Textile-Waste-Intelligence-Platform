@@ -55,7 +55,11 @@ def get_analytics(
 
         # Recycling percentage
 
-        if item.recycling_method:
+        if item.recycling_method in [
+    "Mechanical Recycling",
+    "Chemical Recycling",
+    "Reuse"
+]:
 
             recyclable_count += 1
 

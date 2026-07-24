@@ -50,8 +50,11 @@ def predict_image(image_path):
         value:key
         for key,value in config["class_mapping"].items()
     }
+    print("MODEL INDEX:", index)
+    print("CLASS MAPPING:", reverse_mapping)
+
 
     return {
         "predicted_class": reverse_mapping[index],
         "confidence": round(confidence*100,2)
-    }
+}

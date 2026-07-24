@@ -1,194 +1,315 @@
 import "./Recommendations.css";
 
 
-function Recommendations() {
+function Recommendations(){
 
 
-  const recommendations = [
+const recommendations=[
 
-    {
-      icon:"♻️",
-      title:"Cotton Recycling",
-      material:"Cotton",
-      description:
-      "Convert cotton waste into recycled fibers, insulation materials, and new textile products.",
-      impact:"90% Recovery Potential"
-    },
+{
+icon:"♻",
+material:"Cotton",
+type:"Natural Fiber",
+action:"Mechanical Recycling",
+impact:"High Recovery Potential",
+description:
+"Cotton waste can be processed into regenerated fibers, insulation materials and new textile products."
+},
 
 
-    {
-      icon:"🌱",
-      title:"Reduce Textile Waste",
-      material:"General",
-      description:
-      "Improve sorting efficiency and reduce landfill contribution through automated classification.",
-      impact:"35% Waste Reduction"
-    },
+{
+icon:"🔄",
+material:"Polyester",
+type:"Synthetic Fiber",
+action:"Chemical Recycling",
+impact:"Material Recovery Optimized",
+description:
+"Polyester fabrics can be recovered into reusable polymer fibers for sustainable manufacturing."
+},
 
 
-    {
-      icon:"🔄",
-      title:"Polyester Reuse",
-      material:"Polyester",
-      description:
-      "Recycle polyester fabrics into reusable fibers and sustainable clothing materials.",
-      impact:"80% Reusability"
-    },
+{
+icon:"🧵",
+material:"Blended Fabric",
+type:"Mixed Fiber",
+action:"Specialized Processing",
+impact:"Controlled Recycling",
+description:
+"Mixed textiles require separation or specialized recycling processes for maximum recovery."
+},
 
 
-    {
-      icon:"🧵",
-      title:"Denim Upcycling",
-      material:"Denim",
-      description:
-      "Transform old denim into accessories, insulation products, and regenerated fabrics.",
-      impact:"75% Resource Saving"
-    }
+{
+icon:"🌱",
+material:"Reusable Textile",
+type:"Quality Recovery",
+action:"Upcycling",
+impact:"Waste Reduction",
+description:
+"Good condition textiles can be reused for secondary products and extended lifecycle."
+}
 
-  ];
 
+];
 
 
-  return (
 
-    <div className="recommendations">
 
 
-      <div className="recommendation-header">
+return(
 
-        <h1>
-          AI Sustainability Recommendations
-        </h1>
+<div className="recommendations">
 
 
-        <p>
-          AI-powered suggestions for textile waste recycling and reuse strategies.
-        </p>
 
 
-      </div>
 
+<div className="recommendation-header">
 
 
+<h1>
+AI Circular Decision Engine
+</h1>
 
 
-      <div className="recommendation-summary">
+<p>
+AI-generated sustainability strategies based on textile material intelligence.
+</p>
 
 
-        <div>
+</div>
 
-          <h3>
-            AI Suggestions
-          </h3>
 
-          <h2>
-            24
-          </h2>
 
-        </div>
 
 
 
-        <div>
 
-          <h3>
-            Waste Recovery Score
-          </h3>
 
-          <h2>
-            86%
-          </h2>
 
-        </div>
+<div className="recommendation-summary">
 
 
 
-        <div>
+<div>
 
-          <h3>
-            Environmental Impact
-          </h3>
+<h3>
+AI Recommendations
+</h3>
 
-          <h2>
-            High
-          </h2>
+<h2>
+{recommendations.length}
+</h2>
 
-        </div>
+<span>
+Generated strategies
+</span>
 
+</div>
 
-      </div>
 
 
 
 
+<div>
 
-      <div className="recommendation-grid">
+<h3>
+Recovery Efficiency
+</h3>
 
+<h2>
+86%
+</h2>
 
-        {
-          recommendations.map((item,index)=>(
+<span>
+Circular potential
+</span>
 
+</div>
 
-            <div
-              className="recommendation-card"
-              key={index}
-            >
 
 
-              <div className="recommendation-icon">
 
-                {item.icon}
 
-              </div>
+<div>
 
+<h3>
+Environmental Benefit
+</h3>
 
+<h2>
+High
+</h2>
 
-              <h2>
+<span>
+Impact reduction
+</span>
 
-                {item.title}
+</div>
 
-              </h2>
 
 
+</div>
 
-              <span>
 
-                {item.material}
 
-              </span>
 
 
 
-              <p>
 
-                {item.description}
 
-              </p>
 
+<h2 className="section-heading">
 
+Material-Based Decisions
 
-              <strong>
+</h2>
 
-                {item.impact}
 
-              </strong>
 
 
 
-            </div>
 
 
-          ))
-        }
+<div className="recommendation-grid">
 
 
-      </div>
 
+{
 
+recommendations.map((item,index)=>(
 
-    </div>
 
-  );
+<div
+
+className="recommendation-card"
+
+key={index}
+
+>
+
+
+
+<div className="icon">
+
+{item.icon}
+
+</div>
+
+
+
+
+
+
+<div className="material-tag">
+
+{item.type}
+
+</div>
+
+
+
+
+
+<h2>
+
+{item.material}
+
+</h2>
+
+
+
+
+
+
+<div className="decision-box">
+
+
+<label>
+Recommended Action
+</label>
+
+
+<strong>
+{item.action}
+</strong>
+
+
+</div>
+
+
+
+
+
+
+
+<p>
+
+{item.description}
+
+</p>
+
+
+
+
+
+
+<div className="impact">
+
+
+{item.impact}
+
+
+</div>
+
+
+
+
+
+</div>
+
+
+))
+
+
+}
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<div className="insight-card">
+
+
+<h2>
+AI Sustainability Insight
+</h2>
+
+
+<p>
+Textile waste classification enables automated sorting,
+improved recycling decisions and optimized circular economy workflows.
+</p>
+
+
+</div>
+
+
+
+
+
+</div>
+
+
+);
+
 
 }
 

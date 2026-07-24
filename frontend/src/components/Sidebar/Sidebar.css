@@ -1,97 +1,458 @@
+/* 
+   Eco-Tech Modern Sidebar
+   AI Textile Intelligence Platform
+*/
+
+
 .sidebar {
 
-  width:240px;
 
-  height:100vh;
+    width:250px;
 
-  background:#0F172A;
+    height:100%;
 
-  color:white;
+    min-height:calc(100vh - 78px);
 
-  padding:25px 15px;
+
+    background:#0F172A;
+
+
+    padding:28px 18px;
+
+
+    display:flex;
+
+    flex-direction:column;
+
+
+    box-sizing:border-box;
+
+
+    position:relative;
+
+
+    transition:width .3s ease;
+
 
 }
 
+
+
+
+
+
+
+/* Sidebar Section Title */
+
+
+.sidebar-title {
+
+
+    color:#64748B;
+
+
+    font-size:12px;
+
+
+    font-weight:600;
+
+
+    text-transform:uppercase;
+
+
+    letter-spacing:1px;
+
+
+    margin:0 0 18px 12px;
+
+
+}
+
+
+
+
+
+
+
+
+
+/* Navigation */
 
 
 .sidebar-menu {
 
-  display:flex;
 
-  flex-direction:column;
+    display:flex;
 
-  gap:8px;
+    flex-direction:column;
+
+
+    gap:6px;
+
 
 }
 
 
 
-.sidebar-menu a {
 
-  display:flex;
 
-  align-items:center;
 
-  gap:15px;
 
-  padding:13px 15px;
+.sidebar-link {
 
-  color:#CBD5E1;
 
-  text-decoration:none;
+    height:48px;
 
-  border-radius:12px;
 
-  transition:0.3s;
+    display:flex;
+
+
+    align-items:center;
+
+
+    gap:14px;
+
+
+    padding:0 15px;
+
+
+    border-radius:12px;
+
+
+    text-decoration:none;
+
+
+    color:#CBD5E1;
+
+
+    font-size:15px;
+
+
+    font-weight:500;
+
+
+    transition:
+
+    background .25s ease,
+
+    color .25s ease,
+
+    transform .25s ease;
+
 
 }
 
 
 
-.sidebar-menu a:hover {
 
-  background:#1E293B;
 
-  color:white;
+
+.sidebar-link:hover {
+
+
+    background:
+
+    rgba(255,255,255,0.06);
+
+
+    color:white;
+
+
+    transform:translateX(3px);
+
 
 }
 
 
 
-.sidebar-menu a.active {
 
-  background:#2563EB;
 
-  color:white;
+
+.sidebar-link.active {
+
+
+    background:#0EA5E9;
+
+
+    color:white;
+
+
+    box-shadow:
+
+    0 8px 20px
+
+    rgba(14,165,233,0.25);
+
 
 }
+
+
+
+
+
+
+
+
+/* Icons */
+
+
+.sidebar-icon {
+
+
+    width:22px;
+
+
+    height:22px;
+
+
+    display:flex;
+
+
+    align-items:center;
+
+
+    justify-content:center;
+
+
+    font-size:17px;
+
+
+    flex-shrink:0;
+
+
+}
+
+
+
+
+
+
+.sidebar-text {
+
+
+    white-space:nowrap;
+
+
+}
+
+
+
+
+
+
+
+
+
+/* Footer */
+
+
+.sidebar-footer {
+
+
+    margin-top:auto;
+
+
+    padding-top:25px;
+
+
+}
+
+
+
+
 
 
 
 .logout-btn {
 
-  margin-top:30px;
 
-  width:100%;
+    width:100%;
 
-  padding:13px;
 
-  border:none;
+    height:48px;
 
-  border-radius:12px;
 
-  background:#DC2626;
+    display:flex;
 
-  color:white;
 
-  cursor:pointer;
+    align-items:center;
+
+
+    justify-content:center;
+
+
+    gap:12px;
+
+
+    border-radius:12px;
+
+
+    background:
+
+    rgba(255,255,255,0.05);
+
+
+    border:1px solid #334155;
+
+
+    color:#CBD5E1;
+
+
+    font-size:15px;
+
+
+    font-weight:500;
+
+
+    cursor:pointer;
+
+
+    transition:.3s ease;
+
 
 }
 
 
 
+
+
+
+.logout-btn svg {
+
+
+    font-size:16px;
+
+
+}
+
+
+
+
+
+
+
 .logout-btn:hover {
 
-  background:#B91C1C;
+
+    background:#E11D48;
+
+
+    border-color:#E11D48;
+
+
+    color:white;
+
+
+    transform:translateY(-2px);
+
+
+}
+
+
+
+
+
+
+
+
+
+/* Smooth scrollbar support */
+
+
+.sidebar::-webkit-scrollbar {
+
+
+    width:5px;
+
+
+}
+
+
+.sidebar::-webkit-scrollbar-thumb {
+
+
+    background:#334155;
+
+
+    border-radius:10px;
+
+
+}
+
+
+
+
+
+
+
+
+
+/* Tablet */
+
+
+@media(max-width:900px){
+
+
+    .sidebar {
+
+
+        width:85px;
+
+
+        padding:25px 12px;
+
+
+    }
+
+
+
+
+    .sidebar-title {
+
+
+        display:none;
+
+
+    }
+
+
+
+
+
+    .sidebar-link {
+
+
+        justify-content:center;
+
+
+        padding:0;
+
+
+    }
+
+
+
+
+
+    .sidebar-text {
+
+
+        display:none;
+
+
+    }
+
+
+
+
+
+    .logout-btn span {
+
+
+        display:none;
+
+
+    }
+
 
 }

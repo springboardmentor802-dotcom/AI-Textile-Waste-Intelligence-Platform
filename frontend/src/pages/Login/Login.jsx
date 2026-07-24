@@ -22,69 +22,88 @@ function Login() {
 
   const handleSubmit = async (e) => {
 
-    e.preventDefault();
+  e.preventDefault();
 
-    setError("");
+  setError("");
 
+  try {
 
-    try {
+    const response = await API.post(
+      "/auth/login",
 
-      const response = await API.post(
-        "/auth/login",
+      new URLSearchParams({
+        username: username,
+        password: password,
+      }),
 
-        new URLSearchParams({
-          username: username,
-          password: password,
-        }),
-
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-        }
-      );
-
-
-      const user = response.data;
-
-      console.log("LOGIN RESPONSE:", user);
-
-
-
-      // Check selected role with database role
-      if (
-        user.role.toLowerCase() !== role.toLowerCase()
-      ) {
-
-        setError(
-          "Selected role does not match account role"
-        );
-
-        return;
-
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
       }
+    );
+
+
+    console.log(
+      "LOGIN RESPONSE:",
+      response.data
+    );
+
+
+    const user = {
+
+      username: username,
+
+      role: response.data.role,
+
+      access_token: response.data.access_token
+
+    };
 
 
 
-      // Save user data
-      login(user);
+    // check role
 
-
-
-      // Go to dashboard
-      navigate("/dashboard");
-
-
-
-    } catch (error) {
-
-      console.log(error.response);
+    if (
+      user.role.toLowerCase() !== role.toLowerCase()
+    ) {
 
       setError(
-        "Invalid username or password"
+        "Selected role does not match account role"
       );
 
+      return;
+
     }
+
+
+
+    // save token + user
+
+    login(user);
+
+
+
+    navigate("/dashboard");
+
+
+
+  }
+
+  catch(error){
+
+    console.log(
+      error.response
+    );
+
+
+    setError(
+      "Invalid username or password"
+    );
+
+  }
+
+
 
   };
 

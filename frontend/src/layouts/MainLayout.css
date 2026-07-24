@@ -1,14 +1,141 @@
+/* 
+  Main Application Layout
+  Eco-Tech Modern Theme
+*/
+
+
 .layout {
+
   min-height: 100vh;
-  background: #f5f7fa;
+
+  background: #F8FAFC;
+
+  display: flex;
+
+  flex-direction: column;
+
 }
+
+
+
+/* Area below Navbar */
 
 .layout-body {
+
   display: flex;
-  min-height: calc(100vh - 70px);
+
+  flex: 1;
+
+  min-height: calc(100vh - 78px);
+
 }
 
+
+
+/*
+ Sidebar container
+ Keeps sidebar full height
+*/
+
+.layout-body > aside {
+
+  flex-shrink: 0;
+
+}
+
+
+
+/*
+ Main dashboard/content area
+*/
+
 .main-content {
+
   flex: 1;
-  padding: 30px;
+
+  padding: 35px 40px;
+
+  overflow-x: hidden;
+
+  background: #F8FAFC;
+
+}
+
+
+
+/*
+ Smooth page transition
+*/
+
+.main-content {
+
+  animation: pageFade 0.35s ease-in-out;
+
+}
+
+
+
+@keyframes pageFade {
+
+
+  from {
+
+    opacity: 0;
+
+    transform: translateY(8px);
+
+  }
+
+
+  to {
+
+    opacity: 1;
+
+    transform: translateY(0);
+
+  }
+
+}
+
+
+
+/*
+ Tablet Responsive
+*/
+
+@media(max-width:1024px){
+
+
+  .main-content {
+
+    padding:30px;
+
+  }
+
+
+}
+
+
+
+/*
+ Mobile Responsive
+*/
+
+@media(max-width:768px){
+
+
+  .layout-body {
+
+    flex-direction:column;
+
+  }
+
+
+  .main-content {
+
+    padding:20px;
+
+  }
+
+
 }

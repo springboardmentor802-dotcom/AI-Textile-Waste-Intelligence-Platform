@@ -10,14 +10,21 @@ Over the past two weeks, I’ve laid the groundwork for this platform. Here’s 
 * **Environment & Planning:** I have the frontend and backend environments set up and ready, along with the initial UI wireframes for our inventory management system.
 * **Data Foundation:** I’ve curated a specialized dataset—focusing on Cotton, Silk, and Wool—and integrated it into the system after verifying that everything loads correctly.
 
-## 🚀 Looking Ahead
-Now that the foundation is solid, I’m moving toward the next phase:
-* **Security:** Implementing user authentication and a role-based access system.
-* **AI Core:** Training a CNN (Convolutional Neural Network) model to automate fabric classification.
-* **Logic & Assessment:** Developing a system to accurately assess the recyclability of the materials identified.
+## 🚀 Milestone 2: AI Core & Platform Integration [COMPLETED]
+I have successfully built out the core intelligence pipeline and connected the full-stack architecture:
+
+* **AI Model Integration & Classification (100%):** Integrated the YOLO deep learning model to accurately classify fabrics (e.g., Cotton) and output high-precision confidence metrics (up to 99.91%).
+* **AI Inspection & Assessment Reporting (100%):** Developed an end-to-end processing pipeline that extracts image attributes (dimensions, channels, brightness) and compiles a detailed inspection report on the frontend dashboard.
+* **Recyclability & Reuse Recommendation System (100%):** Automated material recyclability evaluations, providing actionable reuse paths and sustainability guidance based on identified textile types.
+* **Platform Optimization & Final Integration (100%):** Established seamless, asynchronous communication between the FastAPI backend and React frontend for an intuitive user experience.
+* **AI Validation & Error Handling (40%):** Confidence tracking is operational; active development is underway for strict non-textile image rejection and unknown input boundary checks.
 
 ## 🛠️ Tech Stack
-* **Language:** Python
+* **Language:** Python, JavaScript
+* **Backend Framework:** FastAPI
+* **Frontend Library:** React
+* **AI/ML Core:** YOLO, Deep Learning Pipelines
 * **Environment:** VS Code
 * **Data Management:** Roboflow Universe & Custom Datasets
 * **Version Control:** Git & GitHub
+*

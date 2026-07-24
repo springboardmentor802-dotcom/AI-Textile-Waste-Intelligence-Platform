@@ -4,6 +4,12 @@
 
 ### Individual Contribution - Sreevarshini-140
 
+![Python](https://img.shields.io/badge/Python-3.10-blue)
+![React](https://img.shields.io/badge/Frontend-React.js-61DAFB)
+![FastAPI](https://img.shields.io/badge/API-FastAPI-green)
+![TensorFlow](https://img.shields.io/badge/AI-TensorFlow-orange)
+![OpenCV](https://img.shields.io/badge/Vision-OpenCV-red)
+![License](https://img.shields.io/badge/Project-Infosys%20Springboard-purple)
 ---
 
 # Project Overview

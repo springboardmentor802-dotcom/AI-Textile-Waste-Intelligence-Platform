@@ -1,5 +1,5 @@
 # AI-Textile-Waste-Intelligence-Platform
-Infosys Springboard Internship Project - AI Textile Waste Intelligence Platform
+
 **Author:** Durgesh Nandini  
 **Project Verification State:** Milestone 1 (`dn28github`)
 
@@ -22,10 +22,7 @@ Textile Waste Inventory Management Status
 | **Strict Data Validation** | Backend constraints enforced via specialized SQL Enums for Fabric Types and Material States. | **✔️ Completed** |
 | **Live Database Auditing** | Data committed via forms is verified live inside the PostgreSQL `inventory` table via pgAdmin 4. | **✔️ Completed** |
 | **Lifecycle State Machine** | Automatic workflow state assignment tracking parameters starting from a **'Pending'** state. | **✔️ Completed** |
-
-# 🚀 Infosys Springboard Internship Project - AI Textile Waste Intelligence Platform
-
-**Author:** Durgesh Nandini  
+  
 **Project Verification State:** Milestone 2 (`dn28github`)
 
 ---

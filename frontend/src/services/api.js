@@ -8,9 +8,10 @@ const API = axios.create({
   },
 });
 
-// Request Interceptor (Automatic Token Injection)
+// Request Interceptor (Automatic Token Injection Fix)
 API.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  // Check for 'access_token' first, then fallback to 'token'
+  const token = localStorage.getItem('access_token') || localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -23,7 +24,6 @@ API.interceptors.request.use((config) => {
 export const inventoryService = {
   // 1. Fetch All Batches (GET)
   getInventory: async () => {
-    // Path updated to match unified backend auth prefix
     const response = await API.get('/auth/inventory/');
     return response.data;
   },
@@ -47,4 +47,37 @@ export const inventoryService = {
   }
 };
 
+// --- 📊 AI Analytics & Vision Engine Endpoints ---
+export const analyticsService = {
+  // 1. Material Sustainability Assessment (POST)
+  assessMaterialSustainability: async (payload) => {
+    try {
+      const response = await API.post('/auth/analytics/assess', payload);
+      return response.data;
+    } catch (error) {
+      console.error("Error in Material Sustainability Assessment:", error);
+      throw error;
+    }
+  },
+
+  // 2. Upload Textile Image to Vision Pipeline (POST)
+  uploadTextileImage: async (file) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await API.post('/auth/analytics/upload-image', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error in Vision Pipeline Upload:", error);
+      throw error;
+    }
+  }
+};
+
+// 🎯 CRITICAL FIX: Default Export for API instance
 export default API;

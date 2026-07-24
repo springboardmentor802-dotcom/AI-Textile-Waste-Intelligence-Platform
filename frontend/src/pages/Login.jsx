@@ -7,40 +7,48 @@ function Login({ onSwitchToRegister, onLoginSuccess }) {
     password: ''
   });
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage({ type: '', text: '' });
+    setLoading(true);
 
     try {
-      // Backend /auth/login endpoint par call
+      // Form Data preparation for FastAPI OAuth2 / JSON auth compatibility
       const response = await API.post('/auth/login', formData);
-      console.log("Full Backend Response:", response.data); 
-
-      const { access_token, role } = response.data;
-      localStorage.setItem('token', access_token);
-
-      // Backend se jo role aa raha hai wahi set hoga
-      localStorage.setItem('role', role);
-
-      setMessage({ type: 'success', text: `Login Successful! Token Generated.` });
       
-      // 1 second baad dashboard switch hoga
-      setTimeout(() => {
-        onLoginSuccess();
-      }, 1000);
+      const access_token = response.data.access_token || response.data.token;
+      const role = response.data.role || 'Admin';
+
+      if (access_token) {
+        // Save both keys to ensure full compatibility with api.js interceptor
+        localStorage.setItem('access_token', access_token);
+        localStorage.setItem('token', access_token);
+        localStorage.setItem('role', role);
+
+        setMessage({ type: 'success', text: 'Login Successful! Redirecting...' });
+        
+        setTimeout(() => {
+          onLoginSuccess();
+        }, 600);
+      } else {
+        setMessage({ type: 'error', text: 'Authentication failed. No token received.' });
+      }
 
     } catch (error) {
       const errorMsg = error.response?.data?.detail || 'Invalid email or password.';
       setMessage({ type: 'error', text: errorMsg });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full border border-gray-100">
-        <h2 className="text-3xl font-bold text-gray-900 text-center mb-2">Welcome Back</h2>
-        <p className="text-gray-500 text-center mb-6 text-sm">Sign in to manage your textile intelligence workflows</p>
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+      <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full border border-slate-100">
+        <h2 className="text-3xl font-bold text-slate-900 text-center mb-2">Welcome Back 👋</h2>
+        <p className="text-slate-500 text-center mb-6 text-sm">Sign in to manage your textile intelligence workflows</p>
         
         {message.text && (
           <div className={`p-3 rounded-xl text-sm mb-4 text-center font-medium ${
@@ -52,11 +60,11 @@ function Login({ onSwitchToRegister, onLoginSuccess }) {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Email Address</label>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">Email Address</label>
             <input 
               type="email" 
               required
-              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition text-sm"
+              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition text-sm"
               placeholder="operator2@test.com"
               value={formData.email}
               onChange={(e) => setFormData({...formData, email: e.target.value})}
@@ -64,23 +72,27 @@ function Login({ onSwitchToRegister, onLoginSuccess }) {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Password</label>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">Password</label>
             <input 
               type="password" 
               required
-              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition text-sm"
+              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition text-sm"
               placeholder="••••••••"
               value={formData.password}
               onChange={(e) => setFormData({...formData, password: e.target.value})}
             />
           </div>
 
-          <button type="submit" className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-md shadow-emerald-100 transition duration-200 text-sm mt-2">
-            Sign In
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-md shadow-emerald-100 transition duration-200 text-sm mt-2 disabled:bg-emerald-400"
+          >
+            {loading ? 'Authenticating...' : 'Sign In'}
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-600 mt-6">
+        <p className="text-center text-sm text-slate-600 mt-6">
           Don't have an account?{' '}
           <button onClick={onSwitchToRegister} className="text-emerald-600 font-semibold hover:underline">
             Register here

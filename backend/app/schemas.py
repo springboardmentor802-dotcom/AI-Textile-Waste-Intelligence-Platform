@@ -53,3 +53,27 @@ class InventoryUpdate(BaseModel):
 
     class Config:
         use_enum_values = True
+from pydantic import BaseModel
+from typing import Optional, List
+
+# Circularity Assessment Inputs
+class MaterialAssessmentInput(BaseModel):
+    material_type: str
+    material_condition: str
+    reuse_potential: str
+    environmental_benefit: str
+    processing_feasibility: str
+    waste_weight_kg: float
+
+# Individual Prediction Breakdown
+class AssessmentResult(BaseModel):
+    score: float
+    category: str
+
+# API Full Response format
+class SustainabilityReportResponse(BaseModel):
+    status: str
+    batch_details: MaterialAssessmentInput
+    metrics: AssessmentResult
+    co2_savings_estimated_kg: float
+    water_savings_estimated_liters: float

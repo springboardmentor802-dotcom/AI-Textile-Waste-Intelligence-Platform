@@ -601,7 +601,7 @@ AI-Textile-Waste-Intelligence-Platform
 ## Clone Repository
 
 ```bash
-git clone https://github.com/Sreevarshini-140/AI-Textile-Waste-Intelligence-Platform.git
+git clone https://github.com/springboardmentor802-dotcom/AI-Textile-Waste-Intelligence-Platform.git
 ```
 
 ```bash

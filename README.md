@@ -27,7 +27,7 @@ Textile Waste Inventory Management Status
 
 ---
 
-## Core Platform: AI Vision & Sustainability Intelligence Status
+## Core Platform: Material Recognition & Waste Classification
 
 | Feature / Task Spec | Implementation Mechanism | Status |
 | :--- | :--- | :---: |

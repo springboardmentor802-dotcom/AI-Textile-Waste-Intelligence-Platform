@@ -76,22 +76,22 @@ Created SQLAlchemy models for managing application data.
 
 Implemented secure JWT-based authentication system.
 
-Features:
+## Features
 
-- User login authentication.
-- Password hashing using bcrypt.
-- Password verification.
-- JWT token generation.
-- OAuth2 password flow integration.
-- Protected backend APIs using Bearer token authentication.
+- User login authentication
+- Password hashing using bcrypt
+- Password verification
+- JWT token generation
+- OAuth2 password flow integration
+- Protected backend APIs using Bearer token authentication
 
-Secured APIs:
+### Secured APIs
 
 - Inventory APIs
 - Waste Upload APIs
 - Recommendation APIs
 
-Authentication flow:
+### Authentication Flow
 
 ```text
 React Login Page
@@ -108,7 +108,6 @@ JWT Token Generation
         ↓
 Protected API Access
 ```
-
 
 ---
 
@@ -128,6 +127,7 @@ The Ten Fabrics Dataset (TFD) was selected for textile material recognition and 
 - Image Type: RGB Images
 
 ## Fabric Classes
+
 ```text
 001
 002
@@ -143,12 +143,12 @@ The Ten Fabrics Dataset (TFD) was selected for textile material recognition and 
 
 ## Exploratory Data Analysis Completed
 
-- Verified dataset folder structure.
-- Analyzed class distribution.
-- Checked image dimensions.
-- Verified missing values.
-- Checked duplicate images.
-- Prepared dataset for machine learning development.
+- Verified dataset folder structure
+- Analyzed class distribution
+- Checked image dimensions
+- Verified missing values
+- Checked duplicate images
+- Prepared dataset for machine learning development
 
 ---
 
@@ -158,15 +158,15 @@ The Ten Fabrics Dataset (TFD) was selected for textile material recognition and 
 
 Implemented an image preprocessing pipeline using TensorFlow.
 
-## Completed Preprocessing Steps
+### Completed Preprocessing Steps
 
-- Loaded textile image dataset.
-- Converted images into RGB format.
-- Resized images to 224 × 224 pixels.
-- Normalized pixel values between 0 and 1.
-- Encoded fabric class labels.
-- Split dataset into training, validation, and testing sets.
-- Created TensorFlow data pipelines.
+- Loaded textile image dataset
+- Converted images into RGB format
+- Resized images to 224 × 224 pixels
+- Normalized pixel values between 0 and 1
+- Encoded fabric class labels
+- Split dataset into training, validation, and testing sets
+- Created TensorFlow data pipelines
 
 ## Dataset Split
 
@@ -180,11 +180,14 @@ Implemented an image preprocessing pipeline using TensorFlow.
 
 ```json
 {
-    "image_size": [224, 224],
-    "normalization": "pixel values scaled between 0 and 1",
-    "batch_size": 32
+  "image_size": [224, 224],
+  "normalization": "pixel values scaled between 0 and 1",
+  "batch_size": 32
 }
 ```
+
+---
+
 # CNN-Based Fabric Classification Model
 
 Developed a Convolutional Neural Network (CNN) model for textile material recognition.
@@ -246,9 +249,9 @@ The trained CNN model was evaluated using the unseen test dataset.
 
 ## Evaluation Methods
 
-- Training accuracy and loss curves.
-- Classification report.
-- Confusion matrix analysis.
+- Training accuracy and loss curves
+- Classification report
+- Confusion matrix analysis
 
 The confusion matrix showed no misclassification between the ten fabric categories.
 
@@ -267,3 +270,472 @@ models/
 ```
 
 Large model files are managed using Git Large File Storage (Git LFS).
+
+---
+
+# AI Textile Intelligence Workflow
+
+The platform follows an end-to-end AI-driven textile waste analysis pipeline.
+
+```text
+Textile Waste Image Upload
+
+            ↓
+
+CNN-Based Fabric Classification
+
+            ↓
+
+Material Identification
+
+            ↓
+
+Condition Assessment Layer
+
+            ↓
+
+Defect Detection + Contamination Analysis
+
+            ↓
+
+Circular Decision Engine
+
+            ↓
+
+Reuse / Repair / Recycling Recommendation
+```
+
+---
+
+# Textile Condition Assessment
+
+Material classification alone is not sufficient for deciding textile reuse or recycling.
+
+The platform includes an additional inspection layer that evaluates textile quality using computer vision techniques.
+
+## Condition Analysis Features
+
+Implemented using OpenCV:
+
+- Fabric damage detection
+- Visible defect identification
+- Contamination analysis
+- Textile quality assessment
+
+The inspection layer helps determine whether a textile sample should be:
+
+- Reused directly
+- Repaired / Upcycled
+- Sent for recycling
+
+---
+
+# Defect Detection and Contamination Analysis
+
+The computer vision module analyzes uploaded textile images and extracts:
+
+- Defect regions
+- Damage severity
+- Contamination level
+- Affected area percentage
+
+### Example Output
+
+| Parameter | Result |
+|-----------|--------|
+| Condition | Poor |
+| Defect | Fabric Tear |
+| Severity | High |
+| Contamination | Low |
+| Decision | Recycle |
+
+---
+
+# Batch Textile Analysis
+
+The platform supports multiple textile image processing through batch analysis.
+
+## Features
+
+- Upload multiple textile samples
+- Perform AI classification on each sample
+- Generate condition reports
+- Recommend reuse or recycling strategies
+
+### Workflow
+
+```text
+Multiple Textile Images
+
+        ↓
+
+Batch Processing Engine
+
+        ↓
+
+AI Classification
+
+        ↓
+
+Condition Assessment
+
+        ↓
+
+Reuse / Recycle Segregation
+```
+
+---
+
+# Circular Recommendation Engine
+
+The recommendation engine combines:
+
+- Predicted textile material
+- Condition assessment
+- Defect severity
+- Contamination level
+
+to generate sustainable waste management decisions.
+
+### Decision Examples
+
+| Condition | Defect | Recommendation |
+|-----------|---------|----------------|
+| Good | None Detected | Reuse |
+| Fair | Minor Damage | Repair / Upcycle |
+| Poor | Fabric Tear | Recycle |
+| Poor | Heavy Contamination | Specialized Recycling |
+
+---
+
+# Platform Features
+
+## User Management
+
+- Secure Login
+- JWT Authentication
+- User Profiles
+- Protected Routes
+- Role-based Access
+
+## Textile Inventory
+
+- Add Inventory
+- Update Inventory
+- Delete Records
+- Inventory Dashboard
+
+## Waste Upload
+
+- Upload Textile Images
+- Material Classification
+- Store Upload History
+
+## AI Analysis
+
+- Fabric Classification
+- Defect Detection
+- Contamination Analysis
+- Condition Assessment
+
+## Analytics Dashboard
+
+- Waste Statistics
+- Fabric Distribution
+- Inventory Insights
+- AI Prediction Reports
+
+## Recommendation Engine
+
+- Circular Economy Suggestions
+- Reuse Recommendations
+- Recycling Recommendations
+- Repair Suggestions
+
+---
+
+# Application Screenshots
+
+## Dashboard
+
+```text
+Project-screenshots/dashboard.png
+```
+
+![Dashboard](Project-screenshots/dashboard.png)
+
+---
+
+## AI Textile Prediction
+
+```text
+Project-screenshots/single_prediction.png
+```
+
+![Single Prediction](Project-screenshots/single_prediction.png)
+
+---
+
+## Batch Textile Analysis
+
+```text
+Project-screenshots/batch_analysis.png
+```
+
+![Batch Analysis](Project-screenshots/batch_analysis.png)
+
+---
+
+## Analytics Dashboard
+
+```text
+Project-screenshots/analytics.png
+```
+
+![Analytics](Project-screenshots/analytics.png)
+
+---
+
+## Recommendation Engine
+
+```text
+Project-screenshots/recommendations.png
+```
+
+![Recommendations](Project-screenshots/recommendations.png)
+
+---
+
+## API Documentation
+
+```text
+Project-screenshots/api_docs.png
+```
+
+![API Docs](Project-screenshots/api_docs.png)
+
+---
+
+# Technology Stack
+
+## Frontend
+
+- React.js
+- Vite
+- JavaScript
+- HTML5
+- CSS3
+- React Router
+
+## Backend
+
+- Python
+- FastAPI
+- SQLAlchemy
+- MySQL
+- JWT Authentication
+- OAuth2
+
+## AI / Machine Learning
+
+- TensorFlow
+- Keras
+- OpenCV
+- NumPy
+- Pandas
+
+## Development Tools
+
+- Git
+- GitHub
+- Git LFS
+- VS Code
+- Postman
+
+---
+
+# Project Structure
+
+```text
+AI-Textile-Waste-Intelligence-Platform
+
+│
+├── frontend
+│   ├── components
+│   ├── pages
+│   ├── services
+│   ├── routes
+│   └── assets
+│
+├── backend
+│   ├── app
+│   │   ├── api
+│   │   ├── models
+│   │   ├── database
+│   │   ├── authentication
+│   │   ├── ai
+│   │   └── recommendation_engine
+│   │
+│   └── main.py
+│
+├── models
+│   ├── preprocessing_config.json
+│   ├── fabric_classifier.keras
+│   └── fabric_classifier_best.keras
+│
+├── dataset
+│
+├── notebooks
+│
+├── Project-screenshots
+│
+├── requirements.txt
+│
+└── README.md
+```
+
+---
+
+# Installation Guide
+
+## Clone Repository
+
+```bash
+git clone https://github.com/Sreevarshini-140/AI-Textile-Waste-Intelligence-Platform.git
+```
+
+```bash
+cd AI-Textile-Waste-Intelligence-Platform
+```
+
+---
+
+## Backend Setup
+
+```bash
+cd backend
+```
+
+Create virtual environment
+
+```bash
+python -m venv venv
+```
+
+Activate environment
+
+### Windows
+
+```bash
+venv\Scripts\activate
+```
+
+### Linux / macOS
+
+```bash
+source venv/bin/activate
+```
+
+Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+Run FastAPI
+
+```bash
+uvicorn app.main:app --reload
+```
+
+---
+
+## Frontend Setup
+
+```bash
+cd frontend
+```
+
+Install packages
+
+```bash
+npm install
+```
+
+Run application
+
+```bash
+npm run dev
+```
+
+---
+
+# API Documentation
+
+After running the backend:
+
+Swagger UI
+
+```text
+http://localhost:8000/docs
+```
+
+ReDoc
+
+```text
+http://localhost:8000/redoc
+```
+
+---
+
+# Future Enhancements
+
+- Deep learning based textile defect segmentation
+- Real-time camera-based textile inspection
+- Mobile application for field inspection
+- Advanced material composition detection
+- Explainable AI (XAI) for prediction interpretation
+- Cloud deployment using Docker and Kubernetes
+- IoT integration for smart textile waste monitoring
+- Large-scale recycling facility integration
+
+---
+
+# Learning Outcomes
+
+During the Infosys Springboard Internship, the following skills were gained:
+
+- React.js Frontend Development
+- FastAPI Backend Development
+- JWT Authentication
+- SQLAlchemy ORM
+- MySQL Database Design
+- TensorFlow CNN Model Development
+- OpenCV Image Processing
+- Machine Learning Pipeline Development
+- Computer Vision
+- Git & GitHub Collaboration
+- REST API Development
+- AI Model Deployment Fundamentals
+
+---
+
+# Conclusion
+
+The AI Textile Waste Intelligence Platform combines artificial intelligence, computer vision, and sustainable waste management practices to automate textile classification, quality assessment, and recycling decisions.
+
+The platform integrates modern web technologies with deep learning models to create a scalable and intelligent textile waste management solution capable of assisting industries, recycling facilities, NGOs, and research organizations in adopting circular economy practices.
+
+By combining CNN-based fabric recognition, computer vision inspection, secure backend services, and AI-powered recommendation engines, the project demonstrates how artificial intelligence can contribute to more sustainable textile waste management and environmental conservation.
+
+---
+
+# Author
+
+**Prasangi Sree Varshini**
+
+Infosys Springboard Internship Project
+
+GitHub: https://github.com/Sreevarshini-140
+
+---

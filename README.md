@@ -31,29 +31,27 @@ Textile Waste Inventory Management Status
 
 | Feature / Task Spec | Implementation Mechanism | Status |
 | :--- | :--- | :---: |
-| **Textile Image Analysis Engine** | Multi-model vision pipeline leveraging **OpenCV** (HSV color mapping & Canny/Laplacian texture analysis), **PyTorch**, and **TensorFlow** tensor transformations. | **✔️ Completed** |
-| **Material Classification Workflows** | Dynamic algorithmic feature mapping predicting primary fabric types (Cotton, Denim, Wool, Silk, etc.) and fiber blend percentages. | **✔️ Completed** |
-| **Waste Categorization Models** | Automated categorization engine mapping textile wear, edge density, and surface contamination to circular waste categories. | **✔️ Completed** |
-| **Recyclability Assessment Systems** | Circularity Index scoring model synced with real-world enterprise dataset (`sustainable_fashion_dataset.csv`) for CO₂ & Water savings estimation. | **✔️ Completed** |
-| **Live Dynamic Dashboard UI** | Full-stack React integration with responsive visual progress bars, metrics scorecards, and live image previews without static fallback locks. | **✔️ Completed** |
+| **Textile Image Analysis Engine** | Uses **OpenCV** to analyze fabric colors and patterns, along with **PyTorch** and **TensorFlow** to process images. | **✔️ Completed** |
+| **Material Classification Workflows** | Automatically predicts the main fabric type (Cotton, Denim, Wool, Silk) and fiber mix percentages from the image. | **✔️ Completed** |
+| **Waste Categorization Models** | Checks fabric wear, texture, and stains to group textile waste into recycling categories. | **✔️ Completed** |
+| **Recyclability Assessment Systems** | Calculates a recyclability score and estimates saved CO₂ and water using real fashion dataset metrics. | **✔️ Completed** |
+| **Live Dynamic Dashboard UI** | Built with **React** to show live image previews, dynamic progress bars, and real-time scorecards. | **✔️ Completed** |
 
----
+### 🛠️ Implementation Brief & Technical Overview
 
-## 🛠️ Implementation Brief & Technical Overview
+#### 1. Implement Textile Image Analysis Engine
+* **Visual & Texture Feature Extraction:** `backend/app/ml/image_analysis.py` reads uploaded fabric images to detect colors using HSV values and analyzes fabric patterns using OpenCV's edge detection tools.
+* **Stream Handling:** Connected to the FastAPI `/auth/analytics/upload-image` route to process uploaded images in real time.
 
-### 1. Implement Textile Image Analysis Engine
-* **Visual & Texture Feature Extraction:** `backend/app/ml/image_analysis.py` parses raw binary image streams to extract HSV color profiles and compute Laplacian variance alongside Canny edge density for weave pattern scanning.
-* **Stream Handling:** Integrated with FastAPI `/auth/analytics/upload-image` endpoint for real-time binary payload buffer reading and local cache streaming.
+#### 2. Build Material Classification Workflows
+* **Fiber Blend Prediction:** Automatically estimates the main fabric type and fiber mix percentages (like Cotton, Polyester, and Elastane) based on image color and texture.
+* **Quality Grade Assessment:** Assigns a quality grade (Grade A or Grade B) to the fabric using dataset rules.
 
-### 2. Build Material Classification Workflows
-* **Fiber Blend Prediction:** Dynamically calculates primary fabric types and multi-fiber composition percentages (e.g., *Cotton, Polyester, Elastane*) based on image texture sharpness and color signatures.
-* **Quality Grade Assessment:** Classifies material quality into standardized grades (*Grade A, Grade B*) verified against database criteria.
+#### 3. Develop Waste Categorization Models
+* **Surface Condition Analysis:** Scans the fabric to measure surface damage percentages and detect stains or wear.
+* **Automated Categorization:** Automatically groups samples into recycling categories like *High-Grade Recyclable*, *Recyclable / Upcyclable*, or *Low-Grade Recyclable*.
 
-### 3. Develop Waste Categorization Models
-* **Surface Condition Analysis:** Detects wear, surface damage percentages, and contamination levels (*None Detected, Minor Stain*).
-* **Automated Categorization:** Classifies uploaded samples into circular economy categories such as *High-Grade Recyclable*, *Recyclable / Upcyclable*, or *Low-Grade Recyclable*.
-
-### 4. Create Recyclability Assessment Systems
-* **Circularity Index Scoring:** Evaluates a composite recyclability score (0–100%) based on surface degradation and fiber blend complexity.
-* **Actionable Recommendations:** Suggests optimal disposal and recovery pathways (e.g., *High-Yield Mechanical Shredding*, *Chemical Polymer Recycling*, or *Industrial Downcycling*).
-* **Environmental Footprint Estimation:** Queries dataset metrics to output real-time estimated **CO₂ Offset (KG)** and **Water Saved (Liters)**.
+#### 4. Create Recyclability Assessment Systems
+* **Circularity Index Scoring:** Gives an overall recyclability score (0–100%) based on fabric blend complexity and physical damage.
+* **Actionable Recommendations:** Recommends the best recycling or disposal method, such as *Mechanical Shredding*, *Chemical Recycling*, or *Downcycling*.
+* **Environmental Footprint Estimation:** Fetches data from the fashion dataset to calculate saved **CO₂ (KG)** and **Water (Liters)**.

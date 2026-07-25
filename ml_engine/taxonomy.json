@@ -1,14 +1,9 @@
 {
   "garment_type": [
-    "T-Shirt",
-    "Shirt",
-    "Pants",
-    "Jeans",
-    "Dress",
-    "Jacket",
-    "Sweater",
-    "Skirt",
-    "Shorts",
+    "Dress", "Shorts", "Skirt", "T-Shirt", "Shirt", "Sweater",
+    "Jacket", "Jeans", "Pants",
+    "Blouse", "Tank Top", "Cardigan", "Top",
+    "Jumpsuit/Romper", "Leggings", "Joggers", "Hoodie",
     "Other"
   ],
   "material_type": [
@@ -18,13 +13,37 @@
     "Denim",
     "Wool",
     "Silk",
+    "Linen",
+    "Viscose",
+    "Nylon",
+    "Leather",
     "Mixed/Unknown"
   ],
   "waste_status": [
     "Recyclable",
     "Reusable",
-    "Degraded",
-    "Contaminated",
-    "Pending"
+    "Repairable",
+    "Upcyclable",
+    "Compostable",
+    "Hazardous"
+  ],
+  "texture_type": [
+    "Smooth",
+    "Textured",
+    "Rough/Coarse"
+  ],
+  "pattern_type": [
+    "Solid",
+    "Striped",
+    "Plaid/Check",
+    "Patterned"
+  ],
+  "waste_source": [
+    "Post-Consumer Donation",
+    "Pre-Consumer / Manufacturing Offcuts",
+    "Retail Returns",
+    "Collection Bin",
+    "Industrial Partner",
+    "Other"
   ]
 }

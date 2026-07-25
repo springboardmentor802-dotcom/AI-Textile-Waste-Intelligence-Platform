@@ -5,7 +5,9 @@ import torch
 from torchvision import transforms
 from PIL import Image
 
-from vision_model import build_classifier, DEVICE, IMAGE_SIZE
+from .vision_model_colab import build_classifier, DEVICE, IMAGE_SIZE
+from .color_analyzer import analyze_colors
+from .texture_pattern_analyzer import analyze_texture_and_pattern
 
 BASE_DIR = Path(__file__).resolve().parent
 MODELS_DIR = BASE_DIR / "models"
@@ -19,7 +21,6 @@ INFER_TRANSFORM = transforms.Compose([
 TASKS = ["garment", "material", "waste"]
 _loaded = {} 
 
-
 def _load_task(task_name: str):
     weights_path = MODELS_DIR / f"{task_name}_classifier.pt"
     labels_path = MODELS_DIR / f"{task_name}_labels.json"
@@ -32,18 +33,14 @@ def _load_task(task_name: str):
         labels = json.load(f)
 
     model = build_classifier(num_classes=len(labels))
-    model.load_state_dict(torch.load(weights_path, map_location=DEVICE))
+    model.load_state_dict(torch.load(weights_path, map_location=DEVICE, weights_only=False))
     model.eval()
     return model, labels
-
 
 def _load_all_models():
     for task_name in TASKS:
         _loaded[task_name] = _load_task(task_name)
-
-
 _load_all_models()
-
 
 @torch.no_grad()
 def _predict(task_name: str, image_tensor: torch.Tensor):
@@ -56,17 +53,36 @@ def _predict(task_name: str, image_tensor: torch.Tensor):
     top_idx = int(probs.argmax())
     return labels[top_idx], float(probs[top_idx])
 
+MATERIAL_TRANSFORM = transforms.Compose([
+    transforms.CenterCrop(int(IMAGE_SIZE * 0.6)),
+    transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+])
 
 def analyze_image(image_bytes: bytes) -> dict:
     image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-    image_tensor = INFER_TRANSFORM(image)
+    standard_tensor = INFER_TRANSFORM(image)
+    material_tensor = MATERIAL_TRANSFORM(image)
 
     result = {}
-    for task_name, taxonomy_key in zip(TASKS, ["garment_type", "material_type", "waste_status"]):
-        label, confidence = _predict(task_name, image_tensor)
-        result[taxonomy_key] = (
-            {"label": label, "confidence": round(confidence, 4)} if label else None
-        )
+
+    label, confidence = _predict("garment", standard_tensor)
+    result["garment_type"] = {"label": label, "confidence": round(confidence, 4)} if label else None
+
+    label, confidence = _predict("material", material_tensor)
+    result["material_type"] = {"label": label, "confidence": round(confidence, 4)} if label else None
+
+    label, confidence = _predict("waste", standard_tensor)
+    result["waste_status"] = {"label": label, "confidence": round(confidence, 4)} if label else None
+
+    texture_pattern = analyze_texture_and_pattern(image_bytes)
+    result["visual_features"] = {
+        "color_analysis": analyze_colors(image_bytes),
+        "texture": texture_pattern["texture"],
+        "pattern": texture_pattern["pattern"],
+    }
+
     return result
 
 if __name__ == "__main__":

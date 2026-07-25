@@ -13,4 +13,5 @@ client = AsyncIOMotorClient(
 db=client.textile_waste_db
 users_collection=db.get_collection("users")
 inventory_collection=db.get_collection("inventory")
+waste_batches_collection=db.get_collection("waste_batches")
 ai_logs_collection=db.get_collection("ai_logs")

@@ -5,7 +5,6 @@ from security import get_password_hash, verify_password, create_access_token
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
-# --- Move the Pydantic Models here to fix the circular import ---
 class LoginRequest(BaseModel):
     email: str
     password: str = Field(..., max_length=72)

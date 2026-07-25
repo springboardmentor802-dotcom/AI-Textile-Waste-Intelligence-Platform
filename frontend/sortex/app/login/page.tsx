@@ -2,14 +2,15 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Mail, Lock, ArrowRight, Loader2, Recycle, Briefcase } from "lucide-react";
+import { Mail, Lock, ArrowRight, Loader2, Recycle, Briefcase, Cpu, Layers, LineChart } from "lucide-react";
+import { routeForRole } from "@/lib/roleRoutes";
 
 type PlatformRole = "Admin" | "Recycling Facilitator" | "Sustainability Manager" | "Manufacturer";
-type RegistrableRole = Exclude<PlatformRole, "Admin">;
 
 interface RegisterResponse {
   detail?: string;
 }
+
 interface LoginResponse {
   access_token: string;
   role: PlatformRole;
@@ -21,15 +22,14 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8
 export default function LoginPage() {
   const router = useRouter();
 
-  const [isLoginMode, setIsLoginMode] = useState<boolean>(true);
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [role, setRole] = useState<RegistrableRole>("Recycling Facilitator");
+  const [isLoginMode, setIsLoginMode] = useState(true);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("Recycling Facilitator");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
-
-  const handleAuth = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
@@ -63,7 +63,7 @@ export default function LoginPage() {
       localStorage.setItem("access_token", data.access_token);
       localStorage.setItem("user_role", data.role);
 
-      router.push("/dashboard");
+      router.push(routeForRole(data.role));
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Something went wrong. Please try again.";
       setError(message);
@@ -73,66 +73,112 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex h-screen">
-      <div className="hidden lg:flex lg:w-3/5 relative bg-slate-900 overflow-hidden items-center justify-center">
-        <div
-          className="absolute inset-0 z-0 opacity-40 bg-cover bg-center"
-          style={{
-            backgroundImage:
-              "url('https://images.unsplash.com/photo-1605280263929-1c429624440f?q=80&w=2070&auto=format&fit=crop')",
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-transparent z-10" />
+    <div className="min-h-screen flex w-full bg-black font-sans relative overflow-hidden">
 
-        <div className="relative z-20 p-12 max-w-2xl text-left">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="p-3 bg-emerald-500 rounded-xl">
-              <Recycle className="w-8 h-8 text-white" />
-            </div>
-            <h1 className="text-3xl font-bold text-white tracking-tight">
-              Sortex<span className="text-emerald-400">AI</span>
-            </h1>
+      {/* Scattered soft orange glowing blobs */}
+      <div className="pointer-events-none absolute -top-20 -left-20 w-[36rem] h-[36rem] bg-orange-600/20 rounded-full blur-[140px] z-0" />
+      <div className="pointer-events-none absolute top-[20%] right-[15%] w-[28rem] h-[28rem] bg-amber-500/10 rounded-full blur-[130px] z-0" />
+      <div className="pointer-events-none absolute bottom-[25%] left-[25%] w-[32rem] h-[32rem] bg-orange-500/15 rounded-full blur-[150px] z-0" />
+      <div className="pointer-events-none absolute -bottom-10 -right-10 w-[34rem] h-[34rem] bg-orange-600/15 rounded-full blur-[160px] z-0" />
+      
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.05] z-0"
+        style={{
+          backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.8) 1px, transparent 0)',
+          backgroundSize: '32px 32px',
+        }}
+      />
+
+      {/* LEFT: Brand panel */}
+      <div className="hidden lg:flex lg:w-[55%] relative flex-col p-12 lg:p-16 z-10">
+
+        <button
+          type="button"
+          onClick={() => router.push("/")}
+          className="flex items-center gap-3 w-fit hover:opacity-80 transition-opacity"
+        >
+          <div className="p-2.5 bg-orange-500 rounded-xl shadow-lg shadow-orange-900/40">
+            <Recycle className="w-7 h-7 text-white" />
           </div>
+          <h1 className="text-2xl font-bold text-white tracking-tight">
+            Sortex<span className="text-orange-400">AI</span>
+          </h1>
+        </button>
 
-          <h2 className="text-5xl font-bold text-white mb-6 leading-tight">
-            Intelligence for
-            <br />
-            <span className="text-emerald-400">Sustainable</span> Textiles.
+        {/* Hero & Features */}
+        <div className="mt-12 lg:mt-16 ml-12 lg:ml-24 max-w-xl">
+          <h2 className="text-5xl lg:text-6xl font-extrabold text-white mb-10 leading-[1.1] tracking-tight">
+            Sort smarter.<br />
+            Recycle <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-orange-300 to-yellow-200">better.</span>
           </h2>
 
-          <p className="text-lg text-slate-300 leading-relaxed mb-12">
-            The industry&apos;s leading computer vision platform for automated textile sorting, waste
-            diversion analytics, and circular economy tracking.
-          </p>
+          <div className="space-y-7">
+            <div className="flex items-start gap-5 group">
+              <div className="flex-shrink-0 w-11 h-11 rounded-2xl bg-white/[0.03] flex items-center justify-center border border-white/10 group-hover:bg-orange-500/10 group-hover:border-orange-500/30 transition-all duration-300">
+                <Cpu className="w-5 h-5 text-orange-300" />
+              </div>
+              <div>
+                <h3 className="text-white text-base font-semibold tracking-wide">AI Material Analysis</h3>
+                <p className="text-neutral-500 mt-0.5 text-sm leading-relaxed">Instant fabric composition detection via computer vision.</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-5 group">
+              <div className="flex-shrink-0 w-11 h-11 rounded-2xl bg-white/[0.03] flex items-center justify-center border border-white/10 group-hover:bg-orange-500/10 group-hover:border-orange-500/30 transition-all duration-300">
+                <Layers className="w-5 h-5 text-orange-300" />
+              </div>
+              <div>
+                <h3 className="text-white text-base font-semibold tracking-wide">Automated Workflows</h3>
+                <p className="text-neutral-500 mt-0.5 text-sm leading-relaxed">Streamlined inventory for modern recycling facilitators.</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-5 group">
+              <div className="flex-shrink-0 w-11 h-11 rounded-2xl bg-white/[0.03] flex items-center justify-center border border-white/10 group-hover:bg-orange-500/10 group-hover:border-orange-500/30 transition-all duration-300">
+                <LineChart className="w-5 h-5 text-orange-300" />
+              </div>
+              <div>
+                <h3 className="text-white text-base font-semibold tracking-wide">ESG Reporting</h3>
+                <p className="text-neutral-500 mt-0.5 text-sm leading-relaxed">Real-time diversion rates and sustainability metrics.</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="w-full lg:w-2/5 flex flex-col justify-center px-8 sm:px-16 lg:px-24 bg-white z-20 shadow-[0_0_40px_rgba(0,0,0,0.05)] overflow-y-auto py-12">
-        <div className="w-full max-w-sm mx-auto">
-          <div className="flex lg:hidden items-center gap-2 mb-8">
-            <div className="p-2 bg-emerald-500 rounded-lg">
+      {/* RIGHT: Auth form panel */}
+      <div className="w-full lg:w-[50%] flex flex-col justify-center px-8 sm:px-16 z-10 overflow-y-auto py-12 pb-24 lg:pb-12 lg:border-l lg:border-white/5">
+        
+        <div className="w-full max-w-sm mx-auto lg:ml-12 lg:mr-auto">
+
+          <button
+            type="button"
+            onClick={() => router.push("/")}
+            className="flex lg:hidden items-center gap-2 mb-8 w-fit hover:opacity-80 transition-opacity"
+          >
+            <div className="p-2 bg-orange-500 rounded-lg">
               <Recycle className="w-6 h-6 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-slate-900">
-              Sortex<span className="text-emerald-600">AI</span>
+            <h1 className="text-2xl font-bold text-white">
+              Sortex<span className="text-orange-400">AI</span>
             </h1>
-          </div>
+          </button>
 
-          <h2 className="text-3xl font-bold text-slate-900 mb-2">
+          <h2 className="text-3xl font-bold text-white mb-2">
             {isLoginMode ? "Welcome back" : "Create an account"}
           </h2>
-          <p className="text-slate-500 mb-8">
-            {isLoginMode ? "Please enter your details to sign in." : "Join the circular textile revolution."}
+          <p className="text-neutral-500 mb-8 text-sm">
+            {isLoginMode ? "Sign in to continue." : "Join the circular textile revolution."}
           </p>
 
           <form onSubmit={handleAuth} className="space-y-5">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700" htmlFor="email">
+              <label className="text-sm font-medium text-neutral-300" htmlFor="email">
                 Email address
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-slate-400" />
+                  <Mail className="h-5 w-5 text-neutral-500" />
                 </div>
                 <input
                   id="email"
@@ -140,7 +186,7 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                  className="block w-full pl-10 pr-3 py-2.5 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500/50 transition-all"
                   placeholder="name@company.com"
                 />
               </div>
@@ -148,18 +194,18 @@ export default function LoginPage() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-slate-700" htmlFor="password">
+                <label className="text-sm font-medium text-neutral-300" htmlFor="password">
                   Password
                 </label>
                 {isLoginMode && (
-                  <a href="#" className="text-sm font-medium text-emerald-600 hover:text-emerald-500 transition-colors">
+                  <a href="#" className="text-sm font-medium text-orange-400 hover:text-orange-300 transition-colors">
                     Forgot password?
                   </a>
                 )}
               </div>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-slate-400" />
+                  <Lock className="h-5 w-5 text-neutral-500" />
                 </div>
                 <input
                   id="password"
@@ -167,7 +213,7 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                  className="block w-full pl-10 pr-3 py-2.5 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500/50 transition-all"
                   placeholder="••••••••"
                 />
               </div>
@@ -175,18 +221,18 @@ export default function LoginPage() {
 
             {!isLoginMode && (
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700" htmlFor="role">
+                <label className="text-sm font-medium text-neutral-300" htmlFor="role">
                   Platform Role
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Briefcase className="h-5 w-5 text-slate-400" />
+                    <Briefcase className="h-5 w-5 text-neutral-500" />
                   </div>
                   <select
                     id="role"
                     value={role}
-                    onChange={(e) => setRole(e.target.value as RegistrableRole)}
-                    className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all appearance-none bg-white"
+                    onChange={(e) => setRole(e.target.value as PlatformRole)}
+                    className="block w-full pl-10 pr-3 py-2.5 bg-white/[0.03] border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500/50 transition-all appearance-none [&>option]:bg-neutral-900"
                   >
                     <option value="Recycling Facilitator">Recycling Facilitator</option>
                     <option value="Sustainability Manager">Sustainability Manager</option>
@@ -197,7 +243,7 @@ export default function LoginPage() {
             )}
 
             {error && (
-              <div className="p-3 rounded-lg bg-red-50 border border-red-100 text-sm text-red-600 flex items-center gap-2">
+              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-400 flex items-center gap-2">
                 <span className="font-medium">Error:</span> {error}
               </div>
             )}
@@ -205,7 +251,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 px-4 rounded-xl font-medium transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-70 disabled:cursor-not-allowed mt-4"
+              className="w-full flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-500 text-white py-2.5 px-4 rounded-xl font-medium transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black focus:ring-orange-500 disabled:opacity-70 disabled:cursor-not-allowed mt-4 shadow-lg shadow-orange-900/30"
             >
               {isLoading ? (
                 <>
@@ -221,7 +267,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p className="mt-8 text-center text-sm text-slate-500">
+          <p className="mt-8 text-center text-sm text-neutral-500">
             {isLoginMode ? "New user? " : "Already have an account? "}
             <button
               type="button"
@@ -229,13 +275,22 @@ export default function LoginPage() {
                 setIsLoginMode(!isLoginMode);
                 setError("");
               }}
-              className="font-medium text-emerald-600 hover:text-emerald-500 transition-colors bg-transparent border-none cursor-pointer"
+              className="font-medium text-orange-400 hover:text-orange-300 transition-colors bg-transparent border-none cursor-pointer"
             >
               {isLoginMode ? "Register here" : "Sign in here"}
             </button>
           </p>
         </div>
       </div>
+
+      {/* FOOTER */}
+      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex items-center gap-2 text-sm text-neutral-600 whitespace-nowrap z-20">
+        <span>Made with</span>
+        <span className="text-red-500">❤️</span>
+        <span>by</span>
+        <span className="font-semibold text-orange-400/80">JanKas</span>
+      </div>
+
     </div>
   );
 }

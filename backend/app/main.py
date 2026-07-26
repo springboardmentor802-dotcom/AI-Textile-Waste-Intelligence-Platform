@@ -11,7 +11,10 @@ from app.models.user import User
 from app.models.textile_batch import TextileBatch
 from app.routers import auth, users, textile, analysis
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
@@ -31,33 +34,29 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup():
-    # Step 1: Create all database tables if they do not already exist
+    # Database tables
     Base.metadata.create_all(bind=engine)
-    logger.info("Database tables verified/created successfully")
+    logger.info("Database tables verified/created")
 
-    # Step 2: Load the ML model into memory
-    # The model stays loaded for the lifetime of the server process.
-    # If the model file is missing, we log a warning but do NOT crash
-    # the server — all other endpoints (auth, inventory, etc.) continue
-    # to work normally. Only /analysis endpoints return 503 until the
-    # model file is placed correctly.
+    # Material Recognition CNN
     try:
         from app.services.ml_service import load_model
         load_model()
     except FileNotFoundError as e:
-        logger.warning(
-            f"\n{'='*60}\n"
-            f"ML MODEL NOT FOUND — Analysis endpoints will return 503\n"
-            f"{str(e)}\n"
-            f"{'='*60}"
-        )
-    except RuntimeError as e:
-        logger.error(f"ML model failed to load: {e}")
+        logger.warning(f"CNN model not found — /analysis/material-recognition returns 503\n{e}")
     except Exception as e:
-        logger.error(f"Unexpected error loading ML model: {e}")
+        logger.error(f"CNN model load failed: {e}")
+
+    # YOLOv8 Defect Detection
+    try:
+        from app.services.yolo_service import load_yolo_model
+        load_yolo_model()
+    except FileNotFoundError as e:
+        logger.warning(f"YOLOv8 model not found — defect detection returns 503\n{e}")
+    except Exception as e:
+        logger.error(f"YOLOv8 model load failed: {e}")
 
 
-# Register all routers
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(textile.router)
@@ -76,7 +75,9 @@ async def root():
 @app.get("/health")
 async def health_check():
     from app.services.ml_service import is_model_loaded
+    from app.services.yolo_service import is_yolo_loaded
     return {
         "status": "healthy",
-        "ml_model_loaded": is_model_loaded(),
+        "material_recognition_loaded": is_model_loaded(),
+        "defect_detection_loaded": is_yolo_loaded(),
     }

@@ -39,8 +39,18 @@ Thumbs.db
 *.log
 
 
-# =========================
-# ML Models
-# =========================
-*.keras
-ml_models/saved_models/
+# ===========================
+# Machine Learning Models
+# ===========================
+
+# YOLO Models
+ml_models/saved_models/*.pt
+
+# TensorFlow / Keras Models
+ml_models/saved_models/*.keras
+ml_models/saved_models/*.h5
+
+# Other model formats
+ml_models/saved_models/*.onnx
+ml_models/saved_models/*.tflite
+ml_models/saved_models/*.pth

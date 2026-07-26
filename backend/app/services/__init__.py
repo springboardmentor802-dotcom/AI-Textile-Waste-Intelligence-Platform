@@ -17,3 +17,4 @@ from app.services.textile_service import (
     delete_textile_batch,
 )
 from app.services.ml_service import load_model, predict_material, is_model_loaded
+from app.services.yolo_service import load_yolo_model, detect_defects, is_yolo_loaded

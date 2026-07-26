@@ -1,89 +1,362 @@
 # ♻️ AI Textile Waste Intelligence Platform
 
-## 📌 Overview
-A web-based platform for intelligent textile waste management — identifying fabric types, estimating recyclability, and recommending recycling/reuse strategies using computer vision and sustainability analytics. This repo currently implements the secure authentication foundation; inventory management, dashboards, and AI classification are next.
+An AI-powered web application for intelligent textile waste management that combines secure inventory management, deep learning-based material recognition, waste classification, recyclability assessment, and sustainability recommendations.
+
+---
+
+# 📌 Overview
+
+The AI Textile Waste Intelligence Platform is designed to automate textile waste identification and support sustainable waste management using Artificial Intelligence and Computer Vision.
+
+The platform allows users to:
+
+- Securely manage textile inventory
+- Upload textile images
+- Classify fabric materials using a CNN model
+- Categorize textile waste
+- Assess recyclability
+- Generate recycling recommendations
+- Download professional PDF reports
+- Track inventory through an interactive dashboard
 
 ---
 
 ## 🛠️ Tech Stack
 
 **Frontend:** React.js, Vite, React Router DOM, CSS
-**Backend:** Python, FastAPI, SQLAlchemy, Pydantic, Passlib (bcrypt), python-jose (JWT)
-**Database:** PostgreSQL
-**Tools:** Git, GitHub, VS Code, pgAdmin 4
 
+**Backend:** Python, FastAPI, SQLAlchemy, Pydantic, Passlib (bcrypt), python-jose (JWT)
+
+**AI & Machine Learning:** TensorFlow, Keras, NumPy, Pillow
+
+**Database:** PostgreSQL
+
+**Tools:** Git, GitHub, VS Code, pgAdmin 4
 ---
 
-## 📁 Project Structure
+# 📁 Project Structure
 
 ```
 AI-Textile-Waste-Intelligence-Platform/
+
 ├── Frontend/
-│   └── src/{components, pages, services, App.jsx}
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── services/
+│   │   ├── utils/
+│   │   ├── data/
+│   │   └── App.jsx
+│
 ├── Backend/
-│   ├── main.py, database.py, models.py, schemas.py, config.py
-│   └── routes/auth.py
-├── Dataset/  ├── Docs/  ├── Models/  ├── Notebook/
+│   ├── routes/
+│   │   ├── auth.py
+│   │   ├── inventory.py
+│   │   └── predict.py
+│   │
+│   ├── config.py
+│   ├── database.py
+│   ├── models.py
+│   ├── schemas.py
+│   └── main.py
+│
+├── Dataset/
+├── Models/
+├── Notebook/
+├── Docs/
 └── README.md
 ```
 
 ---
 
-## ✅ Completed (Milestone 1: Authentication & Access Control)
+# ✨ Features
 
-- Connected React frontend ↔ FastAPI backend ↔ PostgreSQL (`textile_waste_db`)
-- Backend organized into single-responsibility modules
-- Login & Register pages with client-side routing
-- `/register` and `/login` APIs, tested
-- Password hashing (bcrypt) — no plain-text passwords
-- Duplicate-email validation; secure generic error on invalid login
-- JWT-based authentication — tokens persist across page refresh
-- Protected routes — Dashboard requires a valid session
-- Role-Based Access Control (RBAC) — enforced via `require_role()`, verified with a working `/admin-only` endpoint
-- Full flow tested end-to-end and confirmed directly in the database
+## 🔐 Authentication & Security
 
-## 🔜 Next
-Admin panel for role assignment · role-specific dashboards · textile inventory management · AI fabric classification · recycling recommendations · sustainability reporting
+- User Registration
+- Secure Login
+- Password Hashing using bcrypt
+- JWT Authentication
+- Protected Routes
+- Role-Based Access Control (RBAC)
 
 ---
 
-## 🔐 API Endpoints
+## 📦 Inventory Management
 
-| Method | Endpoint | Description | Auth |
-|--------|----------|--------------|------|
-| GET | `/` | Health check | No |
-| POST | `/register` | Create account | No |
-| POST | `/login` | Get JWT token | No |
-| GET | `/admin-only` | Example role-restricted route | Administrator |
-
-Interactive docs: `http://localhost:8000/docs`
+- Add Inventory
+- View Inventory
+- Update Inventory
+- Delete Inventory
+- Dashboard Integration
 
 ---
 
-## 🚀 Getting Started
+## 🤖 AI Material Recognition
 
-**Backend**
+- Textile Image Upload
+- CNN-based Material Classification
+- Image Preprocessing
+- Confidence Score
+- Top-3 Predictions
+
+Supported Materials
+
+- Cotton
+- Denim
+- Polyester
+- Silk
+- Wool
+- Blended Fabric
+
+---
+
+## ♻️ Waste Classification
+
+Based on the predicted material, the system automatically provides:
+
+- Waste Category
+- Recyclability Status
+- Recycling Recommendation
+
+---
+
+## 📄 Reports
+
+- Single Prediction PDF Report
+- Batch Prediction PDF Report
+- Professional Report Layout
+- Downloadable Reports
+
+---
+
+# ✅ Milestone 1 (Week 1 & Week 2)
+## Authentication & Access Control
+
+### Tasks Completed
+
+- Designed project architecture
+- Connected React frontend with FastAPI backend
+- Configured PostgreSQL database
+- Implemented user registration
+- Implemented secure login
+- Password hashing using bcrypt
+- JWT Authentication
+- Protected Routes
+- Role-Based Access Control (RBAC)
+- Built Inventory CRUD APIs
+- Connected frontend with backend APIs
+- Tested authentication workflow
+
+### Outcomes
+
+- Secure authentication system operational
+- JWT-based authorization functional
+- PostgreSQL integration completed
+- Protected dashboard implemented
+- User management successfully completed
+
+---
+
+# ✅ Milestone 2 (Week 3 & Week 4)
+## Material Recognition & Waste Classification
+
+### Tasks Completed
+
+### ✔ Textile Image Analysis Engine
+
+- Implemented textile image upload
+- Added image validation
+- Image preprocessing
+- Image resizing
+- Image normalization
+
+### ✔ Material Classification Workflow
+
+- Built CNN model using TensorFlow
+- Trained fabric classification model
+- Integrated trained model with FastAPI
+- Developed real-time prediction API
+- Displayed prediction confidence
+- Generated Top-3 predictions
+
+### ✔ Waste Categorization
+
+- Classified textile waste
+- Generated waste category
+- Created material information mapping
+
+### ✔ Recyclability Assessment
+
+- Implemented recyclability assessment
+- Generated recycling recommendations
+- Displayed sustainability information
+
+### ✔ Prediction Reports
+
+- Professional Single Prediction PDF
+- Batch Prediction PDF
+- Material Summary
+- Confidence Score
+- Waste Category
+- Recycling Recommendation
+- Top Predictions
+
+### Outcomes
+
+- Textile Image Analysis Engine operational
+- Material Classification Workflow functional
+- CNN model integrated successfully
+- Waste Categorization completed
+- Recyclability Assessment operational
+- AI Prediction API functional
+- PDF Report Generation completed
+- End-to-End AI workflow tested successfully
+
+---
+
+# 🔐 API Endpoints
+
+| Method | Endpoint | Description | Authentication |
+|---------|----------|-------------|---------------|
+| GET | / | Health Check | No |
+| POST | /register | Register User | No |
+| POST | /login | User Login | No |
+| GET | /inventory | Get Inventory | Yes |
+| POST | /inventory | Add Inventory | Yes |
+| PUT | /inventory/{id} | Update Inventory | Yes |
+| DELETE | /inventory/{id} | Delete Inventory | Yes |
+| POST | /predict | Predict Textile Material | Yes |
+
+---
+
+# 🚀 System Workflow
+
+```
+User Login
+      │
+      ▼
+Upload Textile Image
+      │
+      ▼
+Image Preprocessing
+      │
+      ▼
+CNN Material Classification
+      │
+      ▼
+Material Prediction
+      │
+      ▼
+Waste Classification
+      │
+      ▼
+Recyclability Assessment
+      │
+      ▼
+Recycling Recommendation
+      │
+      ▼
+Generate PDF Report
+```
+
+---
+
+# 📷 Application Screenshots
+
+### Login Page
+
+(Add Screenshot)
+
+### Dashboard
+
+(Add Screenshot)
+
+### Inventory Management
+
+(Add Screenshot)
+
+### Material Prediction
+
+(Add Screenshot)
+
+### Single Prediction Report
+
+(Add Screenshot)
+
+### Batch Prediction Report
+
+(Add Screenshot)
+
+---
+
+# 🚀 Getting Started
+
+## Backend
+
 ```bash
 cd Backend
-python -m venv venv && venv\Scripts\activate
+
+python -m venv venv
+
+venv\Scripts\activate
+
 pip install -r requirements.txt
+
 uvicorn main:app --reload
 ```
 
-**Frontend**
-```bash
-cd Frontend
-npm install
-npm run dev
+Backend URL
+
+```
+http://localhost:8000
 ```
 
-**Promote a user to Administrator** (run in PostgreSQL):
-```sql
-UPDATE users SET role='Administrator' WHERE email='your-email@example.com';
+Swagger API
+
 ```
-Log out and back in afterward — roles are baked into the JWT at login time.
+http://localhost:8000/docs
+```
 
 ---
 
-## 📄 License
-Developed as part of an internship program. License to be finalized.
+## Frontend
+
+```bash
+cd Frontend
+
+npm install
+
+npm run dev
+```
+
+Frontend URL
+
+```
+http://localhost:5173
+```
+
+---
+
+# 🔜 Upcoming Features (Milestone 3)
+
+- Sustainability Intelligence Engine
+- Recycling Recommendation Engine
+- Environmental Impact Assessment
+- Circular Economy Analytics
+- Sustainability Dashboard
+
+---
+
+# 👩‍💻 Contributors
+
+- Rajashree Tharmalingam
+- Infosys Internship Project Team
+
+---
+
+# 📄 License
+
+Developed as part of the Infosys Internship Program.
+
+This project is intended for educational and internship purposes.

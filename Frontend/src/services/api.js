@@ -19,19 +19,26 @@ export async function registerUser(fullName, email, password) {
 }
 
 export async function loginUser(email, password) {
+  const formData = new URLSearchParams();
+  formData.append("username", email);
+  formData.append("password", password);
+
   const response = await fetch(`${API_BASE_URL}/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: formData,
   });
 
   const data = await response.json();
+
   if (!response.ok) {
-    throw new Error(data.detail || 'Login failed');
+    throw new Error(data.detail || "Login failed");
   }
 
-  localStorage.setItem('token', data.access_token);
-  localStorage.setItem('user', JSON.stringify(data.user));
+  localStorage.setItem("token", data.access_token);
+  localStorage.setItem("user", JSON.stringify(data.user));
 
   return data;
 }
@@ -140,4 +147,27 @@ export async function getDashboardStats() {
     .map(([name, count]) => ({ name, count, percent: Math.round((count / totalItems) * 100) || 0 }))
     .sort((a, b) => b.count - a.count);
   return { totalItems, totalQuantity, materialBreakdown };
+}
+
+export async function predictFabric(file) {
+  const token = localStorage.getItem("token");
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch(`${API_BASE_URL}/predict`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.detail || "Prediction failed");
+  }
+
+  return data;
 }

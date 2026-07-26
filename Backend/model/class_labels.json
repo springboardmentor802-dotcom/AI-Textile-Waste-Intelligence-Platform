@@ -1,1 +1,12 @@
-{"0": "Blended", "1": "Cotton", "2": "Denim", "3": "Polyester", "4": "Silk", "5": "Wool"}
+{
+  "0": "Blended",
+  "1": "Cotton",
+  "2": "Denim",
+  "3": "Fleece",
+  "4": "Nylon",
+  "5": "Polyester",
+  "6": "Silk",
+  "7": "Terrycloth",
+  "8": "Viscose",
+  "9": "Wool"
+}

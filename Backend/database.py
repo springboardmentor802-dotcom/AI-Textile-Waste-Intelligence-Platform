@@ -7,7 +7,7 @@ raw_password = "Skcet@123"
 
 encoded_password = quote_plus(raw_password)
 
-DATABASE_URL = f"postgresql://postgres:{encoded_password}@localhost:1511/textile_waste_db"
+DATABASE_URL = f"postgresql://postgres:{encoded_password}@localhost:5432/textile_waste_db"
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

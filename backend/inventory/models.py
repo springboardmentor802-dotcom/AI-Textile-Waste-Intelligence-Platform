@@ -20,6 +20,13 @@ class TextileWaste(models.Model):
         ('Contaminated', 'Contaminated'),
     ]
 
+    STATUS_CHOICES = [
+        ('Registered', 'Registered'),
+        ('Processing', 'Processing'),
+        ('Recycled', 'Recycled'),
+        ('Disposed', 'Disposed'),
+    ]
+
     batch_id = models.CharField(max_length=20, unique=True, editable=False)
     material_type = models.CharField(max_length=100, choices=MATERIAL_CHOICES)
     quantity = models.FloatField()
@@ -27,6 +34,9 @@ class TextileWaste(models.Model):
     source = models.CharField(max_length=100)
     condition = models.CharField(
         max_length=20, choices=CONDITION_CHOICES, default='Worn'
+    )
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default='Registered'
     )
     collection_date = models.DateField(null=True, blank=True)
     created_by = models.ForeignKey(

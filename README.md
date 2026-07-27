@@ -338,11 +338,6 @@ http://localhost:8000/docs
 - Pattern Analysis Module
 - Full Textile Image Analysis API
 - PDF Report Generation
-
----
-
-## In Progress
-
 - Waste Categorization Workflow
 - Recycling Recommendation Engine
 - Sustainability Intelligence Dashboard
@@ -352,15 +347,8 @@ http://localhost:8000/docs
 ## Planned
 
 - Bulk Image Analysis
-- Inventory Dashboard
 - Advanced Analytics
 - Batch Processing
 - Cloud Deployment
 
----
 
-# Developed By
-
-**Infosys Springboard Internship**
-
-**AI Textile Waste Intelligence Platform**

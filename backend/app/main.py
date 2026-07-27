@@ -4,6 +4,7 @@ from app.routes.auth import router as auth_router
 from app.config.database import db
 from app.routes.users import router as users_router
 from app.routes.inventory import router as inventory_router
+from app.api.predict import router as predict_router
 
 app = FastAPI(
     title="AI Textile Waste Intelligence Platform API",
@@ -14,6 +15,7 @@ app = FastAPI(
 app.include_router(inventory_router)
 app.include_router(auth_router)
 app.include_router(users_router)
+app.include_router(predict_router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[

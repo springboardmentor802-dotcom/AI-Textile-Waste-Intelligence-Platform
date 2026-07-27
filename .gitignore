@@ -19,3 +19,15 @@ dist/
 Thumbs.db
 
 .env
+
+# Datasets
+ai_models/datasets/raw/
+
+# Trained models
+ai_models/models/
+
+# Python virtual environment
+ai_models/venv/
+
+# Notebook checkpoints
+**/.ipynb_checkpoints/

@@ -10,6 +10,8 @@ import { createInventory } from "@/services/inventoryService";
 import { getInventory } from "@/services/inventoryService";
 import EditInventoryModal from "@/components/inventory/EditInventoryModal";
 import { updateInventory } from "@/services/inventoryService";
+import DeleteInventoryModal from "@/components/inventory/DeleteInventoryModal";
+import { deleteInventory } from "@/services/inventoryService";
 
 function Inventory() {
   const [inventory, setInventory] = useState([]);
@@ -17,7 +19,7 @@ function Inventory() {
   const [showModal, setShowModal] = useState(false);
   const [selectedInventory, setSelectedInventory] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
-
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   useEffect(() => {
     loadInventory();
   }, []);
@@ -66,11 +68,28 @@ const handleUpdateInventory = async (formData) => {
     alert("Failed to update inventory.");
   }
 };
+const handleDeleteInventory = async () => {
+  try {
+    await deleteInventory(selectedInventory._id);
+
+    await loadInventory();
+
+    setShowDeleteModal(false);
+    setSelectedInventory(null);
+
+  } catch (error) {
+    console.error(error);
+    alert("Failed to delete inventory.");
+  }
+};
 const handleEditClick = (item) => {
     setSelectedInventory(item);
     setShowEditModal(true);
 };
-
+const handleDeleteClick = (item) => {
+  setSelectedInventory(item);
+  setShowDeleteModal(true);
+};
   return (
     <DashboardLayout>
       <SectionHeader
@@ -87,7 +106,7 @@ const handleEditClick = (item) => {
       <InventoryTable
         inventory={inventory}
         onEdit={handleEditClick}
-        onDelete={() => {}}
+        onDelete={handleDeleteClick}
       />
       )}
       <AddInventoryModal
@@ -103,6 +122,15 @@ const handleEditClick = (item) => {
         }}
         inventory={selectedInventory}
         onSubmit={handleUpdateInventory}
+      />
+      <DeleteInventoryModal
+        open={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setSelectedInventory(null);
+        }}
+        onConfirm={handleDeleteInventory}
+        inventory={selectedInventory}
       />
     </DashboardLayout>
   );

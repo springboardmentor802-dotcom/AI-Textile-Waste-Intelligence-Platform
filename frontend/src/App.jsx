@@ -14,6 +14,7 @@ import Inventory from "@/pages/Inventory/Inventory";
 import Analytics from "@/pages/Analytics/Analytics";
 import Reports from "@/pages/Reports/Reports";
 import Settings from "@/pages/Settings/Settings";
+import FabricAnalysis from "@/pages/FabricAnalysis/FabricAnalysis";
 
 import ProtectedRoute from "@/routes/ProtectedRoute";
 function App() {
@@ -74,6 +75,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        
         <Route
   path="/users"
   element={
@@ -128,7 +130,22 @@ function App() {
       <Settings />
     </ProtectedRoute>
   }
-/>
+/>    
+      <Route
+        path="/fabric-analysis"
+        element={
+          <ProtectedRoute
+            allowedRoles={[
+              "administrator",
+              "manufacturer",
+              "manager"
+            ]}
+          >
+            <FabricAnalysis />
+          </ProtectedRoute>
+        }
+      />
+
       </Routes>
     </BrowserRouter>
   );

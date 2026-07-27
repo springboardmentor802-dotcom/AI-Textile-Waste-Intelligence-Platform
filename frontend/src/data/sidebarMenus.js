@@ -28,8 +28,13 @@ export const sidebarMenus = {
     },
     {
       label: "Inventory",
-      path: "/inventory",
       icon: Package,
+      path: "/inventory",
+    },
+    {
+      label: "AI Fabric Analysis",
+      icon: Brain,
+      path: "/fabric-analysis",
     },
     {
       label: "Settings",
@@ -55,9 +60,9 @@ export const sidebarMenus = {
       path: "/waste-upload",
     },
     {
-      label: "AI Detection",
+      label: "AI Fabric Analysis",
       icon: Brain,
-      path: "/ai-detection",
+      path: "/fabric-analysis",
     },
     {
       label: "Reports",
@@ -101,9 +106,9 @@ export const sidebarMenus = {
       path: "/analytics",
     },
     {
-      label: "AI Insights",
+      label: "AI Fabric Analysis",
       icon: Brain,
-      path: "/ai-insights",
+      path: "/fabric-analysis",
     },
     {
       label: "Reports",

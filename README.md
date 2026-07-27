@@ -1,240 +1,193 @@
-# 🧵 AI Textile Waste Intelligence Platform
+# AI Textile Waste Intelligence Platform
 
-An AI-powered platform designed to improve textile waste management through intelligent inventory tracking, waste classification, and sustainability analytics. The platform aims to assist manufacturers, recycling facilities, and sustainability managers in making data-driven decisions for efficient textile waste handling.
+An AI-powered web application that classifies textile fabrics and provides sustainability recommendations to promote textile waste management and recycling.
 
----
+## Overview
 
-## 🚀 Project Overview
-
-The AI Textile Waste Intelligence Platform focuses on:
-
-- Textile inventory management
-- Waste classification using Computer Vision
-- Fabric and garment recognition
-- Sustainability analytics
-- Recycling recommendations
-- Role-based user management
-- AI-powered insights for textile waste reduction
+The AI Textile Waste Intelligence Platform helps users identify different fabric types using computer vision and generates intelligent recommendations for reuse, recycling, and environmental impact. The platform supports multi-image analysis and downloadable PDF reports, making it useful for textile industries, recycling centres, researchers, and sustainability initiatives.
 
 ---
 
-## 🛠️ Tech Stack
+## Features
+
+- User Authentication
+- Inventory Management
+- AI-based Fabric Classification
+- Multiple Image Upload Support
+- Fabric Analysis Report Generation
+- Sustainability Recommendations
+- Environmental Impact Information
+- Recycling Method Suggestions
+- Downloadable PDF Reports
+- Responsive User Interface
+
+---
+
+## Technology Stack
 
 ### Frontend
+
 - React.js
 - Vite
 - Tailwind CSS
-- React Router DOM
-- Lucide React
+- Axios
+- jsPDF
 
-### Backend *(In Progress)*
+### Backend
+
 - FastAPI
+- Python
 - MongoDB
-- Motor (MongoDB Driver)
-- JWT Authentication
-- Passlib (Password Hashing)
 
-### AI & Machine Learning *(Planned)*
+### Artificial Intelligence
+
 - PyTorch
-- YOLOv8
-- OpenCV
-- Hugging Face Transformers
+- EfficientNet-B0
+- TorchVision
+- PIL (Pillow)
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
-AI_textile_waste_management_system/
+AI_Textile_Waste_Management_System/
 
+│
 ├── frontend/
-│   ├── src/
-│   ├── public/
-│   └── package.json
 │
 ├── backend/
 │   ├── app/
-│   ├── requirements.txt
-│   └── .env.example
+│   ├── api/
+│   ├── ml/
+│   └── models/
 │
-├── docs/
-├── uploads/
-├── tests/
+├── ai_models/
+│   ├── notebooks/
+│   ├── datasets/
+│   └── models/
+│
 └── README.md
 ```
 
 ---
 
-## ✨ Current Progress
+## AI Workflow
 
-### ✅ Completed
-
-- Project initialization
-- Repository setup
-- Frontend environment setup
-- React + Vite configuration
-- Tailwind CSS integration
-- React Router configuration
-
-### Authentication & Authorization
-- Authentication UI
-  - Login Page
-  - Register Page
-  - Forgot Password Page
-- JWT Authentication
-- Password Hashing
-- Login API
-- Register API
-- Protected Routes
-- Role-Based Authentication
-- User Session Management
-
-### Reusable UI Components
-- Button
-- Input
-- Password Input
-- Authentication Layout
-- Dashboard Layout
-- Sidebar
-- Navbar
-- Section Header
-
-### Backend Development
-- FastAPI project architecture
-- MongoDB integration
-- Database configuration
-- Authentication APIs
-- User Management APIs
-- Inventory Management APIs
-- Service Layer Architecture
-- Schema-based Validation
-- CRUD API Implementation
-
-### User Management
-- View Users
-- Role-Based User Access
-- Frontend-Backend Integration
-
-### Inventory Management
-- View Inventory
-- Add Inventory
-- Edit Inventory
-- Delete Inventory
-- Reusable Inventory Form
-- Frontend-Backend Integration
-- MongoDB CRUD Operations
+1. Upload one or multiple fabric images.
+2. Images are preprocessed.
+3. EfficientNet-B0 predicts the fabric category.
+4. AI generates:
+   - Fabric Type
+   - Confidence Score
+   - Quality
+   - Reusability
+   - Recyclability
+   - Recycling Method
+   - Environmental Impact
+   - Recommended Products
+5. Reports are displayed.
+6. Reports can be downloaded as PDF.
 
 ---
 
-### 🚧 In Progress
+## Supported Fabric Categories
 
-### AI Textile Intelligence Module
-- AI Module Architecture
-- Image Upload Pipeline
-- Prediction Database Schema
-- AI Service Integration
-- Fabric Classification Pipeline
-
----
-
-### 📌 Next Milestones
-
-- Image Upload API
-- AI Model Integration
-- Fabric Classification
-- Waste Classification
-- Recyclability Prediction
-- Prediction History
-- Analytics Dashboard
-- Reports Module
-### 📌 Planned Features
-
-- Textile inventory management
-- AI-based fabric recognition
-- Textile waste classification
-- Sustainability dashboard
-- Recycling recommendation engine
-- Analytics and reporting
-- Role-based dashboards
-- Image upload and processing
-- Computer Vision integration
+- Cotton
+- Linen
+- Silk
+- Wool
+- Hessian
+- Abaca
 
 ---
 
-## 👥 User Roles
+## Machine Learning
 
-- Administrator
-- Textile Manufacturer
-- Recycling Facility Operator
-- Sustainability Manager
+Model Used:
 
----
+- EfficientNet-B0 (Transfer Learning)
 
-## 📂 Dataset
+Training Framework:
 
-The project will utilize publicly available datasets for textile recognition and sustainability analysis.
+- PyTorch
 
-Examples include:
+Image Size:
 
-- TIPS (Textile Image Dataset)
-- DeepFashion Dataset
-- Fashion-MNIST
-- Fabric Image Dataset
-- Sustainable Fashion Dataset
+- 224 × 224
 
----
+Loss Function:
 
-## 🎯 Project Objectives
+- CrossEntropyLoss
 
-- Digitize textile inventory management
-- Detect and classify textile waste using AI
-- Improve recycling decisions
-- Reduce textile waste through intelligent analytics
-- Support sustainable manufacturing practices
+Optimizer:
+
+- AdamW
+
+Transfer Learning Strategy:
+
+- ImageNet Pretrained Weights
+- Fine-tuning of the final EfficientNet feature block
+- Custom classification head
 
 ---
 
-## 📅 Development Roadmap
+## Current Performance
 
-### Phase 1
-- Authentication System
-- Frontend Setup
-- Backend Setup
-
-### Phase 2
-- Inventory Management
-- Dataset Integration
-- Image Upload
-
-### Phase 3
-- AI Model Integration
-- Textile Classification
-- Waste Detection
-
-### Phase 4
-- Dashboard & Analytics
-- Sustainability Reports
-- Deployment
+- Validation Accuracy: **97.8%**
+- Multi-image prediction supported
+- Real-time inference using FastAPI
+- Individual PDF report generation
 
 ---
 
-## 📌 Current Status
+## Future Improvements
 
-🟢 Frontend authentication module completed.
-
-🟡 Backend authentication module currently under development.
-
----
-
-## 👩‍💻 Developed By
-
-**Anuja Sawant**
-
-B.Tech Information Technology  
-Pillai College of Engineering
+- Train using larger real-world textile datasets (e.g. TextileNet)
+- Improve performance on unconstrained mobile-phone images
+- Support additional fabric categories
+- Fabric region detection before classification
+- AI-powered defect detection
+- Sustainability analytics dashboard
 
 ---
 
-## 📄 License
+## Installation
 
-This project is licensed under the MIT License.
+### Clone Repository
+
+```bash
+git clone <repository-url>
+```
+
+### Backend
+
+```bash
+cd backend
+
+pip install -r requirements.txt
+
+uvicorn app.main:app --reload
+```
+
+### Frontend
+
+```bash
+cd frontend
+
+npm install
+
+npm run dev
+```
+
+---
+
+## Contributors
+
+- Anuja Sawant
+
+---
+
+## License
+
+Academic Project

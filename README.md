@@ -998,4 +998,113 @@ The project currently includes a secure authentication system, role-based access
 
 The next phase of development focuses on recycler workflows, marketplace functionality, and AI-powered textile waste intelligence.
 
+---
+---
+## Milestone 2: Material Recognition & Waste Classification (Week 3 & 4)
+
+### Overview
+
+This milestone focuses on building the AI-enabled backend architecture for textile image analysis and waste classification. The objective is to establish an end-to-end workflow that accepts textile images, performs material analysis, classifies textile waste, evaluates recyclability, and generates detailed analysis reports.
+
+The implementation follows a modular service-oriented architecture to ensure scalability and seamless integration with future AI models.
+
+---
+
+### Backend Workflow
+
+The current backend workflow is designed as follows:
+
+```text
+Upload Textile Image
+        │
+        ▼
+Store Image
+        │
+        ▼
+Create Textile Analysis Record
+        │
+        ▼
+Material Classification Service
+        │
+        ▼
+Waste Classification Service
+        │
+        ▼
+Recyclability Assessment
+        │
+        ▼
+Recommendation Generation
+        │
+        ▼
+Generate Analysis Report (PDF)
+        │
+        ▼
+Return Analysis Result
+```
+
+---
+
+### Backend Features Implemented
+
+* Textile image upload and storage.
+* Material analysis workflow.
+* Material classification service architecture.
+* Waste classification workflow.
+* Recyclability assessment module.
+* Sustainability recommendation generation.
+* PDF report generation.
+* Analysis history management.
+* Individual analysis details API.
+* Secure JWT-protected APIs.
+* SQLAlchemy model relationships and database integration.
+* Modular service-based backend implementation following FastAPI best practices.
+
+---
+
+### REST APIs Implemented
+
+| Method | Endpoint                                  | Description                                                   |
+| ------ | ----------------------------------------- | ------------------------------------------------------------- |
+| POST   | `/material-analysis/analyze`              | Upload a textile image and perform complete material analysis |
+| GET    | `/material-analysis/history`              | Retrieve analysis history of the authenticated user           |
+| GET    | `/material-analysis/{analysis_id}`        | View complete details of a specific analysis                  |
+| GET    | `/material-analysis/report/{analysis_id}` | Generate and download the PDF analysis report                 |
+
+---
+
+### AI Module Progress
+
+The AI module architecture has been designed and integrated into the project structure.
+
+Completed work includes:
+
+* AI module directory structure.
+* Image analysis pipeline design.
+* CNN-based material classification workflow planning.
+* Dataset selection and preparation strategy.
+* Backend integration architecture for AI inference.
+* Recommendation engine integration with the analysis workflow.
+
+The CNN training pipeline and model integration are currently under active development and will replace the existing placeholder classification logic once the model is trained and validated.
+
+---
+
+### Remaining Work
+
+The following tasks are currently in progress:
+
+* Training the CNN model for textile material classification.
+* Fabric defect recognition model implementation.
+* Integration of trained AI models with backend inference services.
+* Frontend integration for material analysis.
+* Batch image processing and batch report generation.
+* Model optimisation, testing, and performance evaluation.
+
+---
+
+### Development Note
+
+The backend architecture for Milestone 2 has been substantially completed. Some AI training scripts, experimental model files, and integration components are intentionally not included in the current repository as they are still under active development and testing. These components will be committed after successful model training and complete integration with the existing backend workflow.
+
+
 

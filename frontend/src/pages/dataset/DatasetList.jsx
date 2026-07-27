@@ -66,132 +66,330 @@ const DatasetList = () => {
     };
 
     if (loading) {
-        return <h2>Loading...</h2>;
-    }
-
     return (
-
         <>
             <Navbar />
 
             <div
                 style={{
-                    display: "flex"
+                    display: "flex",
+                    minHeight: "100vh",
+                    background: "#f8fafc",
                 }}
             >
-
                 <Sidebar />
 
                 <div
                     style={{
                         flex: 1,
-                        padding: "30px"
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        fontSize: "18px",
+                        color: "#64748b",
+                    }}
+                >
+                    Loading dataset...
+                </div>
+            </div>
+        </>
+    );
+}
+
+    return (
+    <>
+        <Navbar />
+
+        <div
+            style={{
+                display: "flex",
+                minHeight: "100vh",
+                background: "#f8fafc",
+            }}
+        >
+
+            <Sidebar />
+
+            <div
+                style={{
+                    flex: 1,
+                    padding: "90px 40px",
+                }}
+            >
+
+                <div
+                    style={{
+                        maxWidth: "1200px",
+                        margin: "auto",
                     }}
                 >
 
-                    <h2>Sustainability Dataset</h2>
-
-                    <table
-                        border="1"
-                        cellPadding="10"
-                        width="100%"
+                    <div
+                        style={{
+                            marginBottom:"30px"
+                        }}
                     >
 
-                        <thead>
+                        <h1
+                            style={{
+                                fontSize:"34px",
+                                fontWeight:"700",
+                                color:"#0f172a",
+                                marginBottom:"8px"
+                            }}
+                        >
+                            Sustainability Dataset
+                        </h1>
 
-                            <tr>
 
-                                <th>ID</th>
+                        <p
+                            style={{
+                                color:"#64748b",
+                                fontSize:"15px"
+                            }}
+                        >
+                            Manage sustainability records and environmental data.
+                        </p>
 
-                                <th>Brand</th>
+                    </div>
 
-                                <th>Country</th>
 
-                                <th>Material</th>
 
-                                <th>Rating</th>
+                    <div
+                        style={{
+                            background:"#ffffff",
+                            border:"1px solid #e5e7eb",
+                            borderRadius:"16px",
+                            overflow:"hidden",
+                            boxShadow:"0 4px 14px rgba(15,23,42,0.06)"
+                        }}
+                    >
 
-                                <th>Carbon</th>
+                        <table
+                            style={{
+                                width:"100%",
+                                borderCollapse:"collapse"
+                            }}
+                        >
 
-                                <th>Actions</th>
+                            <thead
+                                style={{
+                                    background:"#f8fafc"
+                                }}
+                            >
 
-                            </tr>
+                                <tr>
 
-                        </thead>
-
-                        <tbody>
-
-                            {
-                                dataset.length === 0 ?
-
-                                (
-                                    <tr>
-
-                                        <td
-                                            colSpan="7"
-                                            align="center"
+                                    {[
+                                        "ID",
+                                        "Brand",
+                                        "Country",
+                                        "Material",
+                                        "Rating",
+                                        "Carbon",
+                                        "Actions"
+                                    ].map((heading)=>(
+                                        <th
+                                            key={heading}
+                                            style={{
+                                                padding:"16px",
+                                                textAlign:"left",
+                                                fontWeight:"600",
+                                                color:"#374151",
+                                                borderBottom:
+                                                    "1px solid #e5e7eb"
+                                            }}
                                         >
-                                            No Records Found
-                                        </td>
+                                            {heading}
+                                        </th>
+                                    ))}
 
-                                    </tr>
-                                )
+                                </tr>
 
-                                :
+                            </thead>
 
-                                dataset.map(item => (
 
-                                    <tr key={item.id}>
 
-                                        <td>{item.id}</td>
+                            <tbody>
 
-                                        <td>{item.brand_name}</td>
+                                {
+                                    dataset.length === 0 ? (
 
-                                        <td>{item.country}</td>
+                                        <tr>
 
-                                        <td>{item.material_type}</td>
-
-                                        <td>{item.sustainability_rating}</td>
-
-                                        <td>{item.carbon_footprint_mt}</td>
-
-                                        <td>
-
-                                            <Link
-                                                to={`/dataset/${item.id}`}
+                                            <td
+                                                colSpan="7"
+                                                style={{
+                                                    padding:"40px",
+                                                    textAlign:"center",
+                                                    color:"#64748b"
+                                                }}
                                             >
-                                                View
-                                            </Link>
+                                                No records found.
+                                            </td>
 
-                                            {" | "}
+                                        </tr>
 
-                                            <button
-                                                onClick={() =>
-                                                    handleDelete(item.id)
-                                                }
+                                    )
+
+                                    :
+
+                                    dataset.map((item)=>(
+
+                                        <tr
+                                            key={item.id}
+                                            style={{
+                                                borderBottom:
+                                                    "1px solid #e5e7eb"
+                                            }}
+                                        >
+
+                                            <td
+                                                style={{
+                                                    padding:"16px"
+                                                }}
                                             >
-                                                Delete
-                                            </button>
+                                                {item.id}
+                                            </td>
 
-                                        </td>
 
-                                    </tr>
+                                            <td
+                                                style={{
+                                                    padding:"16px",
+                                                    fontWeight:"500"
+                                                }}
+                                            >
+                                                {item.brand_name}
+                                            </td>
 
-                                ))
-                            }
 
-                        </tbody>
+                                            <td
+                                                style={{
+                                                    padding:"16px"
+                                                }}
+                                            >
+                                                {item.country}
+                                            </td>
 
-                    </table>
+
+                                            <td
+                                                style={{
+                                                    padding:"16px"
+                                                }}
+                                            >
+                                                {item.material_type}
+                                            </td>
+
+
+                                            <td
+                                                style={{
+                                                    padding:"16px"
+                                                }}
+                                            >
+
+                                                <span
+                                                    style={{
+                                                        padding:"5px 12px",
+                                                        borderRadius:"999px",
+                                                        background:"#dcfce7",
+                                                        color:"#166534",
+                                                        fontSize:"13px",
+                                                        fontWeight:"600"
+                                                    }}
+                                                >
+                                                    {item.sustainability_rating}
+                                                </span>
+
+                                            </td>
+
+
+                                            <td
+                                                style={{
+                                                    padding:"16px"
+                                                }}
+                                            >
+                                                {item.carbon_footprint_mt}
+                                            </td>
+
+
+                                            <td
+                                                style={{
+                                                    padding:"16px"
+                                                }}
+                                            >
+
+                                                <div
+                                                    style={{
+                                                        display:"flex",
+                                                        gap:"10px"
+                                                    }}
+                                                >
+
+                                                    <Link
+                                                        to={`/dataset/${item.id}`}
+                                                    >
+
+                                                        <button
+                                                            style={{
+                                                                background:"#2563eb",
+                                                                color:"#fff",
+                                                                border:"none",
+                                                                padding:"8px 16px",
+                                                                borderRadius:"8px",
+                                                                cursor:"pointer",
+                                                                fontWeight:"600"
+                                                            }}
+                                                        >
+                                                            View
+                                                        </button>
+
+                                                    </Link>
+
+
+
+                                                    <button
+                                                        onClick={() =>
+                                                            handleDelete(item.id)
+                                                        }
+                                                        style={{
+                                                            background:"#dc2626",
+                                                            color:"#fff",
+                                                            border:"none",
+                                                            padding:"8px 16px",
+                                                            borderRadius:"8px",
+                                                            cursor:"pointer",
+                                                            fontWeight:"600"
+                                                        }}
+                                                    >
+                                                        Delete
+                                                    </button>
+
+
+                                                </div>
+
+                                            </td>
+
+
+                                        </tr>
+
+                                    ))
+                                }
+
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
 
                 </div>
 
             </div>
 
-        </>
+        </div>
 
-    );
-
+    </>
+);
 };
 
 export default DatasetList;

@@ -72,28 +72,72 @@ const UserList = () => {
 
     return (
 
-        <>
+    <>
 
-            <Navbar />
+        <Navbar />
 
-            <div style={{ display: "flex" }}>
+        <div
+            style={{
+                display: "flex",
+                minHeight: "100vh",
+                background: "#f8fafc"
+            }}
+        >
 
-                <Sidebar />
+            <Sidebar />
+
+            <div
+                style={{
+                    flex: 1,
+                    padding: "100px 45px 40px"
+                }}
+            >
 
                 <div
                     style={{
-                        flex: 1,
-                        padding: "30px"
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginBottom: "30px"
                     }}
                 >
 
-                    <h2>User Management</h2>
+                    <div>
 
-                    <hr />
+                        <h1
+                            style={{
+                                margin: 0,
+                                color: "#111827",
+                                fontSize: "30px"
+                            }}
+                        >
+                            User Management
+                        </h1>
+
+                        <p
+                            style={{
+                                marginTop: "8px",
+                                color: "#6b7280"
+                            }}
+                        >
+                            View and manage all registered users.
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div
+                    style={{
+                        background: "#ffffff",
+                        borderRadius: "12px",
+                        border: "1px solid #e5e7eb",
+                        overflow: "hidden",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.05)"
+                    }}
+                >
 
                     <table
-                        border="1"
-                        cellPadding="10"
                         style={{
                             width: "100%",
                             borderCollapse: "collapse"
@@ -102,55 +146,195 @@ const UserList = () => {
 
                         <thead>
 
-                            <tr>
+                            <tr
+                                style={{
+                                    background: "#f9fafb"
+                                }}
+                            >
 
-                                <th>ID</th>
+                                <th
+                                    style={{
+                                        padding: "16px",
+                                        textAlign: "left",
+                                        borderBottom: "1px solid #e5e7eb"
+                                    }}
+                                >
+                                    ID
+                                </th>
 
-                                <th>Name</th>
+                                <th
+                                    style={{
+                                        padding: "16px",
+                                        textAlign: "left",
+                                        borderBottom: "1px solid #e5e7eb"
+                                    }}
+                                >
+                                    Name
+                                </th>
 
-                                <th>Email</th>
+                                <th
+                                    style={{
+                                        padding: "16px",
+                                        textAlign: "left",
+                                        borderBottom: "1px solid #e5e7eb"
+                                    }}
+                                >
+                                    Email
+                                </th>
 
-                                <th>Role</th>
+                                <th
+                                    style={{
+                                        padding: "16px",
+                                        textAlign: "left",
+                                        borderBottom: "1px solid #e5e7eb"
+                                    }}
+                                >
+                                    Role
+                                </th>
 
-                                <th>Actions</th>
+                                <th
+                                    style={{
+                                        padding: "16px",
+                                        textAlign: "center",
+                                        borderBottom: "1px solid #e5e7eb"
+                                    }}
+                                >
+                                    Actions
+                                </th>
 
                             </tr>
 
                         </thead>
 
                         <tbody>
+                                                        {
 
-                            {
+                                users.map((user, index) => (
 
-                                users.map(user => (
+                                    <tr
+                                        key={user.id}
+                                        style={{
+                                            background: index % 2 === 0 ? "#ffffff" : "#fcfcfd",
+                                            transition: "background 0.2s ease"
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.background = "#f9fafb";
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.background =
+                                                index % 2 === 0 ? "#ffffff" : "#fcfcfd";
+                                        }}
+                                    >
 
-                                    <tr key={user.id}>
+                                        <td
+                                            style={{
+                                                padding: "16px",
+                                                borderBottom: "1px solid #e5e7eb",
+                                                color: "#374151"
+                                            }}
+                                        >
+                                            {user.id}
+                                        </td>
 
-                                        <td>{user.id}</td>
+                                        <td
+                                            style={{
+                                                padding: "16px",
+                                                borderBottom: "1px solid #e5e7eb",
+                                                fontWeight: "600",
+                                                color: "#111827"
+                                            }}
+                                        >
+                                            {user.name}
+                                        </td>
 
-                                        <td>{user.name}</td>
+                                        <td
+                                            style={{
+                                                padding: "16px",
+                                                borderBottom: "1px solid #e5e7eb",
+                                                color: "#4b5563"
+                                            }}
+                                        >
+                                            {user.email}
+                                        </td>
 
-                                        <td>{user.email}</td>
+                                        <td
+                                            style={{
+                                                padding: "16px",
+                                                borderBottom: "1px solid #e5e7eb"
+                                            }}
+                                        >
 
-                                        <td>{user.role}</td>
+                                            <span
+                                                style={{
+                                                    display: "inline-block",
+                                                    padding: "6px 14px",
+                                                    borderRadius: "20px",
+                                                    background: "#eff6ff",
+                                                    color: "#2563eb",
+                                                    fontSize: "13px",
+                                                    fontWeight: "600"
+                                                }}
+                                            >
+                                                {user.role}
+                                            </span>
 
-                                        <td>
+                                        </td>
+
+                                        <td
+                                            style={{
+                                                padding: "16px",
+                                                borderBottom: "1px solid #e5e7eb",
+                                                textAlign: "center"
+                                            }}
+                                        >
 
                                             <button
                                                 onClick={() =>
                                                     navigate(`/users/${user.id}`)
                                                 }
+                                                style={{
+                                                    padding: "8px 16px",
+                                                    background: "#2563eb",
+                                                    color: "#ffffff",
+                                                    border: "none",
+                                                    borderRadius: "6px",
+                                                    cursor: "pointer",
+                                                    fontSize: "14px",
+                                                    fontWeight: "500",
+                                                    marginRight: "10px",
+                                                    transition: "0.2s ease"
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    e.target.style.background = "#1d4ed8";
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    e.target.style.background = "#2563eb";
+                                                }}
                                             >
                                                 View
                                             </button>
 
                                             <button
-                                                style={{
-                                                    marginLeft: "10px"
-                                                }}
                                                 onClick={() =>
                                                     handleDelete(user.id)
                                                 }
+                                                style={{
+                                                    padding: "8px 16px",
+                                                    background: "#dc2626",
+                                                    color: "#ffffff",
+                                                    border: "none",
+                                                    borderRadius: "6px",
+                                                    cursor: "pointer",
+                                                    fontSize: "14px",
+                                                    fontWeight: "500",
+                                                    transition: "0.2s ease"
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    e.target.style.background = "#b91c1c";
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    e.target.style.background = "#dc2626";
+                                                }}
                                             >
                                                 Delete
                                             </button>
@@ -171,9 +355,11 @@ const UserList = () => {
 
             </div>
 
-        </>
+        </div>
 
-    );
+    </>
+
+);
 
 };
 

@@ -9,6 +9,24 @@ from app.models.sustainability_dataset import SustainabilityDataset
 CSV_FILE = "dataset/sustainable_fashion_dataset.csv"
 
 
+def clean_string(value):
+    if pd.isna(value):
+        return None
+    return str(value).strip()
+
+
+def clean_float(value):
+    if pd.isna(value):
+        return None
+    return float(value)
+
+
+def clean_int(value):
+    if pd.isna(value):
+        return None
+    return int(value)
+
+
 def import_dataset():
 
     db: Session = SessionLocal()
@@ -17,64 +35,111 @@ def import_dataset():
 
     inserted = 0
     skipped = 0
+    failed = 0
 
-    for _, row in df.iterrows():
+    for index, row in df.iterrows():
 
-        existing = db.query(
-            SustainabilityDataset
-        ).filter(
-            SustainabilityDataset.brand_id == str(row["Brand_ID"])
-        ).first()
+        try:
 
-        if existing:
-            skipped += 1
-            continue
+            existing = (
+                db.query(SustainabilityDataset)
+                .filter(
+                    SustainabilityDataset.brand_id ==
+                    clean_string(row["Brand_ID"])
+                )
+                .first()
+            )
 
-        item = SustainabilityDataset(
+            if existing:
+                skipped += 1
+                continue
 
-            brand_id=str(row["Brand_ID"]),
+            item = SustainabilityDataset(
 
-            brand_name=row["Brand_Name"],
+                brand_id=clean_string(row["Brand_ID"]),
 
-            country=row["Country"],
+                brand_name=clean_string(row["Brand_Name"]),
 
-            year=int(row["Year"]),
+                country=clean_string(row["Country"]),
 
-            sustainability_rating=row["Sustainability_Rating"],
+                year=clean_int(row["Year"]),
 
-            material_type=row["Material_Type"],
+                sustainability_rating=clean_string(
+                    row["Sustainability_Rating"]
+                ),
 
-            eco_friendly_manufacturing=row["Eco_Friendly_Manufacturing"],
+                material_type=clean_string(
+                    row["Material_Type"]
+                ),
 
-            carbon_footprint_mt=float(row["Carbon_Footprint_MT"]),
+                eco_friendly_manufacturing=clean_string(
+                    row["Eco_Friendly_Manufacturing"]
+                ),
 
-            water_usage_liters=float(row["Water_Usage_Liters"]),
+                carbon_footprint_mt=clean_float(
+                    row["Carbon_Footprint_MT"]
+                ),
 
-            waste_production_kg=float(row["Waste_Production_KG"]),
+                water_usage_liters=clean_float(
+                    row["Water_Usage_Liters"]
+                ),
 
-            recycling_programs=row["Recycling_Programs"],
+                waste_production_kg=clean_float(
+                    row["Waste_Production_KG"]
+                ),
 
-            product_lines=int(row["Product_Lines"]),
+                recycling_programs=clean_string(
+                    row["Recycling_Programs"]
+                ),
 
-            average_price_usd=float(row["Average_Price_USD"]),
+                product_lines=clean_int(
+                    row["Product_Lines"]
+                ),
 
-            market_trend=row["Market_Trend"],
+                average_price_usd=clean_float(
+                    row["Average_Price_USD"]
+                ),
 
-            certifications=row["Certifications"]
+                market_trend=clean_string(
+                    row["Market_Trend"]
+                ),
 
-        )
+                certifications=clean_string(
+                    row["Certifications"]
+                )
 
-        db.add(item)
+            )
 
-        inserted += 1
+            db.add(item)
+
+            inserted += 1
+
+            # Commit every 500 rows
+            if inserted % 500 == 0:
+                db.commit()
+                print(f"{inserted} records inserted...")
+
+        except Exception as e:
+
+            db.rollback()
+
+            failed += 1
+
+            print(
+                f"Error on row {index + 1} "
+                f"(Brand: {row['Brand_ID']})"
+            )
+
+            print(e)
 
     db.commit()
 
     db.close()
 
+    print("\n========== IMPORT COMPLETE ==========")
     print(f"Inserted : {inserted}")
-
     print(f"Skipped  : {skipped}")
+    print(f"Failed   : {failed}")
 
 
 if __name__ == "__main__":

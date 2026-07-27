@@ -67,134 +67,268 @@ const ManufacturerList = () => {
     };
 
     if (loading) {
-
-        return <h2>Loading...</h2>;
-
-    }
-
     return (
-
         <>
             <Navbar />
 
-            <div style={{ display: "flex" }}>
-
+            <div
+                style={{
+                    display: "flex",
+                    minHeight: "100vh",
+                    background: "#f8fafc",
+                }}
+            >
                 <Sidebar />
 
                 <div
                     style={{
                         flex: 1,
-                        padding: "30px"
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        fontSize: "18px",
+                        color: "#64748b",
                     }}
                 >
+                    Loading manufacturers...
+                </div>
+            </div>
+        </>
+    );
+}
 
-                    <h2>Manufacturers</h2>
+    return (
+    <>
+        <Navbar />
 
-                    <hr />
+        <div
+            style={{
+                display: "flex",
+                minHeight: "100vh",
+                background: "#f8fafc",
+            }}
+        >
+            <Sidebar />
 
-                    <table
-                        border="1"
-                        cellPadding="10"
+            <div
+                style={{
+                    flex: 1,
+                    padding: "90px 40px",
+                }}
+            >
+                <div
+                    style={{
+                        maxWidth: "1200px",
+                        margin: "auto",
+                    }}
+                >
+                    <div
                         style={{
-                            width: "100%",
-                            borderCollapse: "collapse"
+                            marginBottom: "30px",
                         }}
                     >
+                        <h1
+                            style={{
+                                fontSize: "34px",
+                                fontWeight: "700",
+                                color: "#0f172a",
+                                marginBottom: "8px",
+                            }}
+                        >
+                            Manufacturers
+                        </h1>
 
-                        <thead>
+                        <p
+                            style={{
+                                color: "#64748b",
+                                fontSize: "15px",
+                            }}
+                        >
+                            Browse and manage all registered manufacturers.
+                        </p>
+                    </div>
 
-                            <tr>
+                    <div
+                        style={{
+                            background: "#ffffff",
+                            border: "1px solid #e5e7eb",
+                            borderRadius: "16px",
+                            overflow: "hidden",
+                            boxShadow: "0 4px 14px rgba(15,23,42,0.06)",
+                        }}
+                    >
+                        <table
+                            style={{
+                                width: "100%",
+                                borderCollapse: "collapse",
+                            }}
+                        >
+                            <thead
+                                style={{
+                                    background: "#f8fafc",
+                                }}
+                            >
+                                <tr>
+                                    {[
+                                        "ID",
+                                        "Company",
+                                        "City",
+                                        "State",
+                                        "Phone",
+                                        "Verified",
+                                        "Actions",
+                                    ].map((heading) => (
+                                        <th
+                                            key={heading}
+                                            style={{
+                                                padding: "16px",
+                                                textAlign: "left",
+                                                fontWeight: "600",
+                                                color: "#374151",
+                                                borderBottom:
+                                                    "1px solid #e5e7eb",
+                                            }}
+                                        >
+                                            {heading}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
 
-                                <th>ID</th>
-
-                                <th>Company</th>
-
-                                <th>City</th>
-
-                                <th>State</th>
-
-                                <th>Phone</th>
-
-                                <th>Verified</th>
-
-                                <th>Actions</th>
-
-                            </tr>
-
-                        </thead>
-
-                        <tbody>
-
-                            {
-
-                                manufacturers.map((manufacturer) => (
-
-                                    <tr key={manufacturer.id}>
-
-                                        <td>{manufacturer.id}</td>
-
-                                        <td>{manufacturer.company_name}</td>
-
-                                        <td>{manufacturer.city}</td>
-
-                                        <td>{manufacturer.state}</td>
-
-                                        <td>{manufacturer.phone}</td>
-
-                                        <td>
-
-                                            {
-                                                manufacturer.is_verified
-                                                    ? "Yes"
-                                                    : "No"
-                                            }
-
+                            <tbody>
+                                {manufacturers.length === 0 ? (
+                                    <tr>
+                                        <td
+                                            colSpan="7"
+                                            style={{
+                                                padding: "40px",
+                                                textAlign: "center",
+                                                color: "#6b7280",
+                                            }}
+                                        >
+                                            No manufacturers found.
                                         </td>
-
-                                        <td>
-
-                                            <button
-                                                onClick={() =>
-                                                    navigate(
-                                                        `/manufacturers/${manufacturer.id}`
-                                                    )
-                                                }
-                                            >
-                                                View
-                                            </button>
-
-                                            {" "}
-
-                                            <button
-                                                onClick={() =>
-                                                    handleDelete(
-                                                        manufacturer.id
-                                                    )
-                                                }
-                                            >
-                                                Delete
-                                            </button>
-
-                                        </td>
-
                                     </tr>
+                                ) : (
+                                    manufacturers.map((manufacturer) => (
+                                        <tr
+                                            key={manufacturer.id}
+                                            style={{
+                                                borderBottom:
+                                                    "1px solid #e5e7eb",
+                                            }}
+                                        >
+                                            <td style={{ padding: "16px" }}>
+                                                {manufacturer.id}
+                                            </td>
 
-                                ))
+                                            <td style={{ padding: "16px" }}>
+                                                {manufacturer.company_name}
+                                            </td>
 
-                            }
+                                            <td style={{ padding: "16px" }}>
+                                                {manufacturer.city || "-"}
+                                            </td>
 
-                        </tbody>
+                                            <td style={{ padding: "16px" }}>
+                                                {manufacturer.state || "-"}
+                                            </td>
 
-                    </table>
+                                            <td style={{ padding: "16px" }}>
+                                                {manufacturer.phone || "-"}
+                                            </td>
 
+                                            <td style={{ padding: "16px" }}>
+                                                <span
+                                                    style={{
+                                                        padding:
+                                                            "5px 12px",
+                                                        borderRadius: "999px",
+                                                        fontSize: "13px",
+                                                        fontWeight: "600",
+                                                        background:
+                                                            manufacturer.is_verified
+                                                                ? "#dcfce7"
+                                                                : "#fee2e2",
+                                                        color:
+                                                            manufacturer.is_verified
+                                                                ? "#166534"
+                                                                : "#991b1b",
+                                                    }}
+                                                >
+                                                    {manufacturer.is_verified
+                                                        ? "Verified"
+                                                        : "Pending"}
+                                                </span>
+                                            </td>
+
+                                            <td
+                                                style={{
+                                                    padding: "16px",
+                                                }}
+                                            >
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        gap: "10px",
+                                                    }}
+                                                >
+                                                    <button
+                                                        onClick={() =>
+                                                            navigate(
+                                                                `/manufacturers/${manufacturer.id}`
+                                                            )
+                                                        }
+                                                        style={{
+                                                            background:
+                                                                "#2563eb",
+                                                            color: "#fff",
+                                                            border: "none",
+                                                            padding:
+                                                                "8px 16px",
+                                                            borderRadius:
+                                                                "8px",
+                                                            cursor: "pointer",
+                                                            fontWeight: "600",
+                                                        }}
+                                                    >
+                                                        View
+                                                    </button>
+
+                                                    <button
+                                                        onClick={() =>
+                                                            handleDelete(
+                                                                manufacturer.id
+                                                            )
+                                                        }
+                                                        style={{
+                                                            background:
+                                                                "#dc2626",
+                                                            color: "#fff",
+                                                            border: "none",
+                                                            padding:
+                                                                "8px 16px",
+                                                            borderRadius:
+                                                                "8px",
+                                                            cursor: "pointer",
+                                                            fontWeight: "600",
+                                                        }}
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-
             </div>
-
-        </>
-
-    );
-
+        </div>
+    </>
+);
 };
 
 export default ManufacturerList;

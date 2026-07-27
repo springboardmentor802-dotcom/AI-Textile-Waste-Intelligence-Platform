@@ -55,18 +55,18 @@ class Manufacturer(Base):
         DateTime,
         default=datetime.utcnow
     )
-
-
-
-
-
-user = relationship(
+    user = relationship(
     "User",
     back_populates="manufacturer"
 )
 
-inventory = relationship(
+    inventory = relationship(
     "Inventory",
     back_populates="manufacturer",
     cascade="all, delete-orphan"
 )
+
+
+
+
+

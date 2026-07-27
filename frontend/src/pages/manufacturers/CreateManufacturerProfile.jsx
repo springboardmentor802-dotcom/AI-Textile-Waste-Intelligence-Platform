@@ -5,6 +5,60 @@ import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
 
 import { createManufacturerProfile } from "../../api/manufacturerApi";
+const grid2 = {
+display:"grid",
+gridTemplateColumns:"1fr 1fr",
+gap:"25px",
+marginBottom:"25px"
+};
+
+
+const grid3 = {
+display:"grid",
+gridTemplateColumns:"1fr 1fr 1fr",
+gap:"25px",
+marginBottom:"25px"
+};
+
+
+const labelStyle = {
+
+display:"block",
+marginBottom:"8px",
+fontSize:"14px",
+fontWeight:"600",
+color:"#334155"
+
+};
+
+
+
+const inputStyle = {
+
+width:"100%",
+padding:"14px",
+border:"1px solid #cbd5e1",
+borderRadius:"12px",
+fontSize:"15px",
+outline:"none",
+background:"#ffffff",
+color:"#111827",
+boxSizing:"border-box"
+
+};
+
+
+
+const sectionStyle = {
+
+fontSize:"19px",
+color:"#1e293b",
+marginTop:"30px",
+marginBottom:"20px",
+paddingBottom:"12px",
+borderBottom:"1px solid #e2e8f0"
+
+};
 
 const CreateManufacturerProfile = () => {
 
@@ -60,167 +114,325 @@ const CreateManufacturerProfile = () => {
 
     };
 
-    return (
+ return (
+ <>
+<Navbar />
 
-        <>
-            <Navbar />
+<div
+style={{
+display:"flex",
+minHeight:"100vh",
+background:"#f8fafc"
+}}
+>
 
-            <div style={{ display: "flex" }}>
+<Sidebar />
 
-                <Sidebar />
 
-                <div
-                    style={{
-                        flex: 1,
-                        padding: "30px"
-                    }}
-                >
+<div
+style={{
+flex:1,
+padding:"90px 40px"
+}}
+>
 
-                    <h2>Create Manufacturer Profile</h2>
 
-                    <hr />
+<div
+style={{
+maxWidth:"1000px",
+margin:"auto"
+}}
+>
 
-                    <form
-                        onSubmit={handleSubmit}
-                        style={{
-                            maxWidth: "650px"
-                        }}
-                    >
 
-                        <input
-                            type="text"
-                            name="company_name"
-                            placeholder="Company Name"
-                            value={formData.company_name}
-                            onChange={handleChange}
-                            required
-                        />
+<div
+style={{
+marginBottom:"30px"
+}}
+>
 
-                        <br /><br />
+<h1
+style={{
+fontSize:"32px",
+fontWeight:"700",
+color:"#111827",
+marginBottom:"10px"
+}}
+>
+Create Manufacturer Profile
+</h1>
 
-                        <input
-                            type="text"
-                            name="gst_number"
-                            placeholder="GST Number"
-                            value={formData.gst_number}
-                            onChange={handleChange}
-                        />
 
-                        <br /><br />
+<p
+style={{
+color:"#64748b",
+fontSize:"15px"
+}}
+>
+Complete your company information to create your manufacturer profile.
+</p>
 
-                        <input
-                            type="text"
-                            name="industry_type"
-                            placeholder="Industry Type"
-                            value={formData.industry_type}
-                            onChange={handleChange}
-                        />
 
-                        <br /><br />
+</div>
 
-                        <textarea
-                            name="address"
-                            placeholder="Address"
-                            value={formData.address}
-                            onChange={handleChange}
-                            rows="3"
-                            style={{ width: "100%" }}
-                        />
 
-                        <br /><br />
 
-                        <input
-                            type="text"
-                            name="city"
-                            placeholder="City"
-                            value={formData.city}
-                            onChange={handleChange}
-                        />
+<div
+style={{
+background:"#ffffff",
+borderRadius:"20px",
+padding:"40px",
+boxShadow:"0 10px 35px rgba(0,0,0,0.08)"
+}}
+>
 
-                        <br /><br />
 
-                        <input
-                            type="text"
-                            name="state"
-                            placeholder="State"
-                            value={formData.state}
-                            onChange={handleChange}
-                        />
+<form onSubmit={handleSubmit}>
 
-                        <br /><br />
 
-                        <input
-                            type="text"
-                            name="pincode"
-                            placeholder="Pincode"
-                            value={formData.pincode}
-                            onChange={handleChange}
-                        />
+{/* COMPANY */}
 
-                        <br /><br />
+<h3 style={sectionStyle}>
+    Company Information
+</h3>
 
-                        <input
-                            type="text"
-                            name="contact_person"
-                            placeholder="Contact Person"
-                            value={formData.contact_person}
-                            onChange={handleChange}
-                        />
 
-                        <br /><br />
+<div style={grid2}>
 
-                        <input
-                            type="text"
-                            name="phone"
-                            placeholder="Phone Number"
-                            value={formData.phone}
-                            onChange={handleChange}
-                        />
 
-                        <br /><br />
+{[
+["Company Name","company_name"],
+["GST Number","gst_number"],
+["Industry Type","industry_type"]
+].map((item)=>(
 
-                        <input
-                            type="text"
-                            name="website"
-                            placeholder="Website"
-                            value={formData.website}
-                            onChange={handleChange}
-                        />
+<div key={item[1]}>
 
-                        <br /><br />
+<label style={labelStyle}>
+{item[0]}
+</label>
 
-                        <textarea
-                            name="description"
-                            placeholder="Description"
-                            value={formData.description}
-                            onChange={handleChange}
-                            rows="4"
-                            style={{ width: "100%" }}
-                        />
 
-                        <br /><br />
+<input
+type="text"
+name={item[1]}
+value={formData[item[1]]}
+onChange={handleChange}
+style={inputStyle}
+/>
 
-                        <button type="submit">
-                            Create Profile
-                        </button>
 
-                    </form>
+</div>
 
-                    {
-                        error &&
-                        <p style={{ color: "red" }}>
-                            {error}
-                        </p>
-                    }
+))}
 
-                </div>
 
-            </div>
+</div>
 
-        </>
 
-    );
 
+
+{/* ADDRESS */}
+
+<h3 style={sectionStyle}>
+Address Information
+</h3>
+
+
+<label style={labelStyle}>
+Address
+</label>
+
+
+<textarea
+name="address"
+value={formData.address}
+onChange={handleChange}
+rows="4"
+style={inputStyle}
+/>
+
+
+
+<div style={grid3}>
+
+
+{[
+["City","city"],
+["State","state"],
+["Pincode","pincode"]
+].map((item)=>(
+
+<div key={item[1]}>
+
+<label style={labelStyle}>
+{item[0]}
+</label>
+
+
+<input
+type="text"
+name={item[1]}
+value={formData[item[1]]}
+onChange={handleChange}
+style={inputStyle}
+/>
+
+
+</div>
+
+))}
+
+
+</div>
+
+
+
+
+
+{/* CONTACT */}
+
+<h3 style={sectionStyle}>
+Contact Information
+</h3>
+
+
+
+<div style={grid2}>
+
+
+{[
+["Contact Person","contact_person"],
+["Phone Number","phone"]
+].map((item)=>(
+
+<div key={item[1]}>
+
+<label style={labelStyle}>
+{item[0]}
+</label>
+
+
+<input
+type="text"
+name={item[1]}
+value={formData[item[1]]}
+onChange={handleChange}
+style={inputStyle}
+/>
+
+
+</div>
+
+))}
+
+
+</div>
+
+
+
+
+<label style={labelStyle}>
+Website
+</label>
+
+
+<input
+type="text"
+name="website"
+value={formData.website}
+onChange={handleChange}
+placeholder="https://example.com"
+style={inputStyle}
+/>
+
+
+
+
+{/* DESCRIPTION */}
+
+<h3 style={sectionStyle}>
+Company Description
+</h3>
+
+
+<label style={labelStyle}>
+Description
+</label>
+
+
+<textarea
+name="description"
+value={formData.description}
+onChange={handleChange}
+rows="5"
+placeholder="Provide a brief description about your company..."
+style={inputStyle}
+/>
+
+
+
+<div
+style={{
+display:"flex",
+justifyContent:"flex-end",
+marginTop:"35px"
+}}
+>
+
+
+<button
+type="submit"
+style={{
+background:"linear-gradient(135deg,#2563eb,#1d4ed8)",
+color:"white",
+border:"none",
+padding:"14px 35px",
+borderRadius:"12px",
+fontSize:"15px",
+fontWeight:"600",
+cursor:"pointer",
+boxShadow:"0 5px 15px rgba(37,99,235,0.3)"
+}}
+>
+
+Create Profile
+
+</button>
+
+
+</div>
+
+
+
+</form>
+
+
+
+
+      {error && (
+        <div
+          style={{
+            marginTop: "25px",
+            padding: "15px",
+            background: "#fee2e2",
+            color: "#991b1b",
+            borderRadius: "10px",
+          }}
+        >
+          {error}
+        </div>
+      )}
+    </div> {/* Card */}
+
+  </div> {/* Max width */}
+
+</div> {/* Content */}
+
+</div> {/* Main flex container */}
+
+</>
+ );
 };
 
 export default CreateManufacturerProfile;

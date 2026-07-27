@@ -23,16 +23,19 @@ class User(Base):
 
     role = Column(String, nullable=False)
 
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow
+    )
 
-
-
-
-
-
-manufacturer = relationship(
-    "Manufacturer",
+    manufacturer = relationship(
+        "Manufacturer",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan"
+    )
+    uploaded_textile_waste = relationship(
+    "TextileWaste",
     back_populates="user",
-    uselist=False,
     cascade="all, delete-orphan"
 )

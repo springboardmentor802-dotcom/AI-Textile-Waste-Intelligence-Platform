@@ -90,3 +90,8 @@ class Inventory(Base):
         "Manufacturer",
         back_populates="inventory"
     )
+    textile_waste_items = relationship(
+    "TextileWaste",
+    back_populates="inventory",
+    cascade="all, delete-orphan"
+)

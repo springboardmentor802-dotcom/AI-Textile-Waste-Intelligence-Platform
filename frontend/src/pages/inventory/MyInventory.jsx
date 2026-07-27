@@ -72,88 +72,186 @@ const MyInventory = () => {
     };
 
     if (loading) {
-
-        return <h2>Loading...</h2>;
-
-    }
-
     return (
-
         <>
             <Navbar />
 
             <div
                 style={{
-                    display: "flex"
+                    display: "flex",
+                    minHeight: "100vh",
+                    background: "#f8fafc",
                 }}
             >
-
                 <Sidebar />
 
                 <div
                     style={{
                         flex: 1,
-                        padding: "30px"
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        fontSize: "18px",
+                        color: "#64748b",
+                    }}
+                >
+                    Loading inventory...
+                </div>
+            </div>
+        </>
+    );
+}
+
+    return (
+    <>
+        <Navbar />
+
+        <div
+            style={{
+                display: "flex",
+                minHeight: "100vh",
+                background: "#f8fafc",
+            }}
+        >
+            <Sidebar />
+
+            <div
+                style={{
+                    flex: 1,
+                    padding: "90px 40px",
+                }}
+            >
+                <div
+                    style={{
+                        maxWidth: "1200px",
+                        margin: "auto",
                     }}
                 >
 
-                    <h2>My Inventory</h2>
-
-                    <br />
-
-                    <Link to="/inventory/add">
-                        <button>
-                            Add Inventory
-                        </button>
-                    </Link>
-
-                    <br />
-                    <br />
-
-                    <table
-                        border="1"
-                        cellPadding="10"
-                        width="100%"
+                    <div
+                        style={{
+                            display:"flex",
+                            justifyContent:"space-between",
+                            alignItems:"center",
+                            marginBottom:"30px"
+                        }}
                     >
 
-                        <thead>
+                        <div>
+                            <h1
+                                style={{
+                                    fontSize:"34px",
+                                    fontWeight:"700",
+                                    color:"#0f172a",
+                                    marginBottom:"8px"
+                                }}
+                            >
+                                My Inventory
+                            </h1>
 
-                            <tr>
+                            <p
+                                style={{
+                                    color:"#64748b",
+                                    fontSize:"15px"
+                                }}
+                            >
+                                Manage your uploaded textile inventory.
+                            </p>
+                        </div>
 
-                                <th>ID</th>
 
-                                <th>Textile</th>
+                        <Link to="/inventory/add">
 
-                                <th>Material</th>
+                            <button
+                                style={{
+                                    background:"#2563eb",
+                                    color:"#fff",
+                                    border:"none",
+                                    padding:"14px 25px",
+                                    borderRadius:"10px",
+                                    fontSize:"15px",
+                                    fontWeight:"600",
+                                    cursor:"pointer"
+                                }}
+                            >
+                                Add Inventory
+                            </button>
 
-                                <th>Quantity</th>
+                        </Link>
 
-                                <th>Waste Type</th>
+                    </div>
 
-                                <th>Status</th>
 
-                                <th>Actions</th>
+                    <div
+                        style={{
+                            background:"#ffffff",
+                            border:"1px solid #e5e7eb",
+                            borderRadius:"16px",
+                            overflow:"hidden",
+                            boxShadow:"0 4px 14px rgba(15,23,42,0.06)"
+                        }}
+                    >
 
-                            </tr>
+                        <table
+                            style={{
+                                width:"100%",
+                                borderCollapse:"collapse"
+                            }}
+                        >
 
-                        </thead>
+                            <thead
+                                style={{
+                                    background:"#f8fafc"
+                                }}
+                            >
 
-                        <tbody>
+                                <tr>
 
-                            {
-                                inventory.length === 0 ?
+                                    {[
+                                        "ID",
+                                        "Textile",
+                                        "Material",
+                                        "Quantity",
+                                        "Waste Type",
+                                        "Status",
+                                        "Actions"
+                                    ].map((heading)=>(
+                                        <th
+                                            key={heading}
+                                            style={{
+                                                padding:"16px",
+                                                textAlign:"left",
+                                                fontWeight:"600",
+                                                color:"#374151",
+                                                borderBottom:
+                                                    "1px solid #e5e7eb"
+                                            }}
+                                        >
+                                            {heading}
+                                        </th>
+                                    ))}
 
-                                    (
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody>
+
+                                {
+                                    inventory.length === 0 ? (
 
                                         <tr>
 
                                             <td
                                                 colSpan="7"
-                                                align="center"
+                                                style={{
+                                                    padding:"40px",
+                                                    textAlign:"center",
+                                                    color:"#64748b"
+                                                }}
                                             >
-
-                                                No Inventory Found
-
+                                                No inventory found.
                                             </td>
 
                                         </tr>
@@ -162,70 +260,163 @@ const MyInventory = () => {
 
                                     :
 
-                                    inventory.map(item => (
+                                    inventory.map((item)=>(
 
-                                        <tr key={item.id}>
+                                        <tr
+                                            key={item.id}
+                                            style={{
+                                                borderBottom:
+                                                    "1px solid #e5e7eb"
+                                            }}
+                                        >
 
-                                            <td>{item.id}</td>
+                                            <td style={{padding:"16px"}}>
+                                                {item.id}
+                                            </td>
 
-                                            <td>{item.textile_name}</td>
 
-                                            <td>{item.material}</td>
+                                            <td
+                                                style={{
+                                                    padding:"16px",
+                                                    fontWeight:"500"
+                                                }}
+                                            >
+                                                {item.textile_name}
+                                            </td>
 
-                                            <td>
+
+                                            <td style={{padding:"16px"}}>
+                                                {item.material}
+                                            </td>
+
+
+                                            <td style={{padding:"16px"}}>
                                                 {item.quantity} {item.unit}
                                             </td>
 
-                                            <td>{item.waste_type}</td>
 
-                                            <td>{item.status}</td>
+                                            <td style={{padding:"16px"}}>
+                                                {item.waste_type}
+                                            </td>
 
-                                            <td>
 
-                                                <Link
-                                                    to={`/inventory/${item.id}`}
+                                            <td style={{padding:"16px"}}>
+
+                                                <span
+                                                    style={{
+                                                        padding:"5px 12px",
+                                                        borderRadius:"999px",
+                                                        fontSize:"13px",
+                                                        fontWeight:"600",
+                                                        background:
+                                                            item.status === "AVAILABLE"
+                                                                ? "#dcfce7"
+                                                                : "#fee2e2",
+                                                        color:
+                                                            item.status === "AVAILABLE"
+                                                                ? "#166534"
+                                                                : "#991b1b"
+                                                    }}
                                                 >
-                                                    View
-                                                </Link>
-
-                                                {" | "}
-
-                                                <Link
-                                                    to={`/inventory/edit/${item.id}`}
-                                                >
-                                                    Edit
-                                                </Link>
-
-                                                {" | "}
-
-                                                <button
-                                                    onClick={() =>
-                                                        handleDelete(item.id)
-                                                    }
-                                                >
-                                                    Delete
-                                                </button>
+                                                    {item.status}
+                                                </span>
 
                                             </td>
+
+
+                                            <td style={{padding:"16px"}}>
+
+                                                <div
+                                                    style={{
+                                                        display:"flex",
+                                                        gap:"10px"
+                                                    }}
+                                                >
+
+                                                    <Link
+                                                        to={`/inventory/${item.id}`}
+                                                    >
+
+                                                        <button
+                                                            style={{
+                                                                background:"#2563eb",
+                                                                color:"#fff",
+                                                                border:"none",
+                                                                padding:"8px 16px",
+                                                                borderRadius:"8px",
+                                                                cursor:"pointer",
+                                                                fontWeight:"600"
+                                                            }}
+                                                        >
+                                                            View
+                                                        </button>
+
+                                                    </Link>
+
+
+                                                    <Link
+                                                        to={`/inventory/edit/${item.id}`}
+                                                    >
+
+                                                        <button
+                                                            style={{
+                                                                background:"#16a34a",
+                                                                color:"#fff",
+                                                                border:"none",
+                                                                padding:"8px 16px",
+                                                                borderRadius:"8px",
+                                                                cursor:"pointer",
+                                                                fontWeight:"600"
+                                                            }}
+                                                        >
+                                                            Edit
+                                                        </button>
+
+                                                    </Link>
+
+
+                                                    <button
+                                                        onClick={() =>
+                                                            handleDelete(item.id)
+                                                        }
+                                                        style={{
+                                                            background:"#dc2626",
+                                                            color:"#fff",
+                                                            border:"none",
+                                                            padding:"8px 16px",
+                                                            borderRadius:"8px",
+                                                            cursor:"pointer",
+                                                            fontWeight:"600"
+                                                        }}
+                                                    >
+                                                        Delete
+                                                    </button>
+
+
+                                                </div>
+
+                                            </td>
+
 
                                         </tr>
 
                                     ))
+                                }
 
-                            }
+                            </tbody>
 
-                        </tbody>
+                        </table>
 
-                    </table>
+                    </div>
 
                 </div>
 
             </div>
 
-        </>
+        </div>
 
-    );
-
+    </>
+);
 };
 
 export default MyInventory;

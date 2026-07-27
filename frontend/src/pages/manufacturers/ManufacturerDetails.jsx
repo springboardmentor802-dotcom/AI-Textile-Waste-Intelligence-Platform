@@ -51,135 +51,156 @@ const ManufacturerDetails = () => {
     }
 
     return (
+    <>
+        <Navbar />
 
-        <>
-            <Navbar />
+        <div
+            style={{
+                display: "flex",
+                minHeight: "100vh",
+                background: "#f8fafc",
+            }}
+        >
+            <Sidebar />
 
-            <div style={{ display: "flex" }}>
-
-                <Sidebar />
-
+            <div
+                style={{
+                    flex: 1,
+                    padding: "90px 40px",
+                }}
+            >
                 <div
                     style={{
-                        flex: 1,
-                        padding: "30px"
+                        maxWidth: "950px",
+                        margin: "auto",
                     }}
                 >
+                    <div style={{ marginBottom: "30px" }}>
+                        <h1
+                            style={{
+                                fontSize: "34px",
+                                fontWeight: "700",
+                                color: "#0f172a",
+                                marginBottom: "8px",
+                            }}
+                        >
+                            Manufacturer Details
+                        </h1>
 
-                    <h2>Manufacturer Details</h2>
+                        <p
+                            style={{
+                                color: "#64748b",
+                                fontSize: "15px",
+                            }}
+                        >
+                            View complete manufacturer information.
+                        </p>
+                    </div>
 
-                    <hr />
-
-                    <table
-                        cellPadding="10"
+                    <div
                         style={{
-                            width: "60%"
+                            background: "#fff",
+                            border: "1px solid #e5e7eb",
+                            borderRadius: "16px",
+                            padding: "35px",
+                            boxShadow: "0 4px 14px rgba(15,23,42,0.06)",
                         }}
                     >
+                        <table
+                            style={{
+                                width: "100%",
+                                borderCollapse: "collapse",
+                            }}
+                        >
+                            <tbody>
+                                {[
+                                    ["ID", manufacturer.id],
+                                    ["User ID", manufacturer.user_id],
+                                    ["Company Name", manufacturer.company_name],
+                                    ["GST Number", manufacturer.gst_number || "-"],
+                                    ["Industry Type", manufacturer.industry_type || "-"],
+                                    ["Address", manufacturer.address || "-"],
+                                    ["City", manufacturer.city || "-"],
+                                    ["State", manufacturer.state || "-"],
+                                    ["Pincode", manufacturer.pincode || "-"],
+                                    ["Contact Person", manufacturer.contact_person || "-"],
+                                    ["Phone", manufacturer.phone || "-"],
+                                    ["Website", manufacturer.website || "-"],
+                                    ["Description", manufacturer.description || "-"],
+                                    [
+                                        "Verified",
+                                        manufacturer.is_verified ? "Yes" : "No",
+                                    ],
+                                    [
+                                        "Created At",
+                                        new Date(
+                                            manufacturer.created_at
+                                        ).toLocaleString(),
+                                    ],
+                                ].map(([label, value], index) => (
+                                    <tr
+                                        key={label}
+                                        style={{
+                                            borderBottom:
+                                                index !== 14
+                                                    ? "1px solid #e5e7eb"
+                                                    : "none",
+                                        }}
+                                    >
+                                        <td
+                                            style={{
+                                                padding: "16px",
+                                                fontWeight: "600",
+                                                color: "#374151",
+                                                width: "30%",
+                                                verticalAlign: "top",
+                                            }}
+                                        >
+                                            {label}
+                                        </td>
 
-                        <tbody>
+                                        <td
+                                            style={{
+                                                padding: "16px",
+                                                color: "#111827",
+                                            }}
+                                        >
+                                            {value}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
 
-                            <tr>
-                                <td><b>ID</b></td>
-                                <td>{manufacturer.id}</td>
-                            </tr>
-
-                            <tr>
-                                <td><b>User ID</b></td>
-                                <td>{manufacturer.user_id}</td>
-                            </tr>
-
-                            <tr>
-                                <td><b>Company Name</b></td>
-                                <td>{manufacturer.company_name}</td>
-                            </tr>
-
-                            <tr>
-                                <td><b>GST Number</b></td>
-                                <td>{manufacturer.gst_number || "-"}</td>
-                            </tr>
-
-                            <tr>
-                                <td><b>Industry Type</b></td>
-                                <td>{manufacturer.industry_type || "-"}</td>
-                            </tr>
-
-                            <tr>
-                                <td><b>Address</b></td>
-                                <td>{manufacturer.address || "-"}</td>
-                            </tr>
-
-                            <tr>
-                                <td><b>City</b></td>
-                                <td>{manufacturer.city || "-"}</td>
-                            </tr>
-
-                            <tr>
-                                <td><b>State</b></td>
-                                <td>{manufacturer.state || "-"}</td>
-                            </tr>
-
-                            <tr>
-                                <td><b>Pincode</b></td>
-                                <td>{manufacturer.pincode || "-"}</td>
-                            </tr>
-
-                            <tr>
-                                <td><b>Contact Person</b></td>
-                                <td>{manufacturer.contact_person || "-"}</td>
-                            </tr>
-
-                            <tr>
-                                <td><b>Phone</b></td>
-                                <td>{manufacturer.phone || "-"}</td>
-                            </tr>
-
-                            <tr>
-                                <td><b>Website</b></td>
-                                <td>{manufacturer.website || "-"}</td>
-                            </tr>
-
-                            <tr>
-                                <td><b>Description</b></td>
-                                <td>{manufacturer.description || "-"}</td>
-                            </tr>
-
-                            <tr>
-                                <td><b>Verified</b></td>
-                                <td>
-                                    {manufacturer.is_verified ? "Yes" : "No"}
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td><b>Created At</b></td>
-                                <td>
-                                    {new Date(
-                                        manufacturer.created_at
-                                    ).toLocaleString()}
-                                </td>
-                            </tr>
-
-                        </tbody>
-
-                    </table>
-
-                    <br />
-
-                    <button
-                        onClick={() => navigate("/manufacturers")}
-                    >
-                        Back
-                    </button>
-
+                        <div
+                            style={{
+                                display: "flex",
+                                justifyContent: "flex-end",
+                                marginTop: "30px",
+                            }}
+                        >
+                            <button
+                                onClick={() => navigate("/manufacturers")}
+                                style={{
+                                    background: "#2563eb",
+                                    color: "#fff",
+                                    border: "none",
+                                    padding: "14px 30px",
+                                    borderRadius: "10px",
+                                    fontSize: "15px",
+                                    fontWeight: "600",
+                                    cursor: "pointer",
+                                }}
+                            >
+                                Back to Manufacturers
+                            </button>
+                        </div>
+                    </div>
                 </div>
-
             </div>
-
-        </>
-
-    );
-
+        </div>
+    </>
+);
 };
 
 export default ManufacturerDetails;

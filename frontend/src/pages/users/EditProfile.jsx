@@ -73,112 +73,233 @@ const EditProfile = () => {
 
   return (
     <>
-      <Navbar />
 
-      <div
-        style={{
-          display: "flex",
-        }}
-      >
-        <Sidebar />
+        <Navbar />
 
         <div
-          style={{
-            flex: 1,
-            padding: "30px",
-          }}
-        >
-          <h2>Edit Profile</h2>
-
-          <hr />
-
-          <form
-            onSubmit={handleSubmit}
             style={{
-              maxWidth: "500px",
+                display: "flex",
+                minHeight: "100vh",
+                background: "#f8fafc"
             }}
-          >
-            <div
-              style={{
-                marginBottom: "20px",
-              }}
-            >
-              <label>Name</label>
+        >
 
-              <br />
-
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                style={{
-                  width: "100%",
-                  padding: "10px",
-                }}
-              />
-            </div>
+            <Sidebar />
 
             <div
-              style={{
-                marginBottom: "20px",
-              }}
-            >
-              <label>Email</label>
-
-              <br />
-
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
                 style={{
-                  width: "100%",
-                  padding: "10px",
+                    flex: 1,
+                    padding: "100px 50px 40px"
                 }}
-              />
+            >
+
+                <div
+                    style={{
+                        maxWidth: "700px"
+                    }}
+                >
+
+                    <h1
+                        style={{
+                            margin: 0,
+                            color: "#111827",
+                            fontSize: "30px",
+                            fontWeight: "700"
+                        }}
+                    >
+                        Edit Profile
+                    </h1>
+
+                    <p
+                        style={{
+                            marginTop: "8px",
+                            color: "#6b7280",
+                            marginBottom: "30px",
+                            fontSize: "15px"
+                        }}
+                    >
+                        Update your account information. Your changes will be reflected across the platform.
+                    </p>
+
+                    <div
+                        style={{
+                            background: "#ffffff",
+                            border: "1px solid #e5e7eb",
+                            borderRadius: "12px",
+                            padding: "30px",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.05)"
+                        }}
+                    >
+
+                        <form onSubmit={handleSubmit}>
+
+                            <div
+                                style={{
+                                    marginBottom: "24px"
+                                }}
+                            >
+
+                                <label
+                                    style={{
+                                        display: "block",
+                                        marginBottom: "8px",
+                                        fontWeight: "600",
+                                        color: "#374151"
+                                    }}
+                                >
+                                    Full Name
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={formData.name}
+                                    onChange={handleChange}
+                                    required
+                                    style={{
+                                        width: "100%",
+                                        padding: "13px 14px",
+                                        border: "1px solid #d1d5db",
+                                        borderRadius: "8px",
+                                        fontSize: "15px",
+                                        boxSizing: "border-box",
+                                        color: "#111827",
+                                        background: "#ffffff",
+                                        outline: "none"
+                                    }}
+                                />
+
+                            </div>
+
+                            <div
+                                style={{
+                                    marginBottom: "30px"
+                                }}
+                            >
+
+                                <label
+                                    style={{
+                                        display: "block",
+                                        marginBottom: "8px",
+                                        fontWeight: "600",
+                                        color: "#374151"
+                                    }}
+                                >
+                                    Email Address
+                                </label>
+
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    required
+                                    style={{
+                                        width: "100%",
+                                        padding: "13px 14px",
+                                        border: "1px solid #d1d5db",
+                                        borderRadius: "8px",
+                                        fontSize: "15px",
+                                        boxSizing: "border-box",
+                                        color: "#111827",
+                                        background: "#ffffff",
+                                        outline: "none"
+                                    }}
+                                />
+                                                            </div>
+
+                            <div
+                                style={{
+                                    display: "flex",
+                                    justifyContent: "flex-end",
+                                    gap: "12px",
+                                    marginTop: "10px"
+                                }}
+                            >
+
+                                <button
+                                    type="button"
+                                    onClick={() => navigate("/profile")}
+                                    style={{
+                                        padding: "12px 22px",
+                                        background: "#ffffff",
+                                        color: "#374151",
+                                        border: "1px solid #d1d5db",
+                                        borderRadius: "8px",
+                                        cursor: "pointer",
+                                        fontSize: "15px",
+                                        fontWeight: "500",
+                                        transition: "0.2s ease"
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.target.style.background = "#f9fafb";
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.target.style.background = "#ffffff";
+                                    }}
+                                >
+                                    Cancel
+                                </button>
+
+                                <button
+                                    type="submit"
+                                    style={{
+                                        padding: "12px 22px",
+                                        background: "#2563eb",
+                                        color: "#ffffff",
+                                        border: "none",
+                                        borderRadius: "8px",
+                                        cursor: "pointer",
+                                        fontSize: "15px",
+                                        fontWeight: "600",
+                                        transition: "0.2s ease"
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.target.style.background = "#1d4ed8";
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.target.style.background = "#2563eb";
+                                    }}
+                                >
+                                    Update Profile
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                        {
+                            message && (
+
+                                <div
+                                    style={{
+                                        marginTop: "24px",
+                                        padding: "14px 16px",
+                                        background: "#ecfdf5",
+                                        color: "#065f46",
+                                        border: "1px solid #a7f3d0",
+                                        borderRadius: "8px",
+                                        fontSize: "14px"
+                                    }}
+                                >
+                                    {message}
+                                </div>
+
+                            )
+                        }
+
+                    </div>
+
+                </div>
+
             </div>
 
-            <button
-              type="submit"
-              style={{
-                padding: "10px 20px",
-                cursor: "pointer",
-              }}
-            >
-              Update Profile
-            </button>
-
-            <button
-              type="button"
-              onClick={() => navigate("/profile")}
-              style={{
-                padding: "10px 20px",
-                marginLeft: "15px",
-                cursor: "pointer",
-              }}
-            >
-              Cancel
-            </button>
-          </form>
-
-          {message && (
-            <p
-              style={{
-                marginTop: "20px",
-                color: "green",
-              }}
-            >
-              {message}
-            </p>
-          )}
         </div>
-      </div>
+
     </>
-  );
+
+);
+
 };
 
 export default EditProfile;

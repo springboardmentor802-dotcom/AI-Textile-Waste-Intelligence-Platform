@@ -17,7 +17,6 @@ const ChangePassword = () => {
     });
 
     const [message, setMessage] = useState("");
-
     const [error, setError] = useState("");
 
     const handleChange = (e) => {
@@ -36,14 +35,15 @@ const ChangePassword = () => {
         setMessage("");
         setError("");
 
-        if(formData.new_password !== formData.confirm_password){
+        if (formData.new_password !== formData.confirm_password) {
 
             setError("Passwords do not match.");
 
             return;
+
         }
 
-        try{
+        try {
 
             await changePassword({
                 old_password: formData.old_password,
@@ -52,12 +52,15 @@ const ChangePassword = () => {
 
             setMessage("Password changed successfully.");
 
-            setTimeout(()=>{
+            setTimeout(() => {
+
                 navigate("/profile");
-            },1500);
+
+            }, 1500);
 
         }
-        catch(err){
+
+        catch (err) {
 
             setError(
                 err.response?.data?.detail ||
@@ -68,139 +71,288 @@ const ChangePassword = () => {
 
     };
 
-    return(
+    const inputStyle = {
+    width: "100%",
+    padding: "14px 16px",
+    border: "1px solid #d1d5db",
+    borderRadius: "10px",
+    fontSize: "15px",
+    outline: "none",
+    boxSizing: "border-box",
+    background: "#ffffff",
 
-        <>
-            <Navbar/>
+    color: "#111827",
+    caretColor: "#111827",
 
-            <div style={{display:"flex"}}>
+    marginTop: "8px"
+};
 
-                <Sidebar/>
+    return (
+    <>
+        <Navbar />
+
+        <div
+            style={{
+                display: "flex",
+                minHeight: "100vh",
+                background: "#f8fafc",
+            }}
+        >
+
+            <Sidebar />
+
+            <div
+                style={{
+                    flex: 1,
+                    padding: "90px 40px",
+                }}
+            >
 
                 <div
                     style={{
-                        flex:1,
-                        padding:"30px"
+                        maxWidth: "750px",
+                        margin: "auto",
                     }}
                 >
 
-                    <h2>Change Password</h2>
-
-                    <hr/>
-
-                    <form
-                        onSubmit={handleSubmit}
+                    <div
                         style={{
-                            maxWidth:"450px"
+                            marginBottom: "30px",
                         }}
                     >
 
-                        <div>
-
-                            <label>Current Password</label>
-
-                            <br/>
-
-                            <input
-                                type="password"
-                                name="old_password"
-                                value={formData.old_password}
-                                onChange={handleChange}
-                                required
-                                style={{
-                                    width:"100%",
-                                    padding:"10px"
-                                }}
-                            />
-
-                        </div>
-
-                        <br/>
-
-                        <div>
-
-                            <label>New Password</label>
-
-                            <br/>
-
-                            <input
-                                type="password"
-                                name="new_password"
-                                value={formData.new_password}
-                                onChange={handleChange}
-                                required
-                                style={{
-                                    width:"100%",
-                                    padding:"10px"
-                                }}
-                            />
-
-                        </div>
-
-                        <br/>
-
-                        <div>
-
-                            <label>Confirm Password</label>
-
-                            <br/>
-
-                            <input
-                                type="password"
-                                name="confirm_password"
-                                value={formData.confirm_password}
-                                onChange={handleChange}
-                                required
-                                style={{
-                                    width:"100%",
-                                    padding:"10px"
-                                }}
-                            />
-
-                        </div>
-
-                        <br/>
-
-                        <button
-                            type="submit"
+                        <h1
+                            style={{
+                                fontSize: "34px",
+                                fontWeight: "700",
+                                color: "#0f172a",
+                                marginBottom: "8px",
+                            }}
                         >
                             Change Password
-                        </button>
+                        </h1>
 
-                    </form>
 
-                    {
-                        message &&
                         <p
                             style={{
-                                color:"green",
-                                marginTop:"20px"
+                                color:"#64748b",
+                                fontSize:"15px",
+                                lineHeight:"24px"
                             }}
                         >
-                            {message}
+                            Update your account password regularly to keep your account secure.
                         </p>
-                    }
 
-                    {
-                        error &&
-                        <p
-                            style={{
-                                color:"red",
-                                marginTop:"20px"
-                            }}
-                        >
-                            {error}
-                        </p>
-                    }
+                    </div>
+
+
+
+                    <div
+                        style={{
+                            background:"#ffffff",
+                            border:"1px solid #e5e7eb",
+                            borderRadius:"16px",
+                            padding:"40px",
+                            boxShadow:"0 4px 14px rgba(15,23,42,0.06)"
+                        }}
+                    >
+
+
+                        <form onSubmit={handleSubmit}>
+
+
+                            <div
+                                style={{
+                                    marginBottom:"25px"
+                                }}
+                            >
+
+                                <label
+                                    style={{
+                                        display:"block",
+                                        marginBottom:"8px",
+                                        fontSize:"14px",
+                                        fontWeight:"600",
+                                        color:"#334155"
+                                    }}
+                                >
+                                    Current Password
+                                </label>
+
+
+                                <input
+                                    type="password"
+                                    name="old_password"
+                                    value={formData.old_password}
+                                    onChange={handleChange}
+                                    required
+                                    placeholder="Enter current password"
+                                    style={inputStyle}
+                                />
+
+                            </div>
+
+
+
+                            <div
+                                style={{
+                                    marginBottom:"25px"
+                                }}
+                            >
+
+                                <label
+                                    style={{
+                                        display:"block",
+                                        marginBottom:"8px",
+                                        fontSize:"14px",
+                                        fontWeight:"600",
+                                        color:"#334155"
+                                    }}
+                                >
+                                    New Password
+                                </label>
+
+
+                                <input
+                                    type="password"
+                                    name="new_password"
+                                    value={formData.new_password}
+                                    onChange={handleChange}
+                                    required
+                                    placeholder="Enter new password"
+                                    style={inputStyle}
+                                />
+
+                            </div>
+
+
+
+
+                            <div
+                                style={{
+                                    marginBottom:"30px"
+                                }}
+                            >
+
+                                <label
+                                    style={{
+                                        display:"block",
+                                        marginBottom:"8px",
+                                        fontSize:"14px",
+                                        fontWeight:"600",
+                                        color:"#334155"
+                                    }}
+                                >
+                                    Confirm New Password
+                                </label>
+
+
+                                <input
+                                    type="password"
+                                    name="confirm_password"
+                                    value={formData.confirm_password}
+                                    onChange={handleChange}
+                                    required
+                                    placeholder="Confirm new password"
+                                    style={inputStyle}
+                                />
+
+                            </div>
+
+
+
+
+                            <div
+                                style={{
+                                    display:"flex",
+                                    justifyContent:"flex-end"
+                                }}
+                            >
+
+                                <button
+                                    type="submit"
+                                    style={{
+                                        background:
+                                            "linear-gradient(135deg,#2563eb,#1d4ed8)",
+                                        color:"#ffffff",
+                                        border:"none",
+                                        padding:"14px 32px",
+                                        borderRadius:"10px",
+                                        fontSize:"15px",
+                                        fontWeight:"600",
+                                        cursor:"pointer",
+                                        boxShadow:
+                                            "0 5px 15px rgba(37,99,235,0.25)"
+                                    }}
+                                >
+                                    Update Password
+                                </button>
+
+
+                            </div>
+
+
+                        </form>
+
+
+
+
+                        {
+                            message && (
+
+                                <div
+                                    style={{
+                                        marginTop:"25px",
+                                        padding:"15px",
+                                        background:"#ecfdf5",
+                                        border:"1px solid #a7f3d0",
+                                        borderRadius:"10px",
+                                        color:"#065f46",
+                                        fontSize:"14px",
+                                        fontWeight:"500"
+                                    }}
+                                >
+                                    {message}
+                                </div>
+
+                            )
+                        }
+
+
+
+
+                        {
+                            error && (
+
+                                <div
+                                    style={{
+                                        marginTop:"25px",
+                                        padding:"15px",
+                                        background:"#fee2e2",
+                                        border:"1px solid #fecaca",
+                                        borderRadius:"10px",
+                                        color:"#991b1b",
+                                        fontSize:"14px",
+                                        fontWeight:"500"
+                                    }}
+                                >
+                                    {error}
+                                </div>
+
+                            )
+                        }
+
+
+                    </div>
 
                 </div>
 
             </div>
 
-        </>
+        </div>
 
-    );
-
+    </>
+);
 };
 
 export default ChangePassword;

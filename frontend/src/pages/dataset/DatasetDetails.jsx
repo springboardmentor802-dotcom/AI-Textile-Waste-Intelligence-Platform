@@ -42,107 +42,249 @@ const DatasetDetails = () => {
     };
 
     if (loading) {
-        return <h2>Loading...</h2>;
-    }
-
-    if (!dataset) {
-        return <h2>Record not found.</h2>;
-    }
-
     return (
-
         <>
             <Navbar />
 
             <div
                 style={{
-                    display: "flex"
+                    display: "flex",
+                    minHeight: "100vh",
+                    background: "#f8fafc",
                 }}
             >
-
                 <Sidebar />
 
                 <div
                     style={{
                         flex: 1,
-                        padding: "30px"
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        fontSize: "18px",
+                        color: "#64748b",
+                    }}
+                >
+                    Loading dataset details...
+                </div>
+            </div>
+        </>
+    );
+}
+
+    if (!dataset) {
+    return (
+        <>
+            <Navbar />
+
+            <div
+                style={{
+                    display: "flex",
+                    minHeight: "100vh",
+                    background: "#f8fafc",
+                }}
+            >
+                <Sidebar />
+
+                <div
+                    style={{
+                        flex: 1,
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        color: "#dc2626",
+                        fontSize: "20px",
+                        fontWeight: "600",
+                    }}
+                >
+                    Record not found.
+                </div>
+            </div>
+        </>
+    );
+}
+
+    return (
+    <>
+        <Navbar />
+
+        <div
+            style={{
+                display: "flex",
+                minHeight: "100vh",
+                background: "#f8fafc",
+            }}
+        >
+            <Sidebar />
+
+            <div
+                style={{
+                    flex: 1,
+                    padding: "90px 40px",
+                }}
+            >
+
+                <div
+                    style={{
+                        maxWidth: "950px",
+                        margin: "auto",
                     }}
                 >
 
-                    <h2>
-                        Sustainability Dataset Details
-                    </h2>
+                    <div
+                        style={{
+                            marginBottom: "30px",
+                        }}
+                    >
 
-                    <hr />
+                        <h1
+                            style={{
+                                fontSize:"34px",
+                                fontWeight:"700",
+                                color:"#0f172a",
+                                marginBottom:"8px"
+                            }}
+                        >
+                            Sustainability Dataset Details
+                        </h1>
 
-                    <p>
-                        <strong>Brand ID:</strong> {dataset.brand_id}
-                    </p>
 
-                    <p>
-                        <strong>Brand Name:</strong> {dataset.brand_name}
-                    </p>
+                        <p
+                            style={{
+                                color:"#64748b",
+                                fontSize:"15px"
+                            }}
+                        >
+                            View complete sustainability information for this dataset.
+                        </p>
 
-                    <p>
-                        <strong>Country:</strong> {dataset.country}
-                    </p>
+                    </div>
 
-                    <p>
-                        <strong>Year:</strong> {dataset.year}
-                    </p>
 
-                    <p>
-                        <strong>Sustainability Rating:</strong> {dataset.sustainability_rating}
-                    </p>
 
-                    <p>
-                        <strong>Material Type:</strong> {dataset.material_type}
-                    </p>
+                    <div
+                        style={{
+                            background:"#ffffff",
+                            border:"1px solid #e5e7eb",
+                            borderRadius:"16px",
+                            padding:"35px",
+                            boxShadow:"0 4px 14px rgba(15,23,42,0.06)"
+                        }}
+                    >
 
-                    <p>
-                        <strong>Eco-Friendly Manufacturing:</strong> {dataset.eco_friendly_manufacturing}
-                    </p>
+                        <table
+                            style={{
+                                width:"100%",
+                                borderCollapse:"collapse"
+                            }}
+                        >
 
-                    <p>
-                        <strong>Carbon Footprint (MT):</strong> {dataset.carbon_footprint_mt}
-                    </p>
+                            <tbody>
 
-                    <p>
-                        <strong>Water Usage (Liters):</strong> {dataset.water_usage_liters}
-                    </p>
+                                {[
+                                    ["Brand ID", dataset.brand_id],
+                                    ["Brand Name", dataset.brand_name],
+                                    ["Country", dataset.country],
+                                    ["Year", dataset.year],
+                                    [
+                                        "Sustainability Rating",
+                                        dataset.sustainability_rating
+                                    ],
+                                    [
+                                        "Material Type",
+                                        dataset.material_type
+                                    ],
+                                    [
+                                        "Eco-Friendly Manufacturing",
+                                        dataset.eco_friendly_manufacturing
+                                    ],
+                                    [
+                                        "Carbon Footprint (MT)",
+                                        dataset.carbon_footprint_mt
+                                    ],
+                                    [
+                                        "Water Usage (Liters)",
+                                        dataset.water_usage_liters
+                                    ],
+                                    [
+                                        "Waste Production (KG)",
+                                        dataset.waste_production_kg
+                                    ],
+                                    [
+                                        "Recycling Programs",
+                                        dataset.recycling_programs
+                                    ],
+                                    [
+                                        "Product Lines",
+                                        dataset.product_lines
+                                    ],
+                                    [
+                                        "Average Price (USD)",
+                                        `$${dataset.average_price_usd}`
+                                    ],
+                                    [
+                                        "Market Trend",
+                                        dataset.market_trend
+                                    ],
+                                    [
+                                        "Certifications",
+                                        dataset.certifications
+                                    ],
+                                ].map(([label,value],index)=>(
 
-                    <p>
-                        <strong>Waste Production (KG):</strong> {dataset.waste_production_kg}
-                    </p>
+                                    <tr
+                                        key={label}
+                                        style={{
+                                            borderBottom:
+                                                index !== 14
+                                                    ? "1px solid #e5e7eb"
+                                                    : "none"
+                                        }}
+                                    >
 
-                    <p>
-                        <strong>Recycling Programs:</strong> {dataset.recycling_programs}
-                    </p>
+                                        <td
+                                            style={{
+                                                padding:"16px",
+                                                width:"35%",
+                                                fontWeight:"600",
+                                                color:"#374151",
+                                                verticalAlign:"top"
+                                            }}
+                                        >
+                                            {label}
+                                        </td>
 
-                    <p>
-                        <strong>Product Lines:</strong> {dataset.product_lines}
-                    </p>
 
-                    <p>
-                        <strong>Average Price (USD):</strong> ${dataset.average_price_usd}
-                    </p>
+                                        <td
+                                            style={{
+                                                padding:"16px",
+                                                color:"#111827"
+                                            }}
+                                        >
+                                            {value || "-"}
+                                        </td>
 
-                    <p>
-                        <strong>Market Trend:</strong> {dataset.market_trend}
-                    </p>
 
-                    <p>
-                        <strong>Certifications:</strong> {dataset.certifications}
-                    </p>
+                                    </tr>
+
+                                ))}
+
+
+                            </tbody>
+
+                        </table>
+
+
+                    </div>
 
                 </div>
 
             </div>
 
-        </>
+        </div>
 
-    );
-
+    </>
+);
 };
 
 export default DatasetDetails;

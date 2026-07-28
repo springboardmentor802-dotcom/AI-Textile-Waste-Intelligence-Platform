@@ -1,30 +1,48 @@
 import api from "./api";
 
-/**
- * Submit a fabric image for material recognition analysis.
- * Sends as multipart/form-data because we are uploading a file.
- *
- * @param {File} imageFile - The image file selected by the user
- * @returns {Promise<Object>} Prediction result from the backend
- */
-export const recognizeMaterial = async (imageFile) => {
+export const uploadForMaterialRecognition = async (file) => {
   const formData = new FormData();
-  formData.append("file", imageFile);
-
+  formData.append("file", file);
   const res = await api.post("/analysis/material-recognition", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
+    headers: { "Content-Type": "multipart/form-data" },
   });
   return res.data;
 };
 
-/**
- * Check if the ML model is loaded and the analysis service is ready.
- *
- * @returns {Promise<Object>} Service status from the backend
- */
+// Alias used by MaterialRecognition.jsx
+export const recognizeMaterial = uploadForMaterialRecognition;
+
+export const uploadForFullAnalysis = async (file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await api.post("/analysis/full-analysis", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return res.data;
+};
+
+export const uploadBulkFiles = async (files) => {
+  const formData = new FormData();
+  files.forEach((file) => formData.append("files", file));
+  const res = await api.post("/analysis/bulk-upload", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return res.data;
+};
+
+export const downloadPdfReport = async (sessionId) => {
+  const res = await api.get(`/analysis/report/${sessionId}/pdf`, {
+    responseType: "blob",
+  });
+  return res.data;
+};
+
 export const getAnalysisStatus = async () => {
   const res = await api.get("/analysis/status");
+  return res.data;
+};
+
+export const getDashboardStats = async () => {
+  const res = await api.get("/analysis/dashboard-stats");
   return res.data;
 };

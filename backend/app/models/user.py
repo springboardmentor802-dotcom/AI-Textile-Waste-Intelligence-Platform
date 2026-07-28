@@ -5,10 +5,10 @@ from app.database import Base
 
 
 class UserRole(str, enum.Enum):
-    administrator = "Administrator"
-    textile_manufacturer = "Textile Manufacturer"
-    recycling_operator = "Recycling Facility Operator"
-    sustainability_manager = "Sustainability Manager"
+    admin = "admin"
+    textile_manufacturer = "textile_manufacturer"
+    recycling_operator = "recycling_operator"
+    sustainability_manager = "sustainability_manager"
 
 
 class User(Base):

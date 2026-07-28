@@ -10,12 +10,12 @@ export const useAuth = () => {
   return context;
 };
 
-// These must exactly match the role values returned by the backend
+// Keys must match PostgreSQL enum values exactly
 const ROLE_DASHBOARD_MAP = {
-  "Administrator": "/admin/home",
-  "Recycling Facility Operator": "/operator/home",
-  "Sustainability Manager": "/sustainability/home",
-  "Textile Manufacturer": "/manufacturer/home",
+  "admin": "/admin/home",
+  "recycling_operator": "/operator/home",
+  "sustainability_manager": "/sustainability/home",
+  "textile_manufacturer": "/manufacturer/home",
 };
 
 export const AuthProvider = ({ children }) => {
@@ -29,9 +29,8 @@ export const AuthProvider = ({ children }) => {
       const storedToken = localStorage.getItem("access_token");
       const storedUser = localStorage.getItem("user");
       if (storedToken && storedUser) {
-        const parsedUser = JSON.parse(storedUser);
         setToken(storedToken);
-        setUser(parsedUser);
+        setUser(JSON.parse(storedUser));
       }
     } catch {
       localStorage.removeItem("access_token");
@@ -44,23 +43,18 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     const data = await loginUser(credentials);
     const { access_token, user: userData } = data;
-    if (!access_token || !userData) {
-      throw new Error("Invalid response from server.");
-    }
+    if (!access_token || !userData) throw new Error("Invalid response from server.");
     localStorage.setItem("access_token", access_token);
     localStorage.setItem("user", JSON.stringify(userData));
     setToken(access_token);
     setUser(userData);
-    const dashboardPath = ROLE_DASHBOARD_MAP[userData.role];
-    if (!dashboardPath) {
-      console.error("Unknown role:", userData.role);
-      throw new Error(`Unknown role: ${userData.role}`);
-    }
-    navigate(dashboardPath, { replace: true });
+    const path = ROLE_DASHBOARD_MAP[userData.role];
+    if (!path) throw new Error(`Unknown role: ${userData.role}`);
+    navigate(path, { replace: true });
   };
 
   const logout = () => {
-    try { logoutUser(); } catch { /* ignore */ }
+    try { logoutUser(); } catch { }
     localStorage.removeItem("access_token");
     localStorage.removeItem("user");
     setToken(null);
@@ -68,19 +62,15 @@ export const AuthProvider = ({ children }) => {
     navigate("/login", { replace: true });
   };
 
-  const getDashboardPath = () => {
-    if (!user) return "/login";
-    return ROLE_DASHBOARD_MAP[user.role] || "/login";
-  };
+  const getDashboardPath = () =>
+    user ? ROLE_DASHBOARD_MAP[user.role] || "/login" : "/login";
 
   if (loading) {
     return (
       <div style={{
-        display: "flex", justifyContent: "center",
-        alignItems: "center", height: "100vh",
-        backgroundColor: "#f1f5f9",
-        fontFamily: "'Inter','Segoe UI',sans-serif",
-        fontSize: 14, color: "#6b7280",
+        display: "flex", justifyContent: "center", alignItems: "center",
+        height: "100vh", backgroundColor: "#f1f5f9",
+        fontFamily: "'Inter','Segoe UI',sans-serif", fontSize: 14, color: "#6b7280",
       }}>
         Loading...
       </div>

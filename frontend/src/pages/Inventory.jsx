@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import {
-  getAllBatches, createBatch, updateBatch, deleteBatch,
+  getAllBatches,
+  createBatch,
+  updateBatch,
+  deleteBatch,
 } from "../services/textileService";
 import Table from "../components/Table";
 import Button from "../components/Button";
@@ -10,7 +14,7 @@ import Modal, { ConfirmModal } from "../components/Modal";
 import Badge from "../components/Badge";
 import PageHeader from "../components/PageHeader";
 import Card from "../components/Card";
-import { FiPlus, FiEdit2, FiTrash2, FiSearch } from "react-icons/fi";
+import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiActivity } from "react-icons/fi";
 
 const FABRIC_TYPES = [
   "Cotton", "Polyester", "Wool", "Silk",
@@ -26,6 +30,7 @@ const EMPTY_FORM = {
 };
 
 export default function Inventory() {
+  const navigate = useNavigate();
   const [batches, setBatches] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -96,7 +101,8 @@ export default function Inventory() {
     if (!form.batch_id.trim()) err.batch_id = "Batch ID is required.";
     if (!form.fabric_type) err.fabric_type = "Fabric type is required.";
     if (!form.source.trim()) err.source = "Source is required.";
-    if (!form.quantity || parseFloat(form.quantity) <= 0) err.quantity = "Quantity must be > 0.";
+    if (!form.quantity || parseFloat(form.quantity) <= 0)
+      err.quantity = "Quantity must be greater than 0.";
     if (!form.color.trim()) err.color = "Color is required.";
     if (!form.condition) err.condition = "Condition is required.";
     if (!form.collection_date) err.collection_date = "Collection date is required.";
@@ -106,7 +112,10 @@ export default function Inventory() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const err = validate();
-    if (Object.keys(err).length) { setFormErrors(err); return; }
+    if (Object.keys(err).length) {
+      setFormErrors(err);
+      return;
+    }
     setFormLoading(true);
     try {
       const payload = { ...form, quantity: parseFloat(form.quantity) };
@@ -144,26 +153,52 @@ export default function Inventory() {
   };
 
   const columns = [
-    { key: "batch_id", label: "Batch ID", render: (v) => <span style={{ fontWeight: 600, color: "#1d4ed8" }}>{v}</span> },
+    {
+      key: "batch_id",
+      label: "Batch ID",
+      render: (v) => (
+        <span style={{ fontWeight: 600, color: "#1d4ed8" }}>{v}</span>
+      ),
+    },
     { key: "fabric_type", label: "Fabric Type" },
     { key: "source", label: "Source" },
     { key: "quantity", label: "Qty (kg)", render: (v) => `${v} kg` },
     { key: "color", label: "Color" },
     {
-      key: "condition", label: "Condition",
-      render: (v) => <Badge label={v} preset={CONDITION_PRESET[v] || "gray"} />,
+      key: "condition",
+      label: "Condition",
+      render: (v) => (
+        <Badge label={v} preset={CONDITION_PRESET[v] || "gray"} />
+      ),
     },
     { key: "collection_date", label: "Date" },
     {
-      key: "ml_analyzed", label: "ML Status",
-      render: (v) => <Badge label={v === "pending" ? "Pending" : v || "—"} preset="gray" />,
+      key: "ml_analyzed",
+      label: "ML Status",
+      render: (v) => (
+        <Badge
+          label={v === "pending" ? "Pending" : v || "—"}
+          preset="gray"
+        />
+      ),
     },
     {
-      key: "_actions", label: "Actions",
+      key: "_actions",
+      label: "Actions",
       render: (_, row) => (
         <div style={{ display: "flex", gap: 6 }}>
-          <Button size="sm" variant="ghost" icon={FiEdit2} onClick={() => openEdit(row)} />
-          <Button size="sm" variant="danger" icon={FiTrash2} onClick={() => setDeleteTarget(row.batch_id)} />
+          <Button
+            size="sm"
+            variant="ghost"
+            icon={FiEdit2}
+            onClick={() => openEdit(row)}
+          />
+          <Button
+            size="sm"
+            variant="danger"
+            icon={FiTrash2}
+            onClick={() => setDeleteTarget(row.batch_id)}
+          />
         </div>
       ),
     },
@@ -177,7 +212,18 @@ export default function Inventory() {
         title="Textile Inventory"
         subtitle={`${total} batch${total !== 1 ? "es" : ""} in inventory`}
         action={
-          <Button icon={FiPlus} onClick={openAdd}>Add Batch</Button>
+          <div style={{ display: "flex", gap: 8 }}>
+            <Button icon={FiPlus} onClick={openAdd}>
+              Add Batch
+            </Button>
+            <Button
+              icon={FiActivity}
+              variant="secondary"
+              onClick={() => navigate("/admin/analysis")}
+            >
+              Analyze Image
+            </Button>
+          </div>
         }
       />
 
@@ -200,7 +246,7 @@ export default function Inventory() {
         emptyMessage="No batches found. Add your first textile batch."
       />
 
-      {/* Add/Edit Modal */}
+      {/* Add / Edit Modal */}
       <Modal
         open={showForm}
         title={editTarget ? "Edit Batch" : "Add New Batch"}
@@ -228,7 +274,9 @@ export default function Inventory() {
               required
             >
               <option value="">Select fabric type</option>
-              {FABRIC_TYPES.map((f) => <option key={f} value={f}>{f}</option>)}
+              {FABRIC_TYPES.map((f) => (
+                <option key={f} value={f}>{f}</option>
+              ))}
             </Select>
             <Input
               label="Source"
@@ -267,7 +315,9 @@ export default function Inventory() {
               required
             >
               <option value="">Select condition</option>
-              {CONDITIONS.map((c) => <option key={c} value={c}>{c}</option>)}
+              {CONDITIONS.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
             </Select>
             <div style={{ gridColumn: "1 / -1" }}>
               <Input
@@ -281,16 +331,21 @@ export default function Inventory() {
               />
             </div>
           </div>
+
           <div style={S.formActions}>
-            <Button type="button" variant="ghost" onClick={closeForm}>Cancel</Button>
+            <Button type="button" variant="ghost" onClick={closeForm}>
+              Cancel
+            </Button>
             <Button type="submit" disabled={formLoading}>
-              {formLoading ? (editTarget ? "Saving..." : "Adding...") : (editTarget ? "Save Changes" : "Add Batch")}
+              {formLoading
+                ? editTarget ? "Saving..." : "Adding..."
+                : editTarget ? "Save Changes" : "Add Batch"}
             </Button>
           </div>
         </form>
       </Modal>
 
-      {/* Delete Confirm */}
+      {/* Delete Confirmation */}
       <ConfirmModal
         open={!!deleteTarget}
         title="Delete Batch"
@@ -305,8 +360,31 @@ export default function Inventory() {
 }
 
 const S = {
-  searchRow: { display: "flex", alignItems: "center", gap: 8 },
-  searchInput: { flex: 1, border: "none", outline: "none", fontSize: 14, color: "#374151", backgroundColor: "transparent", fontFamily: "inherit" },
-  formGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 },
-  formActions: { display: "flex", gap: 10, justifyContent: "flex-end", paddingTop: 8, borderTop: "1px solid #f3f4f6" },
+  searchRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+  },
+  searchInput: {
+    flex: 1,
+    border: "none",
+    outline: "none",
+    fontSize: 14,
+    color: "#374151",
+    backgroundColor: "transparent",
+    fontFamily: "inherit",
+  },
+  formGrid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: 16,
+    marginBottom: 24,
+  },
+  formActions: {
+    display: "flex",
+    gap: 10,
+    justifyContent: "flex-end",
+    paddingTop: 8,
+    borderTop: "1px solid #f3f4f6",
+  },
 };

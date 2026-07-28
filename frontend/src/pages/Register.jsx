@@ -3,18 +3,22 @@ import { Link, useNavigate } from "react-router-dom";
 import { registerUser } from "../services/authService";
 import { FiUser, FiMail, FiLock, FiAlertCircle, FiCheckCircle } from "react-icons/fi";
 
+// label = shown to user, value = sent to backend (must match PostgreSQL enum)
 const ROLES = [
-  "Administrator",
-  "Recycling Facility Operator",
-  "Sustainability Manager",
-  "Textile Manufacturer",
+  { label: "Administrator", value: "admin" },
+  { label: "Recycling Facility Operator", value: "recycling_operator" },
+  { label: "Sustainability Manager", value: "sustainability_manager" },
+  { label: "Textile Manufacturer", value: "textile_manufacturer" },
 ];
 
 export default function Register() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    full_name: "", email: "", password: "",
-    confirmPassword: "", role: "",
+    full_name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    role: "",
   });
   const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState("");
@@ -47,7 +51,7 @@ export default function Register() {
         full_name: form.full_name.trim(),
         email: form.email.trim(),
         password: form.password,
-        role: form.role,
+        role: form.role, // sends "admin", "recycling_operator", etc.
       });
       setSuccess("Account created successfully. Redirecting to login...");
       setTimeout(() => navigate("/login"), 2200);
@@ -69,7 +73,7 @@ export default function Register() {
           <div style={S.roleList}>
             <div style={S.roleListTitle}>Available Roles</div>
             {ROLES.map((r) => (
-              <div key={r} style={S.roleItem}>{r}</div>
+              <div key={r.value} style={S.roleItem}>{r.label}</div>
             ))}
           </div>
         </div>
@@ -88,7 +92,6 @@ export default function Register() {
               <span>{errors.submit}</span>
             </div>
           )}
-
           {success && (
             <div style={S.successBox}>
               <FiCheckCircle size={15} />
@@ -102,8 +105,10 @@ export default function Register() {
               <div style={S.inputWrap}>
                 <FiUser size={14} style={S.icon} />
                 <input
-                  name="full_name" type="text"
-                  value={form.full_name} onChange={handleChange}
+                  name="full_name"
+                  type="text"
+                  value={form.full_name}
+                  onChange={handleChange}
                   placeholder="Your full name"
                   style={{ ...S.input, borderColor: errors.full_name ? "#dc2626" : "#d1d5db" }}
                 />
@@ -116,8 +121,10 @@ export default function Register() {
               <div style={S.inputWrap}>
                 <FiMail size={14} style={S.icon} />
                 <input
-                  name="email" type="email"
-                  value={form.email} onChange={handleChange}
+                  name="email"
+                  type="email"
+                  value={form.email}
+                  onChange={handleChange}
                   placeholder="you@example.com"
                   style={{ ...S.input, borderColor: errors.email ? "#dc2626" : "#d1d5db" }}
                 />
@@ -128,11 +135,15 @@ export default function Register() {
             <div style={S.field}>
               <label style={S.label}>Role <span style={S.req}>*</span></label>
               <select
-                name="role" value={form.role} onChange={handleChange}
+                name="role"
+                value={form.role}
+                onChange={handleChange}
                 style={{ ...S.selectInput, borderColor: errors.role ? "#dc2626" : "#d1d5db" }}
               >
                 <option value="">Select your role</option>
-                {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
+                {ROLES.map((r) => (
+                  <option key={r.value} value={r.value}>{r.label}</option>
+                ))}
               </select>
               {errors.role && <span style={S.err}>{errors.role}</span>}
             </div>
@@ -142,8 +153,10 @@ export default function Register() {
               <div style={S.inputWrap}>
                 <FiLock size={14} style={S.icon} />
                 <input
-                  name="password" type="password"
-                  value={form.password} onChange={handleChange}
+                  name="password"
+                  type="password"
+                  value={form.password}
+                  onChange={handleChange}
                   placeholder="Minimum 8 characters"
                   style={{ ...S.input, borderColor: errors.password ? "#dc2626" : "#d1d5db" }}
                 />
@@ -156,8 +169,10 @@ export default function Register() {
               <div style={S.inputWrap}>
                 <FiLock size={14} style={S.icon} />
                 <input
-                  name="confirmPassword" type="password"
-                  value={form.confirmPassword} onChange={handleChange}
+                  name="confirmPassword"
+                  type="password"
+                  value={form.confirmPassword}
+                  onChange={handleChange}
                   placeholder="Re-enter password"
                   style={{ ...S.input, borderColor: errors.confirmPassword ? "#dc2626" : "#d1d5db" }}
                 />
@@ -183,40 +198,36 @@ export default function Register() {
 const S = {
   page: { display: "flex", minHeight: "100vh", fontFamily: "'Inter','Segoe UI',sans-serif" },
   left: {
-    flex: 1,
-    background: "linear-gradient(160deg, #0f172a 0%, #1e3a8a 100%)",
-    display: "flex", alignItems: "center",
-    justifyContent: "center", padding: 48,
+    flex: 1, background: "linear-gradient(160deg, #0f172a 0%, #1e3a8a 100%)",
+    display: "flex", alignItems: "center", justifyContent: "center", padding: 48,
   },
   brand: { color: "#fff", maxWidth: 360 },
   brandMark: {
-    width: 44, height: 44, borderRadius: 10,
-    backgroundColor: "#1d4ed8", display: "flex",
-    alignItems: "center", justifyContent: "center",
-    fontSize: 14, fontWeight: 800, color: "#fff",
-    marginBottom: 20, letterSpacing: "0.5px",
+    width: 44, height: 44, borderRadius: 10, backgroundColor: "#1d4ed8",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    fontSize: 14, fontWeight: 800, color: "#fff", marginBottom: 20,
   },
   brandName: { fontSize: 26, fontWeight: 800, margin: "0 0 10px", color: "#f1f5f9" },
   brandDesc: { fontSize: 15, opacity: 0.75, lineHeight: 1.6, marginBottom: 28, color: "#cbd5e1" },
-  roleListTitle: { fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.8px", color: "#64748b", marginBottom: 10 },
+  roleListTitle: {
+    fontSize: 11, fontWeight: 700, textTransform: "uppercase",
+    letterSpacing: "0.8px", color: "#64748b", marginBottom: 10,
+  },
   roleList: { display: "flex", flexDirection: "column", gap: 8 },
   roleItem: {
-    fontSize: 13, color: "#cbd5e1",
-    padding: "8px 12px",
+    fontSize: 13, color: "#cbd5e1", padding: "8px 12px",
     backgroundColor: "rgba(255,255,255,0.05)",
     borderRadius: 6, borderLeft: "2px solid #3b82f6",
   },
   right: {
     flex: 1, backgroundColor: "#f8fafc",
     display: "flex", alignItems: "center",
-    justifyContent: "center", padding: "48px 24px",
-    overflowY: "auto",
+    justifyContent: "center", padding: "48px 24px", overflowY: "auto",
   },
   card: {
-    backgroundColor: "#fff", borderRadius: 12,
-    padding: "36px 40px", width: "100%", maxWidth: 440,
-    boxShadow: "0 4px 24px rgba(0,0,0,0.07)",
-    border: "1px solid #f1f5f9",
+    backgroundColor: "#fff", borderRadius: 12, padding: "36px 40px",
+    width: "100%", maxWidth: 440,
+    boxShadow: "0 4px 24px rgba(0,0,0,0.07)", border: "1px solid #f1f5f9",
   },
   cardHeader: { marginBottom: 24 },
   cardTitle: { fontSize: 22, fontWeight: 700, color: "#111827", margin: "0 0 6px" },
@@ -239,9 +250,8 @@ const S = {
   req: { color: "#dc2626" },
   inputWrap: { position: "relative" },
   icon: {
-    position: "absolute", left: 10,
-    top: "50%", transform: "translateY(-50%)",
-    color: "#9ca3af", pointerEvents: "none",
+    position: "absolute", left: 10, top: "50%",
+    transform: "translateY(-50%)", color: "#9ca3af", pointerEvents: "none",
   },
   input: {
     width: "100%", padding: "9px 12px 9px 32px",
@@ -253,15 +263,13 @@ const S = {
     width: "100%", padding: "9px 12px",
     borderRadius: 7, border: "1.5px solid #d1d5db",
     fontSize: 14, color: "#111827", outline: "none",
-    fontFamily: "inherit", boxSizing: "border-box",
-    backgroundColor: "#fafafa",
+    fontFamily: "inherit", boxSizing: "border-box", backgroundColor: "#fafafa",
   },
   err: { fontSize: 11, color: "#dc2626" },
   btn: {
-    backgroundColor: "#1d4ed8", color: "#fff",
-    border: "none", borderRadius: 7, padding: "11px",
-    fontSize: 14, fontWeight: 600, cursor: "pointer",
-    width: "100%", marginTop: 4, fontFamily: "inherit",
+    backgroundColor: "#1d4ed8", color: "#fff", border: "none",
+    borderRadius: 7, padding: "11px", fontSize: 14, fontWeight: 600,
+    cursor: "pointer", width: "100%", marginTop: 4, fontFamily: "inherit",
   },
   foot: { textAlign: "center", fontSize: 13, color: "#6b7280", marginTop: 22 },
   link: { color: "#1d4ed8", fontWeight: 600, textDecoration: "none" },

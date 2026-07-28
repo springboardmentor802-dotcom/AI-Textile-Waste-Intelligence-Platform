@@ -42,35 +42,35 @@ export const theme = {
   },
   font: {
     xs: "11px", sm: "12px", md: "14px",
-    base: "15px", lg: "18px", xl: "22px",
-    xxl: "28px",
+    base: "15px", lg: "18px", xl: "22px", xxl: "28px",
   },
 };
 
-// These keys must exactly match UserRole enum values from backend models/user.py
+// Keys must exactly match the PostgreSQL enum values
+// admin | textile_manufacturer | recycling_operator | sustainability_manager
 export const ROLE_CONFIG = {
-  "Administrator": {
+  "admin": {
     color: "#7c3aed",
     light: "#f5f3ff",
     badge: "#ede9fe",
     label: "Administrator",
     homePath: "/admin/home",
   },
-  "Recycling Facility Operator": {
+  "recycling_operator": {
     color: "#16a34a",
     light: "#f0fdf4",
     badge: "#dcfce7",
-    label: "Operator",
+    label: "Recycling Operator",
     homePath: "/operator/home",
   },
-  "Sustainability Manager": {
+  "sustainability_manager": {
     color: "#0891b2",
     light: "#ecfeff",
     badge: "#cffafe",
     label: "Sustainability Mgr",
     homePath: "/sustainability/home",
   },
-  "Textile Manufacturer": {
+  "textile_manufacturer": {
     color: "#d97706",
     light: "#fffbeb",
     badge: "#fef3c7",
@@ -79,7 +79,7 @@ export const ROLE_CONFIG = {
   },
 };
 
-// Safe getter — never returns undefined, prevents component crashes
+// Safe getter — never crashes on unknown role
 export const getRoleConfig = (role) => {
   return ROLE_CONFIG[role] || {
     color: "#6b7280",

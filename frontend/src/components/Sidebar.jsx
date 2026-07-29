@@ -1,118 +1,67 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Package, 
-  PlusCircle, 
-  Database, 
-  Users, 
-  User, 
-  Recycle,
-  Layers,
-  Settings
-} from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { NavLink, useNavigate } from 'react-router-dom'
+import { LayoutGrid, Boxes, UploadCloud, ScanEye, History, BarChart3, Settings as SettingsIcon, User, LogOut, Leaf } from 'lucide-react'
 
-const Sidebar = () => {
-  const { user } = useAuth();
-  const location = useLocation();
+const links = [
+  { to: '/dashboard', label: 'Dashboard', icon: LayoutGrid },
+  { to: '/inventory', label: 'Inventory', icon: Boxes },
+  { to: '/upload', label: 'Upload Waste', icon: UploadCloud },
+  { to: '/history', label: 'History', icon: History },
+  { to: '/reports', label: 'Reports', icon: BarChart3 },
+  { to: '/profile', label: 'Profile', icon: User },
+  { to: '/settings', label: 'Settings', icon: SettingsIcon },
+]
 
-  if (!user) return null;
+export default function Sidebar() {
+  const navigate = useNavigate()
+  const fullName = localStorage.getItem('full_name')
+  const role = localStorage.getItem('role')
 
-  const isActive = (path) => location.pathname === path;
-
-  const menuItems = [
-    {
-      title: 'Dashboard',
-      path: '/dashboard',
-      icon: LayoutDashboard,
-      roles: ['Administrator', 'Recycling Facility Operator', 'Sustainability Manager', 'Textile Manufacturer']
-    },
-    {
-      title: 'Waste Inventory',
-      path: '/inventory',
-      icon: Package,
-      roles: ['Administrator', 'Recycling Facility Operator', 'Sustainability Manager', 'Textile Manufacturer']
-    },
-    {
-      title: 'Register Batch',
-      path: '/inventory/new',
-      icon: PlusCircle,
-      roles: ['Administrator', 'Textile Manufacturer']
-    },
-    {
-      title: 'Datasets Integration',
-      path: '/datasets',
-      icon: Database,
-      roles: ['Administrator', 'Recycling Facility Operator', 'Sustainability Manager', 'Textile Manufacturer']
-    },
-    {
-      title: 'User Roles',
-      path: '/users',
-      icon: Users,
-      roles: ['Administrator']
-    },
-    {
-      title: 'My Profile',
-      path: '/profile',
-      icon: User,
-      roles: ['Administrator', 'Recycling Facility Operator', 'Sustainability Manager', 'Textile Manufacturer']
-    }
-  ];
+  const handleLogout = () => {
+    localStorage.clear()
+    navigate('/login')
+  }
 
   return (
-    <aside className="w-64 bg-forest-900 text-slate-100 flex flex-col h-full border-r border-forest-800">
-      {/* Platform Title Banner */}
-      <div className="p-6 border-b border-forest-800 flex items-center space-x-3">
-        <div className="bg-earth-500 p-2 rounded-lg text-forest-950">
-          <Recycle className="h-6 w-6 animate-pulse" />
+    <div className="w-64 shrink-0 h-screen sticky top-0 flex flex-col glass-card m-3 p-4 rounded-2xl">
+      <div className="flex items-center gap-2 mb-8 px-1">
+        <div className="w-9 h-9 rounded-xl bg-mint-600/20 flex items-center justify-center border border-mint-500/30">
+          <Leaf size={18} className="text-mint-400" />
         </div>
         <div>
-          <h1 className="font-bold text-lg leading-tight tracking-wide font-sans">TEXWASTE</h1>
-          <span className="text-xs text-forest-400 font-medium font-sans">INTELLIGENCE HUB</span>
+          <div className="text-sm font-bold leading-tight">🧵 Textile Waste</div>
+          <div className="text-[10px] text-white/50 leading-tight">Intelligence Platform</div>
         </div>
       </div>
 
-      {/* Role Badge Indicator */}
-      <div className="px-6 py-4 border-b border-forest-800/50 bg-forest-950/30">
-        <div className="flex flex-col">
-          <span className="text-[10px] uppercase tracking-wider text-forest-400 font-bold">Current Role</span>
-          <span className="text-sm font-semibold text-earth-200 truncate">{user.role}</span>
-          <span className="text-[11px] text-forest-300 truncate">{user.organization || 'No Organization'}</span>
-        </div>
-      </div>
-
-      {/* Navigation list */}
-      <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
-        {menuItems
-          .filter((item) => item.roles.includes(user.role))
-          .map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item.path);
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all-300 ${
-                  active
-                    ? 'bg-earth-500 text-forest-950 font-semibold shadow-md shadow-earth-500/10'
-                    : 'text-slate-300 hover:bg-forest-800/60 hover:text-slate-100'
-                }`}
-              >
-                <Icon className={`h-5 w-5 ${active ? 'text-forest-950' : 'text-forest-300'}`} />
-                <span className="text-sm font-sans">{item.title}</span>
-              </Link>
-            );
-          })}
+      <nav className="flex-1 flex flex-col gap-1">
+        {links.map(({ to, label, icon: Icon }) => (
+          <NavLink
+            key={to}
+            to={to}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition ${
+                isActive ? 'bg-mint-600/20 text-mint-400 border border-mint-500/30' : 'text-white/60 hover:bg-white/5 hover:text-white/90'
+              }`
+            }
+          >
+            <Icon size={17} />
+            {label}
+          </NavLink>
+        ))}
       </nav>
 
-      {/* Sidebar Footer */}
-      <div className="p-4 border-t border-forest-800 flex items-center space-x-2 text-xs text-forest-400">
-        <Layers className="h-4 w-4" />
-        <span>Version 1.0.0 (Milestone 1)</span>
+      <div className="border-t border-white/10 pt-3 mt-3">
+        <div className="px-3 mb-2">
+          <div className="text-sm font-medium">👤 {fullName || 'User'}</div>
+          <div className="text-[10px] text-mint-400/80 uppercase tracking-wide">{role?.replace('_', ' ')}</div>
+        </div>
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-white/60 hover:bg-red-500/10 hover:text-red-400 transition"
+        >
+          <LogOut size={17} /> Logout
+        </button>
       </div>
-    </aside>
-  );
-};
-
-export default Sidebar;
+    </div>
+  )
+}

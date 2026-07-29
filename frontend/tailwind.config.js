@@ -1,47 +1,28 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ["./index.html", "./src/**/*.{js,jsx}"],
   theme: {
     extend: {
       colors: {
-        earth: {
-          50: '#fcfbf7',
-          100: '#f6f4e8',
-          200: '#ebe6c5',
-          300: '#dcd39b',
-          400: '#cbba70',
-          500: '#b9a04c',
-          600: '#9d833c',
-          700: '#7c6430',
-          800: '#604d27',
-          900: '#48391f',
-          950: '#261e0f',
+        base: {
+          950: "#0a0f0d",
+          900: "#0f1713",
+          800: "#141f1a",
+          700: "#1c2b24",
         },
-        forest: {
-          50: '#f2f8f4',
-          100: '#e1ede5',
-          200: '#c5dacd',
-          300: '#9cbca9',
-          400: '#6c977f',
-          500: '#4d7c64',
-          600: '#3a624e',
-          700: '#2f4f40',
-          800: '#274034',
-          900: '#21352c',
-          950: '#111e19',
+        mint: {
+          400: "#4ade80",
+          500: "#22c55e",
+          600: "#16a34a",
+          700: "#15803d",
         },
-        accent: {
-          light: '#f5efe6',
-          dark: '#e3d5ca',
-          sand: '#d5bdaf',
-        }
+        glass: "rgba(255,255,255,0.04)",
       },
-      fontFamily: {
-        sans: ['Outfit', 'Inter', 'system-ui', 'sans-serif'],
+      boxShadow: {
+        glass: "0 8px 32px 0 rgba(0,0,0,0.37)",
+        glow: "0 0 24px 0 rgba(34,197,94,0.25)",
       },
+      backdropBlur: { xs: "2px" },
     },
   },
   plugins: [],

@@ -1,190 +1,74 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { Recycle, Mail, Lock, User, Building, Loader2, ArrowRight } from 'lucide-react';
+import { useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
+import api from '../api'
 
-const Register = () => {
-  const { register } = useAuth();
-  const navigate = useNavigate();
+const ROLES = [
+  { value: 'manufacturer', label: 'Textile Manufacturer' },
+  { value: 'sustainability_manager', label: 'Sustainability Manager' },
+  { value: 'recycling_operator', label: 'Recycling Facility Operator' },
+  { value: 'admin', label: 'Administrator' },
+]
 
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [organization, setOrganization] = useState('');
-  const [role, setRole] = useState('Textile Manufacturer');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+export default function Register() {
+  const [form, setForm] = useState({ full_name: '', email: '', password: '', role: 'manufacturer' })
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
+  const navigate = useNavigate()
 
-  const roles = [
-    { value: 'Textile Manufacturer', label: 'Manufacturer' },
-    { value: 'Recycling Facility Operator', label: 'Recycling Operator' },
-    { value: 'Sustainability Manager', label: 'Sustainability Manager' }
-  ];
+  const update = (k, v) => setForm({ ...form, [k]: v })
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!name || !email || !password || !role) {
-      setError('Please fill in all required fields.');
-      return;
-    }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters.');
-      return;
-    }
-
-    setLoading(true);
-    setError('');
-
+    e.preventDefault()
+    setError(''); setSuccess('')
     try {
-      await register(name, email, organization, password, role);
-      navigate('/login');
+      await api.post('/auth/register', form)
+      setSuccess('Registered! Redirecting to login...')
+      setTimeout(() => navigate('/login'), 1200)
     } catch (err) {
-      setError(err.message || 'Registration failed. Please check details.');
-    } finally {
-      setLoading(false);
+      setError(err.response?.data?.detail || 'Registration failed')
     }
-  };
+  }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
-      <div className="flex-1 flex flex-col justify-center items-center px-6 py-12">
-        
-        {/* Core Auth Panel */}
-        <div className="w-full max-w-md space-y-8 bg-white p-8 lg:p-10 rounded-3xl border border-slate-200 shadow-xl">
-          
-          {/* Branding Banner */}
-          <div className="text-center space-y-2">
-            <Link to="/" className="inline-flex items-center space-x-2 text-forest-700 hover:opacity-90 transition-opacity">
-              <Recycle className="h-8 w-8 text-forest-600 animate-spin" style={{ animationDuration: '8s' }} />
-              <span className="font-extrabold text-2xl tracking-tight text-forest-950">TexWaste</span>
-            </Link>
-            <h2 className="text-xl font-bold text-slate-800">Create an account</h2>
-            <p className="text-xs text-slate-400 font-medium">Textile Waste Intelligence Portal</p>
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="glass-card w-full max-w-md p-8">
+        <div className="font-bold mb-1">Create your account</div>
+        <div className="text-xs text-white/50 mb-6">Textile Waste Intelligence Platform</div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="text-xs text-white/60">Full name</label>
+            <input required value={form.full_name} onChange={(e) => update('full_name', e.target.value)}
+              className="w-full mt-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-mint-500/50" />
           </div>
-
-          {/* Error Message */}
-          {error && (
-            <div className="bg-rose-50 border border-rose-200 text-rose-800 p-3.5 rounded-xl text-sm font-semibold text-center">
-              {error}
-            </div>
-          )}
-
-          {/* Form */}
-          <form className="space-y-5" onSubmit={handleSubmit}>
-            <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                Full Name
-              </label>
-              <div className="relative">
-                <User className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
-                <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="John Doe"
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-forest-500 focus:border-forest-500 transition-all font-medium"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                Email Address
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@organization.com"
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-forest-500 focus:border-forest-500 transition-all font-medium"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                Organization / Facility Name
-              </label>
-              <div className="relative">
-                <Building className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
-                <input
-                  type="text"
-                  value={organization}
-                  onChange={(e) => setOrganization(e.target.value)}
-                  placeholder="Apex Textiles Inc"
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-forest-500 focus:border-forest-500 transition-all font-medium"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                System Role Selection
-              </label>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-forest-500 focus:border-forest-500 transition-all font-medium text-slate-700"
-              >
-                {roles.map((r) => (
-                  <option key={r.value} value={r.value}>
-                    {r.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                Create Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Min 6 characters"
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-forest-500 focus:border-forest-500 transition-all font-medium"
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-forest-600 hover:bg-forest-700 disabled:bg-slate-300 text-white font-bold py-3.5 rounded-xl shadow-lg hover:shadow-forest-600/10 flex items-center justify-center space-x-2 transition-all cursor-pointer"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  <span>Registering...</span>
-                </>
-              ) : (
-                <>
-                  <span>Create Account</span>
-                  <ArrowRight className="h-4 w-4" />
-                </>
-              )}
-            </button>
-          </form>
-
-          <div className="border-t border-slate-100 pt-6 text-center text-xs">
-            <span className="text-slate-400 font-semibold">Already have an account? </span>
-            <Link to="/login" className="text-forest-600 hover:underline font-bold">
-              Sign In
-            </Link>
+          <div>
+            <label className="text-xs text-white/60">Email</label>
+            <input required type="email" value={form.email} onChange={(e) => update('email', e.target.value)}
+              className="w-full mt-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-mint-500/50" />
           </div>
+          <div>
+            <label className="text-xs text-white/60">Password</label>
+            <input required type="password" minLength={6} value={form.password} onChange={(e) => update('password', e.target.value)}
+              className="w-full mt-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-mint-500/50" />
+          </div>
+          <div>
+            <label className="text-xs text-white/60">Role</label>
+            <select value={form.role} onChange={(e) => update('role', e.target.value)}
+              className="w-full mt-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-mint-500/50">
+              {ROLES.map((r) => <option key={r.value} value={r.value} className="bg-base-900">{r.label}</option>)}
+            </select>
+          </div>
+          {error && <div className="text-xs text-red-400">{error}</div>}
+          {success && <div className="text-xs text-mint-400">{success}</div>}
+          <button type="submit" className="w-full bg-mint-600 hover:bg-mint-500 transition rounded-xl py-2.5 text-sm font-semibold shadow-glow">
+            Register
+          </button>
+        </form>
 
+        <div className="text-xs text-white/40 mt-5 text-center">
+          Already have an account? <Link to="/login" className="text-mint-400 hover:underline">Sign in</Link>
         </div>
       </div>
     </div>
-  );
-};
-
-export default Register;
+  )
+}

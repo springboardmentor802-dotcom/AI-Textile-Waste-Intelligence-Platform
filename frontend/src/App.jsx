@@ -1,140 +1,42 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { Routes, Route, Navigate } from 'react-router-dom'
+import Login from './pages/Login.jsx'
+import Register from './pages/Register.jsx'
+import Dashboard from './pages/Dashboard.jsx'
+import Inventory from './pages/Inventory.jsx'
+import UploadWaste from './pages/UploadWaste.jsx'
+import History from './pages/History.jsx'
+import Reports from './pages/Reports.jsx'
+import Settings from './pages/Settings.jsx'
+import Profile from './pages/Profile.jsx'
+import Sidebar from './components/Sidebar.jsx'
 
-// Components
-import Layout from './components/Layout';
-import ProtectedRoute from './components/ProtectedRoute';
-
-// Pages
-import Landing from './pages/Landing';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import InventoryList from './pages/InventoryList';
-import InventoryDetail from './pages/InventoryDetail';
-import InventoryForm from './pages/InventoryForm';
-import Profile from './pages/Profile';
-import UserManagement from './pages/UserManagement';
-import DatasetIntegration from './pages/DatasetIntegration';
-import ClassificationReports from './pages/ClassificationReports';
-
-function App() {
-  return (
-    <Router>
-      <AuthProvider>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Landing />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-
-          {/* Protected Dashboard Routes (Wrapped in Layout & ProtectedRoute) */}
-          <Route 
-            path="/dashboard" 
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <Dashboard />
-                </Layout>
-              </ProtectedRoute>
-            } 
-          />
-
-          <Route 
-            path="/inventory" 
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <InventoryList />
-                </Layout>
-              </ProtectedRoute>
-            } 
-          />
-
-          <Route 
-            path="/inventory/new" 
-            element={
-              <ProtectedRoute allowedRoles={['Administrator', 'Textile Manufacturer']}>
-                <Layout>
-                  <InventoryForm />
-                </Layout>
-              </ProtectedRoute>
-            } 
-          />
-
-          <Route 
-            path="/inventory/:batch_id" 
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <InventoryDetail />
-                </Layout>
-              </ProtectedRoute>
-            } 
-          />
-
-          <Route 
-            path="/inventory/:batch_id/edit" 
-            element={
-              <ProtectedRoute allowedRoles={['Administrator', 'Textile Manufacturer', 'Recycling Facility Operator']}>
-                <Layout>
-                  <InventoryForm />
-                </Layout>
-              </ProtectedRoute>
-            } 
-          />
-
-          <Route 
-            path="/datasets" 
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <DatasetIntegration />
-                </Layout>
-              </ProtectedRoute>
-            } 
-          />
-
-          <Route 
-            path="/reports" 
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <ClassificationReports />
-                </Layout>
-              </ProtectedRoute>
-            } 
-          />
-
-          <Route 
-            path="/users" 
-            element={
-              <ProtectedRoute allowedRoles={['Administrator']}>
-                <Layout>
-                  <UserManagement />
-                </Layout>
-              </ProtectedRoute>
-            } 
-          />
-
-          <Route 
-            path="/profile" 
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <Profile />
-                </Layout>
-              </ProtectedRoute>
-            } 
-          />
-
-          {/* Fallback Catch-All */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </AuthProvider>
-    </Router>
-  );
+function isAuthed() {
+  return !!localStorage.getItem('access_token')
 }
 
-export default App;
+function ProtectedLayout({ children }) {
+  if (!isAuthed()) return <Navigate to="/login" replace />
+  return (
+    <div className="flex min-h-screen">
+      <Sidebar />
+      <main className="flex-1 p-6 overflow-x-hidden">{children}</main>
+    </div>
+  )
+}
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/dashboard" element={<ProtectedLayout><Dashboard /></ProtectedLayout>} />
+      <Route path="/inventory" element={<ProtectedLayout><Inventory /></ProtectedLayout>} />
+      <Route path="/upload" element={<ProtectedLayout><UploadWaste /></ProtectedLayout>} />
+      <Route path="/history" element={<ProtectedLayout><History /></ProtectedLayout>} />
+      <Route path="/reports" element={<ProtectedLayout><Reports /></ProtectedLayout>} />
+      <Route path="/settings" element={<ProtectedLayout><Settings /></ProtectedLayout>} />
+      <Route path="/profile" element={<ProtectedLayout><Profile /></ProtectedLayout>} />
+      <Route path="*" element={<Navigate to={isAuthed() ? '/dashboard' : '/login'} replace />} />
+    </Routes>
+  )
+}

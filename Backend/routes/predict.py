@@ -1,6 +1,8 @@
 import io
 import json
 import os
+import uuid
+from pathlib import Path
 
 import numpy as np
 import tensorflow as tf
@@ -9,10 +11,18 @@ from PIL import Image
 
 from routes.auth import get_current_user
 
+from sqlalchemy.orm import Session
+from database import get_db
+from models import Prediction
+
 router = APIRouter()
 
 # --- Paths (robust regardless of the working directory uvicorn is run from) ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+UPLOAD_DIR = Path(BASE_DIR).parent / "uploads"
+UPLOAD_DIR.mkdir(exist_ok=True)
+
 MODEL_PATH = os.path.join(BASE_DIR, "..", "model", "fabric_classifier.keras")
 LABELS_PATH = os.path.join(BASE_DIR, "..", "model", "class_labels.json")
 
@@ -95,11 +105,27 @@ def preprocess_image(image_bytes: bytes) -> np.ndarray:
 async def predict_fabric_type(
     file: UploadFile = File(...),
     current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="File must be an image.")
 
     contents = await file.read()
+
+    # Generate a unique filename
+    file_extension = Path(file.filename).suffix
+    filename = f"{uuid.uuid4()}{file_extension}"
+
+    # Full path where the image will be saved
+    file_path = UPLOAD_DIR / filename
+
+    # Save the uploaded image
+    with open(file_path, "wb") as image_file:
+        image_file.write(contents)
+
+    # Store the relative path for the database
+    image_path = f"uploads/{filename}"
+    
     size_mb = len(contents) / (1024 * 1024)
     if size_mb > MAX_FILE_SIZE_MB:
         raise HTTPException(status_code=400, detail=f"File too large (max {MAX_FILE_SIZE_MB}MB).")
@@ -134,6 +160,20 @@ async def predict_fabric_type(
         },
     )
 
+    prediction = Prediction(
+        user_id=current_user.id,
+        material=material,
+        confidence=confidence,
+        waste_category=info["waste_category"],
+        recyclability=info["recyclability"],
+        recommendation=info["recommendation"],
+        image_path=image_path,
+    )
+
+    db.add(prediction)
+    db.commit()
+    db.refresh(prediction)
+
     return {
         "material": material,
         "confidence": confidence,
@@ -142,3 +182,30 @@ async def predict_fabric_type(
         "recommendation": info["recommendation"],
         "top_3_predictions": top_3_predictions,
     }
+
+@router.get("/predictions/count")
+def get_prediction_count(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    count = (
+        db.query(Prediction)
+        .filter(Prediction.user_id == current_user.id)
+        .count()
+    )
+
+    return {"totalPredictions": count}
+
+@router.get("/history")
+def get_prediction_history(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    predictions = (
+        db.query(Prediction)
+        .filter(Prediction.user_id == current_user.id)
+        .order_by(Prediction.created_at.desc())
+        .all()
+    )
+
+    return predictions

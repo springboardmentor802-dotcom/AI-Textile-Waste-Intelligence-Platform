@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, Package, BrainCircuit, FileBarChart,
+  LayoutDashboard, Package, BrainCircuit, FileBarChart, History,
   Users as UsersIcon, User, Settings as SettingsIcon, LogOut, Recycle
 } from 'lucide-react';
 import { logoutUser } from '../services/api';
@@ -33,6 +33,9 @@ function Sidebar() {
         </NavLink>
         <NavLink to="/predictions" className="sidebar-link">
           <BrainCircuit size={19} strokeWidth={1.8} /> AI Prediction
+        </NavLink>
+        <NavLink to="/history" className="sidebar-link">
+          <History size={19} strokeWidth={1.8} /> History
         </NavLink>
         <NavLink to="/reports" className="sidebar-link">
           <FileBarChart size={19} strokeWidth={1.8} /> Reports

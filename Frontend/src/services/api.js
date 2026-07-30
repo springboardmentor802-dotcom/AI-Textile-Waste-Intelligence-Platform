@@ -137,6 +137,7 @@ export async function deleteInventoryItem(id) {
 }
 export async function getDashboardStats() {
   const items = await getInventoryList();
+  const predictionData = await getPredictionCount();    
   const totalItems = items.length;
   const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
   const materialCounts = {};
@@ -146,7 +147,37 @@ export async function getDashboardStats() {
   const materialBreakdown = Object.entries(materialCounts)
     .map(([name, count]) => ({ name, count, percent: Math.round((count / totalItems) * 100) || 0 }))
     .sort((a, b) => b.count - a.count);
-  return { totalItems, totalQuantity, materialBreakdown };
+  return { totalItems, totalQuantity, materialBreakdown,totalPredictions: predictionData.totalPredictions, };
+}
+
+export async function getPredictionCount() {
+  const response = await fetch(`${API_BASE_URL}/predictions/count`, {
+    method: "GET",
+    headers: getAuthHeaders(),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.detail || "Failed to fetch prediction count");
+  }
+
+  return data;
+}
+
+export async function getPredictionHistory() {
+  const response = await fetch(`${API_BASE_URL}/history`, {
+    method: "GET",
+    headers: getAuthHeaders(),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.detail || "Failed to fetch prediction history");
+  }
+
+  return data;
 }
 
 export async function predictFabric(file) {
@@ -170,4 +201,18 @@ export async function predictFabric(file) {
   }
 
   return data;
+}
+
+export async function deletePredictionHistory(id) {
+  const response = await fetch(`${API_BASE_URL}/history/${id}`, {
+    method: "DELETE",
+    headers: {
+      ...getAuthHeaders(),
+    },
+  });
+ 
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || "Failed to delete this prediction.");
+  }
 }

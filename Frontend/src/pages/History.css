@@ -1,0 +1,741 @@
+.history-page {
+  padding: 24px;
+}
+
+.history-header {
+  margin-bottom: 24px;
+}
+
+.history-header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 4px 0;
+  letter-spacing: -0.01em;
+}
+
+.history-header p {
+  color: #6b7280;
+  margin: 0;
+  font-size: 14px;
+}
+
+/* --- Search --- */
+.history-search-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.history-search-box {
+  position: relative;
+  flex: 1;
+  min-width: 280px;
+  max-width: 390px;
+}
+
+.history-date-input {
+  padding: 10px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 13px;
+  background: #ffffff;
+  color: #374151;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.history-date-input:focus {
+  outline: none;
+  border-color: #2e7d32;
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.12);
+}
+
+.history-date-input:disabled {
+  background: #f9fafb;
+  cursor: not-allowed;
+}
+
+.history-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.history-search-box input {
+  width: 100%;
+  padding: 10px 12px 10px 36px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 13px;
+  background: #ffffff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.history-search-box input:focus {
+  outline: none;
+  border-color: #2e7d32;
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.12);
+}
+
+.history-search-box input:disabled {
+  background: #f9fafb;
+  cursor: not-allowed;
+}
+
+/* --- Table card --- */
+.history-table-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.history-table-wrap {
+  overflow-x: auto;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.history-table thead th {
+  text-align: left;
+  color: #9ca3af;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 14px 20px;
+  border-bottom: 1px solid #eef1ee;
+  white-space: nowrap;
+}
+
+.history-table tbody td {
+  padding: 14px 20px;
+  border-bottom: 1px solid #f5f6f5;
+  vertical-align: middle;
+  color: #374151;
+}
+
+.history-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.history-table tbody tr {
+  transition: background 0.15s ease;
+}
+
+.history-table tbody tr:hover {
+  background: #fafbfa;
+}
+
+.history-material {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.history-waste-category {
+  color: #6b7280;
+  max-width: 220px;
+}
+
+.history-date {
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.history-confidence-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 120px;
+}
+
+.history-confidence-track {
+  width: 60px;
+  height: 6px;
+  background: #f3f4f6;
+  border-radius: 999px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.history-confidence-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2e7d32, #43a047);
+  border-radius: 999px;
+}
+
+/* --- Recyclability badges --- */
+.hist-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.hist-badge-high {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.hist-badge-medium {
+  background: #fff7e6;
+  color: #b45309;
+}
+
+.hist-badge-low {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.hist-badge-neutral {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+/* --- View button --- */
+.history-view-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f6faf4;
+  border: 1px solid #d1e7d2;
+  color: #2e7d32;
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.history-view-btn:hover {
+  background: #e8f5e9;
+  transform: translateY(-1px);
+}
+
+.history-view-btn:focus-visible {
+  outline: 2px solid #2e7d32;
+  outline-offset: 2px;
+}
+
+/* --- Empty / error states --- */
+.history-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 6px;
+  padding: 64px 24px;
+}
+
+.history-state-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.history-state-icon-error {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.history-state-title {
+  margin: 0;
+  font-weight: 600;
+  color: #374151;
+  font-size: 14px;
+}
+
+.history-state-subtitle {
+  margin: 0;
+  color: #9ca3af;
+  font-size: 13px;
+  max-width: 320px;
+}
+
+/* Page-level "Try Again" button (error state). This class is ONLY used
+   here now -- the modal's Close button has its own class below, so the two
+   no longer collide. */
+.history-retry-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #2e7d32;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 12px;
+  transition: background 0.2s ease;
+}
+
+.history-retry-btn:hover {
+  background: #256428;
+}
+
+/* --- Loading skeleton cells --- */
+.history-skeleton-cell {
+  height: 14px;
+  width: 80%;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #f0f2f0 25%, #e6e9e6 37%, #f0f2f0 63%);
+  background-size: 400% 100%;
+  animation: history-shimmer 1.4s ease infinite;
+}
+
+@keyframes history-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .history-skeleton-cell {
+    animation-duration: 0.001ms !important;
+  }
+}
+
+/* --- Responsive (page-level) --- */
+@media (max-width: 700px) {
+  .history-search-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .history-search-box {
+    max-width: 100%;
+  }
+
+  .history-date-input {
+    width: 100%;
+  }
+
+  .history-table thead th,
+  .history-table tbody td {
+    padding: 10px 12px;
+  }
+
+  .history-waste-category {
+    max-width: 140px;
+  }
+}
+
+/* ===========================
+   History Modal
+   ===========================
+   ROOT CAUSE OF THE HORIZONTAL LAYOUT BUG (fixed here):
+   The JSX previously rendered five <p> tags as DIRECT children of
+   .history-modal-content, which is `display: flex` with no
+   flex-direction set (defaults to `row`). That made every <p> its own
+   flex item, lining them up horizontally. The .history-detail-row /
+   .history-modal-left / .history-modal-right classes below were defined
+   but never referenced in the JSX -- dead CSS. The fix (in History.jsx)
+   wraps the image in .history-modal-left and each field in its own
+   .history-detail-row inside .history-modal-right, so THESE rules
+   actually apply now.
+*/
+
+.history-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.history-modal {
+  background: #fff;
+  width: 750px;
+  max-width: 100%;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+}
+
+.history-modal h2 {
+  margin: 0 0 30px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.history-modal-content {
+  display: flex;
+  flex-direction: row;
+  gap: 35px;
+  align-items: flex-start;
+}
+
+/* --- Left: image --- */
+.history-modal-left {
+  width: 200px;
+  flex-shrink: 0;
+}
+
+.history-modal-image {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  display: block;
+}
+
+.history-modal-image-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+  color: #9ca3af;
+}
+
+/* --- Right: details, stacked VERTICALLY --- */
+.history-modal-right {
+  flex: 1;
+  min-width: 0; /* prevents flex item from overflowing on long values */
+  display: flex;
+  flex-direction: column;
+}
+
+.history-detail-row {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  align-items: center;
+  padding: 10px 0;
+}
+
+
+.history-detail-row strong {
+  font-size: 14px;
+  color: #374151;
+  font-weight: 600;
+}
+
+.history-detail-row span {
+  font-size: 14px;
+  color: #6b7280;
+  text-align: left;
+}
+
+/* --- Modal Close button (own class -- no longer collides with the
+   page-level .history-retry-btn) --- */
+.history-modal-close-btn {
+  display: block;
+  margin: 30px auto 0;
+  padding: 10px 30px;
+  background: #2e7d32;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: background 0.2s ease;
+}
+
+.history-modal-close-btn:hover {
+  background: #256428;
+}
+
+.history-modal-close-btn:focus-visible {
+  outline: 2px solid #2e7d32;
+  outline-offset: 2px;
+}
+
+/* --- Modal responsive --- */
+@media (max-width: 768px) {
+  .history-modal {
+    width: 95%;
+    padding: 20px;
+  }
+
+  .history-modal-content {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .history-modal-left {
+    width: auto;
+  }
+
+  .history-modal-image,
+  .history-modal-image-placeholder {
+    width: 170px;
+    height: 170px;
+  }
+
+  .history-modal-right {
+    width: 100%;
+  }
+
+  .history-detail-row {
+    grid-template-columns: 130px 1fr;
+  }
+}
+
+/* ==========================================================================
+   Export dropdown + Delete button + Delete confirmation dialog (added)
+   ========================================================================== */
+
+.history-export-wrap {
+  position: relative;
+  margin-left: auto;
+}
+
+.history-export-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f6faf4;
+  border: 1px solid #d1e7d2;
+  color: #2e7d32;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.history-export-btn:hover:not(:disabled) {
+  background: #e8f5e9;
+  transform: translateY(-1px);
+}
+
+.history-export-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.history-export-btn:focus-visible {
+  outline: 2px solid #2e7d32;
+  outline-offset: 2px;
+}
+
+.history-export-chevron-open {
+  transform: rotate(180deg);
+}
+
+.history-export-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #eef1ee;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  min-width: 170px;
+  z-index: 20;
+  animation: history-menu-fade-in 0.15s ease both;
+}
+
+.history-export-menu button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 9px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #374151;
+  cursor: pointer;
+}
+
+.history-export-menu button:hover {
+  background: #f6faf4;
+  color: #2e7d32;
+}
+
+@keyframes history-menu-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- Action column: View + Delete side by side --- */
+.history-action-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.history-delete-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.history-delete-btn:hover:not(:disabled) {
+  background: #fee2e2;
+  transform: translateY(-1px);
+}
+
+.history-delete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.history-delete-btn:focus-visible {
+  outline: 2px solid #b91c1c;
+  outline-offset: 2px;
+}
+
+/* --- Delete confirmation dialog --- */
+.history-confirm-modal {
+  background: #ffffff;
+  width: 400px;
+  max-width: 90%;
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.history-confirm-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #fef2f2;
+  color: #b91c1c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.history-confirm-title {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.history-confirm-subtitle {
+  margin: 0 0 22px 0;
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.history-confirm-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.history-confirm-cancel-btn {
+  flex: 1;
+  background: #f3f4f6;
+  color: #374151;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.history-confirm-cancel-btn:hover:not(:disabled) {
+  background: #e5e7eb;
+}
+
+.history-confirm-delete-btn {
+  flex: 1;
+  background: #dc2626;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.history-confirm-delete-btn:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.history-confirm-cancel-btn:disabled,
+.history-confirm-delete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 700px) {
+  .history-export-wrap {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .history-export-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .history-export-menu {
+    left: 0;
+    right: 0;
+  }
+
+  .history-action-cell {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

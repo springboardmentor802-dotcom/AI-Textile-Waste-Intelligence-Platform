@@ -68,7 +68,7 @@ function Dashboard() {
             <div className="dash-icon-circle"><BrainCircuit size={17} color={ICON_COLOR} /></div>
             <div>
               <div className="dash-card-label">Predictions</div>
-              <div className="dash-card-value dash-card-value-muted">No predictions yet</div>
+              <div className="dash-card-value">{stats ? stats.totalPredictions : "—"}</div>
             </div>
           </div>
 

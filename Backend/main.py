@@ -1,5 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+import os
+
 import models
 from database import engine
 from routes.auth import router as auth_router
@@ -9,6 +12,9 @@ from routes.predict import router as predict_router
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "uploads")
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 app.add_middleware(
     CORSMiddleware,

@@ -124,10 +124,25 @@ Infosys Springboard Internship Project - AI Textile Waste Intelligence Platform
 - Verified the model performance with approximately **87.70% accuracy**.
 - Integrated the trained Machine Learning model into the Flask backend.
 - Loaded the saved Label Encoders into the backend.
-- Created the initial Prediction API (`/predict`).
-- Successfully verified JSON request handling for prediction requests.
-- Started backend integration for AI-based fabric quality prediction.
----
+- Implemented the Prediction API (`/predict`).
+- Connected the Prediction API with the React frontend.
+- Successfully tested end-to-end AI-based fabric quality prediction.
+- Verified JSON request handling and prediction results.
+
+
+## Day 13 - Milestone 3 Research & Planning
+
+- Studied the Sustainability Intelligence Engine.
+- Researched the Recycling Recommendation Workflow.
+- Explored Environmental Impact Assessment concepts.
+- Studied Circular Economy Analytics.
+- Understood Sustainability Dashboard architecture.
+- Completed mentor-assigned R&D tasks and project analysis.
+- Identified limitations of the current dataset for defect detection.
+- Researched integrating an additional textile defect image dataset.
+- Explored synthetic dataset generation for project-specific requirements.
+- Planned the implementation workflow for Milestone 3.
+----
 
 ## Technologies Used
 
@@ -137,29 +152,30 @@ Infosys Springboard Internship Project - AI Textile Waste Intelligence Platform
 - Flask
 - SQLite
 - Pandas
+- NumPy
 - Scikit-learn
 - Joblib
+- bcrypt
+- PyJWT
 - Git
 - GitHub
-- bcrypt
 
 ## Current Progress
 
-Completed:
+### Completed
+
 - Frontend UI Development
 - Backend Setup
 - SQLite Database Integration
-- Waste Inventory API
-- User Registration API
-- Login API
+- Waste Inventory Management
+- User Registration & Login
 - Password Hashing (bcrypt)
 - JWT Authentication
 - Role-Based Authentication
-- Frontend Authentication Integration
 - Frontend ↔ Backend Integration
 - Backend ↔ Database Integration
-- Inventory Records Dashboard
-- Inventory Records Table
+- Inventory Dashboard
+- Inventory Table
 - Inventory Record Deletion
 - Dataset Selection
 - Exploratory Data Analysis (EDA)
@@ -167,15 +183,35 @@ Completed:
 - Duplicate Record Removal
 - Missing Value Handling
 - Feature Engineering
+- Label Encoding
 - Train-Test Split
 - Random Forest Model Training
-- Model Evaluation
+- Model Evaluation (87.70% Accuracy)
 - Trained Model Generation
+- Flask Model Integration
+- Prediction API (`/predict`)
+- React Prediction Module
+- End-to-End AI Prediction Testing
+- Milestone 3 Research & Planning
 
-Next Phase:
-- Implement Prediction Logic
-- Connect Prediction API with React Frontend
-- End-to-End Testing
+### In Progress
+
+- Sustainability Intelligence Engine
+- Recycling Recommendation Workflow
+- Environmental Impact Assessment
+- Circular Economy Analytics
+- Sustainability Dashboard
+
+
+## Next Phase
+
+- Implement Sustainability Intelligence Engine
+- Develop Recycling Recommendation Workflow
+- Build Environmental Impact Assessment Module
+- Generate Circular Economy Analytics
+- Create Sustainability Dashboard
+- Integrate Milestone 3 modules with Flask backend
+- Perform End-to-End Testing
 - Final Project Integration
 
 ## GitHub Branch
@@ -185,23 +221,36 @@ Next Phase:
 
 ✅ Milestone 1 Completed Successfully
 
-🚀 Milestone 2 Approximately 90% Completed
+✅ Milestone 2 Completed Successfully
 
-Completed:
-- Dataset Selection
-- Exploratory Data Analysis (EDA)
-- Data Cleaning & Preprocessing
-- Feature Engineering
-- Label Encoding
-- Saved Label Encoders
-- Train-Test Split
-- Random Forest Model Training
-- Model Evaluation (87.70% Accuracy)
-- Trained Model Generation
-- Flask Model Integration
-- Initial Prediction API
+🚀 Milestone 3 Research Completed
 
-Current Task:
-- Implement Prediction Logic
-- Connect Prediction API with React Frontend
-- End-to-End Testing
+🔄 Milestone 3 Implementation In Progress
+
+### Completed
+
+- Textile Image Analysis
+- Material Classification
+- Machine Learning Model Training
+- Prediction API
+- React Prediction Integration
+- End-to-End Prediction Testing
+- Milestone 3 Research & Planning
+
+### Current Task
+
+- Implement Sustainability Intelligence Engine
+- Build Recycling Recommendation Workflow
+- Develop Environmental Impact Assessment
+- Generate Circular Economy Analytics
+- Create Sustainability Dashboard
+
+
+## Future Scope
+
+- Improve AI prediction accuracy using additional textile image datasets.
+- Integrate textile defect detection.
+- Enhance sustainability analytics with real-world environmental metrics.
+- Deploy the application using Docker and cloud platforms (AWS/Azure).
+- Generate downloadable sustainability reports.
+- Optimize the recommendation engine using advanced machine learning models.

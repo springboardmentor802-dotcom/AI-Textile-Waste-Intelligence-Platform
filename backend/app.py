@@ -4,9 +4,29 @@ import sqlite3
 import bcrypt
 import jwt
 import datetime
+import joblib
+import pandas as pd
+import os
 
 app = Flask(__name__)
 CORS(app)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+MODEL_PATH = os.path.join(BASE_DIR, "..", "ml", "fabric_quality_model.pkl")
+
+ENCODER_DIR = os.path.join(BASE_DIR, "..", "ml", "encoders")
+
+model = joblib.load(MODEL_PATH)
+
+fabric_type_encoder = joblib.load(os.path.join(ENCODER_DIR, "fabric_type_encoder.pkl"))
+weave_type_encoder = joblib.load(os.path.join(ENCODER_DIR, "weave_type_encoder.pkl"))
+finish_type_encoder = joblib.load(os.path.join(ENCODER_DIR, "finish_type_encoder.pkl"))
+production_method_encoder = joblib.load(os.path.join(ENCODER_DIR, "production_method_encoder.pkl"))
+warehouse_id_encoder = joblib.load(os.path.join(ENCODER_DIR, "warehouse_id_encoder.pkl"))
+operator_name_encoder = joblib.load(os.path.join(ENCODER_DIR, "operator_name_encoder.pkl"))
+inspection_shift_encoder = joblib.load(os.path.join(ENCODER_DIR, "inspection_shift_encoder.pkl"))
+inspection_notes_encoder = joblib.load(os.path.join(ENCODER_DIR, "inspection_notes_encoder.pkl"))
+fabric_quality_encoder = joblib.load(os.path.join(ENCODER_DIR, "fabric_quality_encoder.pkl"))
 
 @app.route("/")
 def home():
@@ -197,5 +217,59 @@ def delete_inventory(id):
     return jsonify({
         "message": "Inventory Deleted Successfully"
     })   
+
+@app.route("/predict", methods=["POST"])
+def predict():
+
+    try:
+
+        data = request.get_json()
+
+        input_data = {
+            "thread_count": data["thread_count"],
+            "gsm": data["gsm"],
+            "tensile_strength": data["tensile_strength"],
+            "shrinkage_percent": data["shrinkage_percent"],
+            "color_fastness": data["color_fastness"],
+            "fabric_thickness": data["fabric_thickness"],
+            "defect_count": data["defect_count"],
+            "elongation_percent": data["elongation_percent"],
+            "moisture_absorption": data["moisture_absorption"],
+
+            "fabric_type": fabric_type_encoder.transform([data["fabric_type"]])[0],
+            "weave_type": weave_type_encoder.transform([data["weave_type"]])[0],
+            "finish_type": finish_type_encoder.transform([data["finish_type"]])[0],
+            "production_method": production_method_encoder.transform([data["production_method"]])[0],
+
+            "batch_id": data["batch_id"],
+            "roll_number": data["roll_number"],
+            "inspection_time_minutes": data["inspection_time_minutes"],
+
+            "warehouse_id": warehouse_id_encoder.transform([data["warehouse_id"]])[0],
+            "operator_name": operator_name_encoder.transform([data["operator_name"]])[0],
+            "inspection_shift": inspection_shift_encoder.transform([data["inspection_shift"]])[0],
+
+            "machine_temperature": data["machine_temperature"],
+            "humidity_level": data["humidity_level"],
+
+            "inspection_notes": inspection_notes_encoder.transform([data["inspection_notes"]])[0]
+        }
+
+        input_df = pd.DataFrame([input_data])
+
+        prediction = model.predict(input_df)
+
+        predicted_quality = fabric_quality_encoder.inverse_transform(prediction)
+
+        return jsonify({
+            "predicted_fabric_quality": predicted_quality[0]
+        })
+
+    except Exception as e:
+
+        return jsonify({
+            "error": str(e)
+        }), 400
+    
 if __name__ == "__main__":
     app.run(debug=True)

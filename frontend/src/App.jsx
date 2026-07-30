@@ -1,13 +1,17 @@
 import { useState, useEffect } from "react";
-
+import PredictionForm from "./components/PredictionForm";
 function App() {
 
-  // Registration States
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
-  const [role, setRole] = useState("Administrator");
+
+// Registration States
+const [fullName, setFullName] = useState("");
+const [email, setEmail] = useState("");
+const [password, setPassword] = useState("");
+
+const [loginEmail, setLoginEmail] = useState("");
+const [loginPassword, setLoginPassword] = useState("");
+
+const [role, setRole] = useState("Administrator");
 
   // Inventory States
   const [batchId, setBatchId] = useState("");
@@ -373,8 +377,12 @@ return (
     ))}
   </tbody>
 </table>
+<hr />
+
+<PredictionForm />
     </div>
   );
+  
 }
 
 export default App;

@@ -262,34 +262,6 @@ Generate PDF Report
 
 ---
 
-# 📷 Application Screenshots
-
-### Login Page
-
-(Add Screenshot)
-
-### Dashboard
-
-(Add Screenshot)
-
-### Inventory Management
-
-(Add Screenshot)
-
-### Material Prediction
-
-(Add Screenshot)
-
-### Single Prediction Report
-
-(Add Screenshot)
-
-### Batch Prediction Report
-
-(Add Screenshot)
-
----
-
 # 🚀 Getting Started
 
 ## Backend

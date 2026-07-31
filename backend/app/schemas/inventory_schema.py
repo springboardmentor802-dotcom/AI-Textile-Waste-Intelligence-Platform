@@ -8,6 +8,8 @@ class InventoryCreate(BaseModel):
     unit: str
     location: str
     status: str
+    image_path: str | None = None
+    prediction: str | None = None
 
 
 class InventoryResponse(InventoryCreate):

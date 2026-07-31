@@ -6,6 +6,10 @@ from app.database.base import Base
 
 class Inventory(Base):
     __tablename__ = "inventory"
+    
+    image_path = Column(String, nullable=True)
+
+    prediction = Column(String, nullable=True)
 
     id = Column(Integer, primary_key=True, index=True)
 

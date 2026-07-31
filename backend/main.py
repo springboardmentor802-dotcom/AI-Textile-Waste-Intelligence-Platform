@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.database.database import engine
 from app.database.base import Base
@@ -13,6 +14,11 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Textile Waste Intelligence Platform"
+)
+app.mount(
+    "/uploads",
+    StaticFiles(directory="uploads"),
+    name="uploads",
 )
 app.add_middleware(
     CORSMiddleware,

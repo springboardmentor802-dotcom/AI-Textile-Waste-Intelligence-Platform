@@ -1,0 +1,252 @@
+[33m3baa55f[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mSiripuramAbhinayReddy[m[33m)[m Completed Milestone 3 - Sustainability Intelligence and Waste Classification
+ backend/app/api/defect_analysis.py                 |  26 [32m+++[m
+ backend/app/api/inventory.py                       |  48 [32m+++[m[31m--[m
+ backend/app/api/material_analysis.py               |  30 [32m+++[m
+ backend/app/api/router.py                          |  12 [32m+[m[31m-[m
+ backend/app/api/sustainability.py                  |  42 [32m+++++[m
+ backend/app/api/upload.py                          |  31 [32m++++[m
+ backend/app/api/waste_classification.py            |  56 [32m++++++[m
+ backend/app/models/inventory.py                    |   4 [32m+[m
+ backend/app/schemas/inventory_schema.py            |   2 [32m+[m
+ backend/app/services/inventory_service.py          |  15 [32m+[m[31m-[m
+ backend/app/services/sustainability_service.py     |  76 [32m++++++++[m
+ backend/app/services/waste_service.py              |  41 [32m+++++[m
+ backend/main.py                                    |   6 [32m+[m
+ backend/ml/analyze.py                              |  45 [32m+++++[m
+ backend/ml/config.py                               |  25 [32m+++[m
+ backend/ml/defect_preprocess.py                    |  65 [32m+++++++[m
+ backend/ml/predict.py                              | 165 [32m+++++++++++++++++[m
+ backend/ml/predict_defect.py                       |  81 [32m+++++++++[m
+ backend/ml/preprocess.py                           |  33 [32m++++[m
+ backend/ml/test_dataset.py                         |  11 [32m++[m
+ backend/ml/test_defect_dataset.py                  |  26 [32m+++[m
+ backend/ml/train_defect.py                         | 159 [32m++++++++++++++++[m
+ backend/ml/train_material.py                       |  97 [32m++++++++++[m
+ backend/ml/utils.py                                |  67 [32m+++++++[m
+ backend/models/defect_model.pth                    | Bin [31m0[m -> [32m44788299[m bytes
+ backend/models/material_model.pth                  | Bin [31m0[m -> [32m44804939[m bytes
+ backend/uploads/0003_000_01.png                    | Bin [31m0[m -> [32m634338[m bytes
+ backend/uploads/0003_000_06.png                    | Bin [31m0[m -> [32m741907[m bytes
+ backend/uploads/0003_002_00_mask.png               | Bin [31m0[m -> [32m1857[m bytes
+ backend/uploads/0004_000_01.png                    | Bin [31m0[m -> [32m636028[m bytes
+ backend/uploads/003-122.png                        | Bin [31m0[m -> [32m152528[m bytes
+ backend/uploads/0042_019_02.png                    | Bin [31m0[m -> [32m798903[m bytes
+ backend/uploads/0043_019_04.png                    | Bin [31m0[m -> [32m855090[m bytes
+ backend/uploads/007-750.png                        | Bin [31m0[m -> [32m160716[m bytes
+ backend/uploads/007-753.png                        | Bin [31m0[m -> [32m162850[m bytes
+ backend/uploads/0078_025_03.png                    | Bin [31m0[m -> [32m605722[m bytes
+ backend/uploads/008-306.png                        | Bin [31m0[m -> [32m121739[m bytes
+ backend/uploads/Screenshot 2026-07-10 144931.png   | Bin [31m0[m -> [32m23752[m bytes
+ backend/uploads/sample.jpg.png                     | Bin [31m0[m -> [32m18990[m bytes
+ datasets/TenFabrics/001/001-001.png                | Bin [31m0[m -> [32m148589[m bytes
+ datasets/TenFabrics/001/001-001.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-002.png                | Bin [31m0[m -> [32m148536[m bytes
+ datasets/TenFabrics/001/001-002.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-003.png                | Bin [31m0[m -> [32m150257[m bytes
+ datasets/TenFabrics/001/001-003.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-004.png                | Bin [31m0[m -> [32m151564[m bytes
+ datasets/TenFabrics/001/001-004.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-005.png                | Bin [31m0[m -> [32m152735[m bytes
+ datasets/TenFabrics/001/001-005.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-006.png                | Bin [31m0[m -> [32m152102[m bytes
+ datasets/TenFabrics/001/001-006.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-007.png                | Bin [31m0[m -> [32m152088[m bytes
+ datasets/TenFabrics/001/001-007.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-008.png                | Bin [31m0[m -> [32m152937[m bytes
+ datasets/TenFabrics/001/001-008.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-009.png                | Bin [31m0[m -> [32m151407[m bytes
+ datasets/TenFabrics/001/001-009.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-010.png                | Bin [31m0[m -> [32m149311[m bytes
+ datasets/TenFabrics/001/001-010.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-011.png                | Bin [31m0[m -> [32m149526[m bytes
+ datasets/TenFabrics/001/001-011.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-012.png                | Bin [31m0[m -> [32m148016[m bytes
+ datasets/TenFabrics/001/001-012.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-013.png                | Bin [31m0[m -> [32m146806[m bytes
+ datasets/TenFabrics/001/001-013.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-014.png                | Bin [31m0[m -> [32m147872[m bytes
+ datasets/TenFabrics/001/001-014.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-015.png                | Bin [31m0[m -> [32m148596[m bytes
+ datasets/TenFabrics/001/001-015.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-016.png                | Bin [31m0[m -> [32m149335[m bytes
+ datasets/TenFabrics/001/001-016.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-017.png                | Bin [31m0[m -> [32m149095[m bytes
+ datasets/TenFabrics/001/001-017.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-018.png                | Bin [31m0[m -> [32m150590[m bytes
+ datasets/TenFabrics/001/001-018.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-019.png                | Bin [31m0[m -> [32m152005[m bytes
+ datasets/TenFabrics/001/001-019.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-020.png                | Bin [31m0[m -> [32m153237[m bytes
+ datasets/TenFabrics/001/001-020.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-021.png                | Bin [31m0[m -> [32m152496[m bytes
+ datasets/TenFabrics/001/001-021.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-022.png                | Bin [31m0[m -> [32m151054[m bytes
+ datasets/TenFabrics/001/001-022.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-023.png                | Bin [31m0[m -> [32m151756[m bytes
+ datasets/TenFabrics/001/001-023.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-024.png                | Bin [31m0[m -> [32m152725[m bytes
+ datasets/TenFabrics/001/001-024.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-025.png                | Bin [31m0[m -> [32m150136[m bytes
+ datasets/TenFabrics/001/001-025.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-026.png                | Bin [31m0[m -> [32m147550[m bytes
+ datasets/TenFabrics/001/001-026.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-027.png                | Bin [31m0[m -> [32m147772[m bytes
+ datasets/TenFabrics/001/001-027.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-028.png                | Bin [31m0[m -> [32m147607[m bytes
+ datasets/TenFabrics/001/001-028.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-029.png                | Bin [31m0[m -> [32m148480[m bytes
+ datasets/TenFabrics/001/001-029.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-030.png                | Bin [31m0[m -> [32m149050[m bytes
+ datasets/TenFabrics/001/001-030.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-031.png                | Bin [31m0[m -> [32m150147[m bytes
+ datasets/TenFabrics/001/001-031.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-032.png                | Bin [31m0[m -> [32m151579[m bytes
+ datasets/TenFabrics/001/001-032.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-033.png                | Bin [31m0[m -> [32m150001[m bytes
+ datasets/TenFabrics/001/001-033.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-034.png                | Bin [31m0[m -> [32m150822[m bytes
+ datasets/TenFabrics/001/001-034.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-035.png                | Bin [31m0[m -> [32m151444[m bytes
+ datasets/TenFabrics/001/001-035.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-036.png                | Bin [31m0[m -> [32m152600[m bytes
+ datasets/TenFabrics/001/001-036.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-037.png                | Bin [31m0[m -> [32m151636[m bytes
+ datasets/TenFabrics/001/001-037.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-038.png                | Bin [31m0[m -> [32m151834[m bytes
+ datasets/TenFabrics/001/001-038.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-039.png                | Bin [31m0[m -> [32m152311[m bytes
+ datasets/TenFabrics/001/001-039.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-040.png                | Bin [31m0[m -> [32m149244[m bytes
+ datasets/TenFabrics/001/001-040.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-041.png                | Bin [31m0[m -> [32m147572[m bytes
+ datasets/TenFabrics/001/001-041.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-042.png                | Bin [31m0[m -> [32m151664[m bytes
+ datasets/TenFabrics/001/001-042.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-043.png                | Bin [31m0[m -> [32m146586[m bytes
+ datasets/TenFabrics/001/001-043.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-044.png                | Bin [31m0[m -> [32m146531[m bytes
+ datasets/TenFabrics/001/001-044.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-045.png                | Bin [31m0[m -> [32m147282[m bytes
+ datasets/TenFabrics/001/001-045.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-046.png                | Bin [31m0[m -> [32m148013[m bytes
+ datasets/TenFabrics/001/001-046.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-047.png                | Bin [31m0[m -> [32m148944[m bytes
+ datasets/TenFabrics/001/001-047.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-048.png                | Bin [31m0[m -> [32m149569[m bytes
+ datasets/TenFabrics/001/001-048.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-049.png                | Bin [31m0[m -> [32m149982[m bytes
+ datasets/TenFabrics/001/001-049.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-050.png                | Bin [31m0[m -> [32m150431[m bytes
+ datasets/TenFabrics/001/001-050.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-051.png                | Bin [31m0[m -> [32m151104[m bytes
+ datasets/TenFabrics/001/001-051.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-052.png                | Bin [31m0[m -> [32m150258[m bytes
+ datasets/TenFabrics/001/001-052.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-053.png                | Bin [31m0[m -> [32m151376[m bytes
+ datasets/TenFabrics/001/001-053.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-054.png                | Bin [31m0[m -> [32m151019[m bytes
+ datasets/TenFabrics/001/001-054.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-055.png                | Bin [31m0[m -> [32m151460[m bytes
+ datasets/TenFabrics/001/001-055.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-056.png                | Bin [31m0[m -> [32m148946[m bytes
+ datasets/TenFabrics/001/001-056.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-057.png                | Bin [31m0[m -> [32m148171[m bytes
+ datasets/TenFabrics/001/001-057.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-058.png                | Bin [31m0[m -> [32m147002[m bytes
+ datasets/TenFabrics/001/001-058.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-059.png                | Bin [31m0[m -> [32m147686[m bytes
+ datasets/TenFabrics/001/001-059.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-060.png                | Bin [31m0[m -> [32m148124[m bytes
+ datasets/TenFabrics/001/001-060.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-061.png                | Bin [31m0[m -> [32m148881[m bytes
+ datasets/TenFabrics/001/001-061.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-062.png                | Bin [31m0[m -> [32m149847[m bytes
+ datasets/TenFabrics/001/001-062.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-063.png                | Bin [31m0[m -> [32m150745[m bytes
+ datasets/TenFabrics/001/001-063.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-064.png                | Bin [31m0[m -> [32m150913[m bytes
+ datasets/TenFabrics/001/001-064.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-065.png                | Bin [31m0[m -> [32m151600[m bytes
+ datasets/TenFabrics/001/001-065.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-066.png                | Bin [31m0[m -> [32m151977[m bytes
+ datasets/TenFabrics/001/001-066.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-067.png                | Bin [31m0[m -> [32m150954[m bytes
+ datasets/TenFabrics/001/001-067.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-068.png                | Bin [31m0[m -> [32m152004[m bytes
+ datasets/TenFabrics/001/001-068.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-069.png                | Bin [31m0[m -> [32m152259[m bytes
+ datasets/TenFabrics/001/001-069.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-070.png                | Bin [31m0[m -> [32m151143[m bytes
+ datasets/TenFabrics/001/001-070.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-071.png                | Bin [31m0[m -> [32m148917[m bytes
+ datasets/TenFabrics/001/001-071.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-072.png                | Bin [31m0[m -> [32m151487[m bytes
+ datasets/TenFabrics/001/001-072.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-073.png                | Bin [31m0[m -> [32m147315[m bytes
+ datasets/TenFabrics/001/001-073.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-074.png                | Bin [31m0[m -> [32m147184[m bytes
+ datasets/TenFabrics/001/001-074.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-075.png                | Bin [31m0[m -> [32m147139[m bytes
+ datasets/TenFabrics/001/001-075.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-076.png                | Bin [31m0[m -> [32m146188[m bytes
+ datasets/TenFabrics/001/001-076.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-077.png                | Bin [31m0[m -> [32m147141[m bytes
+ datasets/TenFabrics/001/001-077.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-078.png                | Bin [31m0[m -> [32m147987[m bytes
+ datasets/TenFabrics/001/001-078.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-079.png                | Bin [31m0[m -> [32m149161[m bytes
+ datasets/TenFabrics/001/001-079.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-080.png                | Bin [31m0[m -> [32m150231[m bytes
+ datasets/TenFabrics/001/001-080.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-081.png                | Bin [31m0[m -> [32m151055[m bytes
+ datasets/TenFabrics/001/001-081.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-082.png                | Bin [31m0[m -> [32m150724[m bytes
+ datasets/TenFabrics/001/001-082.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-083.png                | Bin [31m0[m -> [32m149946[m bytes
+ datasets/TenFabrics/001/001-083.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-084.png                | Bin [31m0[m -> [32m150444[m bytes
+ datasets/TenFabrics/001/001-084.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-085.png                | Bin [31m0[m -> [32m154312[m bytes
+ datasets/TenFabrics/001/001-085.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-086.png                | Bin [31m0[m -> [32m150704[m bytes
+ datasets/TenFabrics/001/001-086.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-087.png                | Bin [31m0[m -> [32m148580[m bytes
+ datasets/TenFabrics/001/001-087.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-088.png                | Bin [31m0[m -> [32m147532[m bytes
+ datasets/TenFabrics/001/001-088.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-089.png                | Bin [31m0[m -> [32m146958[m bytes
+ datasets/TenFabrics/001/001-089.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-090.png                | Bin [31m0[m -> [32m149608[m bytes
+ datasets/TenFabrics/001/001-090.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-091.png                | Bin [31m0[m -> [32m146601[m bytes
+ datasets/TenFabrics/001/001-091.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-092.png                | Bin [31m0[m -> [32m147462[m bytes
+ datasets/TenFabrics/001/001-092.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-093.png                | Bin [31m0[m -> [32m148536[m bytes
+ datasets/TenFabrics/001/001-093.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-094.png                | Bin [31m0[m -> [32m148341[m bytes
+ datasets/TenFabrics/001/001-094.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-095.png                | Bin [31m0[m -> [32m149476[m bytes
+ datasets/TenFabrics/001/001-095.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-096.png                | Bin [31m0[m -> [32m151056[m bytes
+ datasets/TenFabrics/001/001-096.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-097.png                | Bin [31m0[m -> [32m152267[m bytes
+ datasets/TenFabrics/001/001-097.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-098.png                | Bin [31m0[m -> [32m151812[m bytes
+ datasets/TenFabrics/001/001-098.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-099.png                | Bin [31m0[m -> [32m151741[m bytes
+ datasets/TenFabrics/001/001-099.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-100.png                | Bin [31m0[m -> [32m153338[m bytes
+ datasets/TenFabrics/001/001-100.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-101.png                | Bin [31m0[m -> [32m152192[m bytes
+ datasets/TenFabrics/001/001-101.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-102.png                | Bin [31m0[m -> [32m148999[m bytes
+ datasets/TenFabrics/001/001-102.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-103.png                | Bin [31m0[m -> [32m146881[m bytes
+ datasets/TenFabrics/001/001-103.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-104.png                | Bin [31m0[m -> [32m147187[m bytes
+ datasets/TenFabrics/001/001-104.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-105.png                | Bin [31m0[m -> [32m146711[m bytes
+ datasets/TenFabrics/001/001-105.txt                |  21 [32m+++[m
+ datasets/TenFabrics/001/001-106.png                | Bin [31m0[m -> [32m147203[m bytes
+ datasets/TenFabrics/001/001-106.txt                |  21 [32m+++[

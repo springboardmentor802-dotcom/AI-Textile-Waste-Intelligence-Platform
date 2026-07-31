@@ -1,0 +1,49 @@
+h1{
+    color:rgb(166, 230, 64);
+}
+
+P{
+    color:rgb(7, 8, 50);
+}
+
+button{
+    color:violet;
+    background-color:rgb(45, 65, 45);
+}
+
+body{
+    /* background-color:rgb(213, 185, 189); */
+    background-color: #383e63;
+}
+.myid{
+    background-color: green;
+}
+
+/* line allignment */
+#p1{
+    text-align:right;
+}
+h2{
+    text-align:center;
+    text-decoration:blue line-through;
+}
+
+/* changing heading from default bold to normal/lighter */
+#id1{
+    color:skyblue;
+    text-align: center;
+    text-decoration: black wavy underline;
+    font-weight:lighter;
+}
+#id2{
+    color:rgb(12, 12, 12);
+    text-decoration: none;
+    font-weight:900;
+}
+#one{
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana;
+    font-size:30px;
+    line-height:normal;
+    text-transform:uppercase;
+    
+}

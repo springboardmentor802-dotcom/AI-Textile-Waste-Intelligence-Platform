@@ -1,0 +1,66 @@
+*{
+   color:white
+}
+#navbar{
+    height:60px;
+    background-color: black;
+    border-style:solid;
+}
+button{
+    background-color:#f08804;
+}
+#logo{
+    color: #f08804;
+    font-size:20px;
+}
+a{
+    margin-right:200px;
+    text-decoration:none;
+}
+.contentbox{
+    height: 100px;
+    width: 100px;
+    border:2px solid black;
+    text-align: center;
+    display:inline-block;
+    padding:60px 8px 4px 8px;
+    /* position: fixed; */
+    background-image:url("https://pluspng.com/img-png/shirt-hd-png-plaid-shirt-starting-at-85-1618.png") ;
+    background-size:cover;
+}
+.contentbox1{
+    height: 100px;
+    width: 100px;
+    border:2px solid black;
+    text-align: center;
+    display:inline-block;
+    padding:60px 8px 4px 8px;
+    position: relative;
+    top:100px;
+    left:50px;
+    /* z-index:2; */
+    background-image:url("https://tse3.mm.bing.net/th/id/OIP.Jf11XUHEnXsV59-6EpzSfQHaJ4?pid=Api&P=0&h=180") ;
+    background-size:cover;
+}
+.contentbox3{
+    height: 100px;
+    width: 100px;
+    border:2px solid black;
+    text-align: center;
+    display:inline-block;
+    padding:60px 8px 4px 8px;
+    position:sticky;
+    top:200px;
+    left:200px;
+    background-image:url("https://tse1.mm.bing.net/th/id/OIP.pRLPE-9G5n1tt4kyV_lfBwHaJC?pid=Api&P=0&h=180") ;
+    background-size:cover;
+    color:yellow
+}
+#content{
+    height:600px;
+}
+footer{
+    background-color:black;
+    color:white;
+    text-align:center;
+}

@@ -4,14 +4,15 @@ from app.models.inventory import Inventory
 
 
 def add_inventory(db: Session, data):
-
     waste = Inventory(
-        waste_type=data.waste_type,
-        fabric_type=data.fabric_type,
-        quantity=data.quantity,
-        unit=data.unit,
-        location=data.location,
-        status=data.status,
+    waste_type=data.waste_type,
+    fabric_type=data.fabric_type,
+    quantity=data.quantity,
+    unit=data.unit,
+    location=data.location,
+    status=data.status,
+    image_path=data.image_path,
+    prediction=data.prediction
     )
 
     db.add(waste)

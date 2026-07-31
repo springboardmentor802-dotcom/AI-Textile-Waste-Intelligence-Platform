@@ -1,0 +1,96 @@
+
+*{
+    margin:0;
+    font-family: Arial;
+    border: border-box;
+
+}
+
+.navbar{
+    height:60px;
+    background-color: #0F1111;
+    color:white;
+    display:flex;
+    align-items: center;
+    justify-content: space-evenly;
+}
+.nav-logo{
+    height: 50px;
+    width: 100px;
+}
+.logo{
+    background-image:url("https://up.yimg.com/ib/th/id/OIP.jrf82BrfUlBS15n-X3tTLgHaE9?pid=Api&rs=1&c=1&qlt=95&w=142&h=95");
+    background-size: cover;
+    height:50px;
+    width:100%;
+}
+.border:hover{
+    border: 1.4px solid white;
+}
+
+.add-first{
+    color:#cccccc;
+    font-size: 0.85rem;
+    margin-left:18px;
+}
+.add-second{
+    font-size: 1rem;
+    margin-left:1px ;
+}
+.add-icon{
+    display:flex;
+}
+.nav-search{
+    display: flex;
+    justify-content: space-evenly;
+    background-color: pink;
+    height: 40px;
+    width:620px;
+    border-radius:4px ;
+}
+.nav-search:hover{
+    border:2px solid orange
+}
+
+.search-select{
+    background-color: #f3f3f3;
+    width:50px;
+    text-align: center;
+    border-top-left-radius:4px ;
+    border-bottom-left-radius:4px;
+}
+
+.search-input{
+    width:100%;
+    font-size:1rem;
+    border:none;
+}
+
+.search-icon{
+    width:45px;
+    display:flex;
+    justify-content: center;
+    align-items:center ;
+    font-size:1.2rem;
+    background-color: rgb(236, 192, 33);
+    border-top-right-radius:4px ;
+    border-bottom-right-radius:4px;
+    color:#0F1111
+
+}
+
+span{
+    font-size: 0.7rem;
+}
+.nav-second{
+    font-size:0.85rem;
+    font-weight:700 ;
+}
+
+.nav-cart i {
+    font-size: 30px
+}
+.nav-cart{
+    font-size: 0.85rem;
+    font-weight:700
+}

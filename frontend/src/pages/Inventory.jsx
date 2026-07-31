@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { getInventory } from "../services/inventoryService";
+import AddWasteForm from "../components/inventory/AddWasteForm";
 
 function Inventory() {
-
   const [inventory, setInventory] = useState([]);
 
   useEffect(() => {
@@ -25,32 +25,25 @@ function Inventory() {
         Inventory Management
       </h1>
 
-      <table className="table-auto w-full border">
+      <AddWasteForm />
+
+      <table className="table-auto w-full border border-collapse">
 
         <thead>
-
           <tr className="bg-green-700 text-white">
-
             <th className="p-3">Waste</th>
-
             <th>Fabric</th>
-
             <th>Quantity</th>
-
             <th>Unit</th>
-
             <th>Location</th>
-
             <th>Status</th>
-
+            <th>Image</th>
+            <th>Prediction</th>
           </tr>
-
         </thead>
 
         <tbody>
-
           {inventory.map((item) => (
-
             <tr key={item.id} className="border">
 
               <td className="p-3">{item.waste_type}</td>
@@ -65,10 +58,24 @@ function Inventory() {
 
               <td>{item.status}</td>
 
+              <td>
+                {item.image_path ? (
+                  <img
+                    src={`http://127.0.0.1:8000/${item.image_path}`}
+                    alt="Waste"
+                    className="w-20 h-20 object-cover rounded"
+                  />
+                ) : (
+                  "No Image"
+                )}
+              </td>
+
+              <td>
+                {item.prediction ? item.prediction : "Pending"}
+              </td>
+
             </tr>
-
           ))}
-
         </tbody>
 
       </table>

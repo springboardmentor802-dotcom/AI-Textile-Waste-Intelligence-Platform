@@ -1,0 +1,95 @@
+body{
+    text-align:center;
+}
+div{
+    height: 100px;
+    width: 150px;
+    display: inline-block;
+    border: 2px solid black;
+    transition-property:all;
+    transition-duration: 1.2s;
+    transition-timing-function: ease-in-out;
+    transition-delay: 0.2s;
+    /* transform:scale(0.5) */
+    animation-name: Anime;
+    animation-duration: 1s;
+    animation-iteration-count:6;
+    animation-delay:0s;
+    animation-direction: alternate;
+
+    /* animation-name:crcle 3s ease-in 0s infinite normal; */
+
+}
+#container{
+    width: 600px;
+    height: 600px;
+    display: flex;
+    flex-direction: row;
+    /* flex-direction: column; */
+    justify-content:center;
+    flex-wrap:wrap;
+    align-items: center ;
+    align-content: center;
+}
+#box1{
+    background-color: aqua;
+    transform:rotate(-45deg);
+    
+}
+#box2{
+    background-color: coral;
+    height: 200px;
+}
+#box3{
+    background-color: lightgreen;
+    transform:rotate(45deg);
+}
+#box4{
+    background-color: lightblue;
+}
+div:hover{
+    background-color: yellow;
+    color:red;
+    transform:rotate(90deg);
+    /* transform:translateX(150px); */
+    /* transform:skew(50deg) ; */
+}
+div:active{
+    background-color: orange;
+    color: white;
+}
+#box2:hover{
+    background-color:black ;
+    font-size: 40px;;
+}
+
+
+@keyframes Anime{
+    /* from{ */  0%{
+        transform:rotate(0deg);
+    }
+    /* to{ */50%{
+        transform:rotate(120deg);
+    }
+    100%{
+        transform:rotate(280deg);
+    }
+}
+.load{
+    background-color:skyblue;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border:20px solid purple;
+    border-top:20px solid black;
+
+    animation:crcle 1s ease-in-out  0s infinite normal;
+}
+@keyframes crcle{
+    /* from{ */  0%{
+        transform:rotate(0deg);
+    }
+    100%{
+        transform:rotate(360deg);
+    }
+}

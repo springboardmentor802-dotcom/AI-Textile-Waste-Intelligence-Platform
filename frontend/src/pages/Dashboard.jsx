@@ -10,7 +10,7 @@ import {
 import { 
   Package, BarChart3, Shield, LogOut, Leaf, Scale, 
   RefreshCw, Upload, FileText, CheckCircle2, Image as ImageIcon, 
-  Database, Droplet, Box, Activity, Search
+  Droplet, Box, Activity, Search
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -95,7 +95,7 @@ const Dashboard = () => {
 
   // ---------------- REAL-TIME DYNAMIC DATA AGGREGATION FROM POSTGRESQL ----------------
 
-  // 1. Dynamic Material Distribution for Pie / Doughnut Chart (Dataset + Inventory Combined)
+  // 1. Dynamic Material Distribution for Pie / Doughnut Chart
   const calculateFabricDistribution = () => {
     const combinedItems = [
       ...dataset.map(d => ({ fabric: d.material_type || d.Material_Type || 'Cotton' })),
@@ -127,7 +127,7 @@ const Dashboard = () => {
     }));
   };
 
-  // 2. Dynamic Monthly Waste Diversion Line Chart (From Logged Inventory)
+  // 2. Dynamic Monthly Waste Diversion Line Chart
   const calculateMonthlyDiversion = () => {
     if (!inventory || inventory.length === 0) {
       return [
@@ -435,26 +435,7 @@ const Dashboard = () => {
             >
               <Package className="w-4 h-4 mr-3" /> Waste Inventory Logging
             </button>
-
-            <button
-              onClick={() => setActiveTab('dataset')}
-              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition ${
-                activeTab === 'dataset'
-                  ? 'bg-emerald-600 text-white font-semibold shadow-md'
-                  : 'text-slate-600 hover:bg-slate-50'
-              }`}
-            >
-              <Database className="w-4 h-4 mr-3" /> Circularity Dataset
-            </button>
           </nav>
-
-          {/* Quick Help Widget */}
-          <div className="bg-slate-900 text-white p-5 rounded-2xl shadow-sm border border-slate-800 space-y-2">
-            <span className="text-xs text-emerald-400 font-mono font-bold uppercase tracking-wider">System Status</span>
-            <p className="text-xs text-slate-300 leading-relaxed">
-              FastAPI ML Pipeline running active image classification, 5-tier circularity scoring engine, and audit log tracking.
-            </p>
-          </div>
         </aside>
 
         {/* Content Area */}
@@ -971,44 +952,6 @@ const Dashboard = () => {
                     </tbody>
                   </table>
                 </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 5: CIRCULARITY DATASET */}
-          {activeTab === 'dataset' && (
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div>
-                  <h2 className="text-lg font-bold text-slate-800 flex items-center">
-                    <Database className="w-5 h-5 mr-2 text-emerald-600" />
-                    Sustainable Fashion Dataset Inspection
-                  </h2>
-                  <p className="text-slate-500 text-xs mt-0.5">Showing live entries from PostgreSQL database</p>
-                </div>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm border-collapse">
-                  <thead>
-                    <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
-                      <th className="py-3.5 px-4">Material Type</th>
-                      <th className="py-3.5 px-4">Material Condition</th>
-                      <th className="py-3.5 px-4">Weight (KG)</th>
-                      <th className="py-3.5 px-4">Recyclability Score</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 text-slate-700">
-                    {dataset.map((row, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50 transition">
-                        <td className="py-3.5 px-4 font-medium text-slate-800">{row.material_type || row.Material_Type || 'Cotton'}</td>
-                        <td className="py-3.5 px-4">{row.material_condition || row.Material_Condition || 'Good'}</td>
-                        <td className="py-3.5 px-4 font-mono">{row.waste_weight_kg || row.Waste_Weight_KG || 50.0}</td>
-                        <td className="py-3.5 px-4 font-semibold text-emerald-600">{row.recyclability_score || row.Recyclability_Score || 75.0}%</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
               </div>
             </div>
           )}

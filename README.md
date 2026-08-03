@@ -56,8 +56,7 @@ Textile Waste Inventory Management Status
 * **Actionable Recommendations:** Recommends the best recycling or disposal method, such as *Mechanical Shredding*, *Chemical Recycling*, or *Downcycling*.
 * **Environmental Footprint Estimation:** Fetches data from the fashion dataset to calculate saved **CO₂ (KG)** and **Water (Liters)**.
 
-### 📌 Milestone 3 Status Summary
-
+**Project Verification State:** Milestone 3 (`dn28github`)
 | Feature / Task Spec | Implementation Mechanism | Status |
 | :--- | :--- | :---: |
 | **Sustainability Intelligence Engine** | Uses a weighted scoring model to measure fabric quality, reuse potential, and overall recyclability. | Completed |

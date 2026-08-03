@@ -35,6 +35,7 @@ export const inventoryService = {
     return response.data;
   },
   registerWaste: async (data) => {
+    // Exact matching POST endpoint for FastAPI backend
     const response = await API.post('/inventory/', data);
     return response.data;
   },

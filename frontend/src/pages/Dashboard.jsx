@@ -84,8 +84,8 @@ const Dashboard = () => {
         sustainabilityService.getDataset(5000).catch(() => ({ data: [] })),
         inventoryService.getInventory().catch(() => ({ data: [] }))
       ]);
-      setDataset(datasetRes.data || []);
-      setInventory(inventoryRes.data || []);
+      setDataset(datasetRes.data || datasetRes || []);
+      setInventory(inventoryRes.data || inventoryRes || []);
     } catch (err) {
       console.error('Error loading dashboard data:', err);
     } finally {
@@ -95,9 +95,14 @@ const Dashboard = () => {
 
   // ---------------- REAL-TIME DYNAMIC DATA AGGREGATION FROM POSTGRESQL ----------------
 
-  // 1. Dynamic Material Distribution for Pie / Doughnut Chart
+  // 1. Dynamic Material Distribution for Pie / Doughnut Chart (Dataset + Inventory Combined)
   const calculateFabricDistribution = () => {
-    if (!dataset || dataset.length === 0) {
+    const combinedItems = [
+      ...dataset.map(d => ({ fabric: d.material_type || d.Material_Type || 'Cotton' })),
+      ...inventory.map(i => ({ fabric: i.fabric_type || 'Cotton' }))
+    ];
+
+    if (combinedItems.length === 0) {
       return [
         { name: 'Cotton', value: 45, color: '#10B981' },
         { name: 'Denim', value: 25, color: '#3B82F6' },
@@ -109,12 +114,12 @@ const Dashboard = () => {
     const colorPalette = ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EC4899', '#06B6D4', '#6366F1'];
     const counts = {};
 
-    dataset.forEach(item => {
-      const mat = item.material_type || item.Material_Type || 'Cotton Blend';
+    combinedItems.forEach(item => {
+      const mat = item.fabric || 'Cotton';
       counts[mat] = (counts[mat] || 0) + 1;
     });
 
-    const total = dataset.length;
+    const total = combinedItems.length;
     return Object.keys(counts).map((key, idx) => ({
       name: key,
       value: Math.round((counts[key] / total) * 100) || 1,
@@ -122,9 +127,59 @@ const Dashboard = () => {
     }));
   };
 
-  // 2. Dynamic Circularity Score Tiers for Bar Chart
+  // 2. Dynamic Monthly Waste Diversion Line Chart (From Logged Inventory)
+  const calculateMonthlyDiversion = () => {
+    if (!inventory || inventory.length === 0) {
+      return [
+        { month: 'Jan', weightKg: 120 },
+        { month: 'Feb', weightKg: 280 },
+        { month: 'Mar', weightKg: 450 },
+        { month: 'Apr', weightKg: 620 },
+        { month: 'May', weightKg: 780 },
+        { month: 'Jun', weightKg: 950 },
+      ];
+    }
+
+    const monthsMap = { Jan: 0, Feb: 0, Mar: 0, Apr: 0, May: 0, Jun: 0, Jul: 0, Aug: 0, Sep: 0, Oct: 0, Nov: 0, Dec: 0 };
+    let hasValidData = false;
+
+    inventory.forEach(item => {
+      const dateVal = item.collection_date || item.created_at;
+      if (dateVal) {
+        const dateObj = new Date(dateVal);
+        const monthName = dateObj.toLocaleString('default', { month: 'short' });
+        if (monthsMap[monthName] !== undefined) {
+          monthsMap[monthName] += parseFloat(item.quantity || 0);
+          hasValidData = true;
+        }
+      }
+    });
+
+    if (!hasValidData) {
+      const totalInventoryQty = inventory.reduce((acc, i) => acc + (parseFloat(i.quantity) || 0), 0);
+      return [
+        { month: 'Jan', weightKg: 100 },
+        { month: 'Feb', weightKg: 200 },
+        { month: 'Mar', weightKg: 350 },
+        { month: 'Apr', weightKg: 500 },
+        { month: 'May', weightKg: 650 },
+        { month: 'Current', weightKg: totalInventoryQty || 800 },
+      ];
+    }
+
+    return Object.keys(monthsMap)
+      .filter(m => monthsMap[m] > 0)
+      .map(m => ({ month: m, weightKg: monthsMap[m] }));
+  };
+
+  // 3. Dynamic Circularity Score Tiers for Bar Chart
   const calculateScoreDistribution = () => {
-    if (!dataset || dataset.length === 0) {
+    const combinedItems = [
+      ...dataset.map(d => ({ score: parseFloat(d.recyclability_score || d.Recyclability_Score || 75) })),
+      ...inventory.map(i => ({ score: i.condition === 'Excellent' ? 95 : i.condition === 'Good' ? 80 : i.condition === 'Fair' ? 65 : 40 }))
+    ];
+
+    if (combinedItems.length === 0) {
       return [
         { range: 'High Potential (80-100)', percentage: 60, fill: '#10B981' },
         { range: 'Moderate (50-80)', percentage: 30, fill: '#F59E0B' },
@@ -133,14 +188,14 @@ const Dashboard = () => {
     }
 
     let high = 0, mod = 0, low = 0;
-    dataset.forEach(item => {
-      const score = item.recyclability_score || item.Recyclability_Score || 75;
+    combinedItems.forEach(item => {
+      const score = item.score;
       if (score >= 80) high++;
       else if (score >= 50) mod++;
       else low++;
     });
 
-    const total = dataset.length;
+    const total = combinedItems.length;
     return [
       { range: 'High Potential (80-100)', percentage: Math.round((high / total) * 100), fill: '#10B981' },
       { range: 'Moderate (50-80)', percentage: Math.round((mod / total) * 100), fill: '#F59E0B' },
@@ -148,17 +203,8 @@ const Dashboard = () => {
     ];
   };
 
-  // 3. Dynamic Monthly Waste Diversion Line Chart
-  const monthlyDiversionData = [
-    { month: 'Jan', weightKg: 120 },
-    { month: 'Feb', weightKg: 280 },
-    { month: 'Mar', weightKg: 450 },
-    { month: 'Apr', weightKg: 620 },
-    { month: 'May', weightKg: 780 },
-    { month: 'Jun', weightKg: 950 },
-  ];
-
   const dynamicFabricData = calculateFabricDistribution();
+  const dynamicMonthlyData = calculateMonthlyDiversion();
   const dynamicScoreData = calculateScoreDistribution();
 
   // Calculated Dynamic Environmental & ESG Metrics from PostgreSQL
@@ -481,7 +527,7 @@ const Dashboard = () => {
                   <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
                     <div>
                       <h3 className="font-bold text-slate-800 text-sm">Material Distribution Index</h3>
-                      <p className="text-slate-400 text-xs">Live percentages calculated from {dataset.length} PostgreSQL entries</p>
+                      <p className="text-slate-400 text-xs">Live percentages calculated from {dataset.length + inventory.length} entries</p>
                     </div>
                     <div className="h-64 w-full">
                       <ResponsiveContainer width="100%" height="100%">
@@ -514,7 +560,7 @@ const Dashboard = () => {
                     </div>
                     <div className="h-64 w-full">
                       <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={monthlyDiversionData} margin={{ top: 10, right: 20, left: -10, bottom: 0 }}>
+                        <LineChart data={dynamicMonthlyData} margin={{ top: 10, right: 20, left: -10, bottom: 0 }}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
                           <XAxis dataKey="month" stroke="#94A3B8" fontSize={11} />
                           <YAxis stroke="#94A3B8" fontSize={11} />
@@ -529,7 +575,7 @@ const Dashboard = () => {
                   <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3 lg:col-span-2">
                     <div>
                       <h3 className="font-bold text-slate-800 text-sm">Circularity Score Distribution (%)</h3>
-                      <p className="text-slate-400 text-xs">Calculated dynamically across PostgreSQL dataset items</p>
+                      <p className="text-slate-400 text-xs">Calculated dynamically across active database items</p>
                     </div>
                     <div className="h-64 w-full">
                       <ResponsiveContainer width="100%" height="100%">

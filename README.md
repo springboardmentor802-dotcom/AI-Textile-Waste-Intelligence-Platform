@@ -57,13 +57,16 @@ Textile Waste Inventory Management Status
 * **Environmental Footprint Estimation:** Fetches data from the fashion dataset to calculate saved **CO₂ (KG)** and **Water (Liters)**.
 
 **Project Verification State:** Milestone 3 (`dn28github`)
+
+## Core Platform: Sustainability Intelligence & Recommendations
+
 | Feature / Task Spec | Implementation Mechanism | Status |
 | :--- | :--- | :---: |
-| **Sustainability Intelligence Engine** | Uses a weighted scoring model to measure fabric quality, reuse potential, and overall recyclability. | Completed |
-| **Recycling Recommendation Workflows** | Automatically suggests the best recycling path (like Mechanical Shredding, Upcycling, or Chemical Processing). | Completed |
-| **Environmental Impact Assessment Models** | Calculates saved carbon emissions ($\text{CO}_2$), water saved, and landfill space reduced for each batch. | Completed |
-| **Circular Economy Analytics** | Aggregates data from the database and waste inventory to track live recycling progress and trends. | Completed |
-| **Sustainability Dashboards** | Built with React and Recharts to display interactive charts, live waste logging, and ESG scorecards. | Completed |
+| **Sustainability Intelligence Engine** | Uses a weighted scoring model to measure fabric quality, reuse potential, and overall recyclability. | **✔️ Completed** |
+| **Recycling Recommendation Workflows** | Automatically suggests the best recycling path (like Mechanical Shredding, Upcycling, or Chemical Processing). | **✔️ Completed** |
+| **Environmental Impact Assessment Models** | Calculates saved carbon emissions ($\text{CO}_2$), water saved, and landfill space reduced for each batch. | **✔️ Completed** |
+| **Circular Economy Analytics** | Aggregates data from the database and waste inventory to track live recycling progress and trends. | **✔️ Completed** |
+| **Sustainability Dashboards** | Built with React and Recharts to display interactive charts, live waste logging, and ESG scorecards. | **✔️ Completed** |
 
 ---
 

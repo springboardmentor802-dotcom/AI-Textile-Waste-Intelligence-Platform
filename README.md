@@ -55,3 +55,42 @@ Textile Waste Inventory Management Status
 * **Circularity Index Scoring:** Gives an overall recyclability score (0–100%) based on fabric blend complexity and physical damage.
 * **Actionable Recommendations:** Recommends the best recycling or disposal method, such as *Mechanical Shredding*, *Chemical Recycling*, or *Downcycling*.
 * **Environmental Footprint Estimation:** Fetches data from the fashion dataset to calculate saved **CO₂ (KG)** and **Water (Liters)**.
+
+### 📌 Milestone 3 Status Summary
+
+| Feature / Task Spec | Implementation Mechanism | Status |
+| :--- | :--- | :---: |
+| **Sustainability Intelligence Engine** | Uses a weighted scoring model to measure fabric quality, reuse potential, and overall recyclability. | Completed |
+| **Recycling Recommendation Workflows** | Automatically suggests the best recycling path (like Mechanical Shredding, Upcycling, or Chemical Processing). | Completed |
+| **Environmental Impact Assessment Models** | Calculates saved carbon emissions ($\text{CO}_2$), water saved, and landfill space reduced for each batch. | Completed |
+| **Circular Economy Analytics** | Aggregates data from the database and waste inventory to track live recycling progress and trends. | Completed |
+| **Sustainability Dashboards** | Built with React and Recharts to display interactive charts, live waste logging, and ESG scorecards. | Completed |
+
+---
+
+### 🛠️ Implementation Brief & Technical Overview
+
+#### 1. Implement Sustainability Intelligence Engine
+
+* **Smart Scoring System:** Calculates a total score ($0\text{--}100\%$) for each fabric based on its type, condition, and weight.
+* **Backend Connection:** Connected to the `/analytics/assess-sustainability` endpoint to process calculations instantly in real time.
+
+#### 2. Build Recycling Recommendation Workflows
+
+* **Smart Decision Making:** Automatically guides textile waste to the right process, such as *Mechanical Shredding*, *Direct Garment Upcycling*, or *Chemical Processing*.
+* **Exportable Reports:** Generates complete summary reports in text and PDF formats for easy record-keeping.
+
+#### 3. Develop Environmental Impact Assessment Models
+
+* **Eco-Savings Calculator:** Measures real environmental benefits by estimating saved $\text{CO}_2$ ($\text{KG}$), water saved ($\text{Liters}$), and landfill space saved ($\text{m}^3$).
+* **Live Integration:** Automatically updates eco-savings values whenever new waste batches are added to the system.
+
+#### 4. Generate Circular Economy Analytics
+
+* **Data Aggregation:** Collects information from the database and user logs to measure overall platform recycling performance.
+* **Smart Categorization:** Groups samples into recyclability tiers (High Potential, Moderate, and Low Recyclability).
+
+#### 5. Create Sustainability Dashboards
+
+* **Interactive Charts:** Uses Recharts to show material distribution (Doughnut Chart), monthly waste reduction trends (Line Chart), and score tiers (Bar Chart).
+* **Live Waste Logging:** Allows users to log new waste batches and instantly updates all analytics on the screen.

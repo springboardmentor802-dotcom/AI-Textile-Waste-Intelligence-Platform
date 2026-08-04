@@ -1,0 +1,329 @@
+{
+  "metadata": {
+    "name": "Textile Recovery Recommendation Rules",
+    "version": "1.0.0",
+    "description": "Explainable rule-based recommendations for textile reuse, repair, recycling, upcycling, recovery, donation, and specialized treatment.",
+    "default_recommendation": "Manual Review"
+  },
+
+  "priority_levels": {
+    "critical": 100,
+    "high": 80,
+    "medium": 60,
+    "low": 40
+  },
+
+  "rules": [
+    {
+      "rule_id": "RULE-001",
+      "priority": 100,
+      "name": "Hazardous contamination handling",
+      "conditions": {
+        "contamination": ["hazardous"]
+      },
+      "recommendation": "Hazardous Textile Waste Treatment",
+      "recovery_category": "Specialized Disposal",
+      "reason": "Hazardous contamination requires controlled treatment and must not enter normal reuse or recycling workflows.",
+      "requires_manual_review": true
+    },
+
+    {
+      "rule_id": "RULE-002",
+      "priority": 95,
+      "name": "High contamination handling",
+      "conditions": {
+        "contamination": ["high"]
+      },
+      "recommendation": "Specialized Treatment",
+      "recovery_category": "Industrial Recovery",
+      "reason": "High contamination prevents direct reuse and may require cleaning, separation, or specialized industrial processing.",
+      "requires_manual_review": true
+    },
+
+    {
+      "rule_id": "RULE-003",
+      "priority": 70,
+      "name": "Severely damaged textile",
+      "conditions": {
+        "damage_level": ["severe"],
+        "contamination": ["none", "low", "medium"]
+      },
+      "recommendation": "Fiber Recovery",
+      "recovery_category": "Recycling",
+      "reason": "Severely damaged textiles are unsuitable for direct reuse but may still contain recoverable fibers.",
+      "requires_manual_review": false
+    },
+
+    {
+      "rule_id": "RULE-004",
+      "priority": 85,
+      "name": "Excellent condition direct reuse",
+      "conditions": {
+        "condition": ["excellent"],
+        "contamination": ["none", "low"],
+        "damage_level": ["none", "minor"]
+      },
+      "recommendation": "Direct Reuse",
+      "recovery_category": "Reuse",
+      "reason": "The textile is in excellent condition with minimal contamination and can remain in use without major processing.",
+      "requires_manual_review": false
+    },
+
+    {
+      "rule_id": "RULE-005",
+      "priority": 82,
+      "name": "Good condition donation",
+      "conditions": {
+        "condition": ["good"],
+        "contamination": ["none", "low"],
+        "damage_level": ["none", "minor"]
+      },
+      "recommendation": "Donation",
+      "recovery_category": "Reuse",
+      "reason": "The textile remains usable and can be redistributed through donation or resale channels.",
+      "requires_manual_review": false
+    },
+
+    {
+      "rule_id": "RULE-006",
+      "priority": 80,
+      "name": "Repairable textile",
+      "conditions": {
+        "condition": ["fair", "good"],
+        "contamination": ["none", "low"],
+        "damage_level": ["moderate"]
+      },
+      "recommendation": "Repair and Reuse",
+      "recovery_category": "Repair",
+      "reason": "The textile has repairable damage and can return to use after minor restoration.",
+      "requires_manual_review": false
+    },
+
+    {
+      "rule_id": "RULE-007",
+      "priority": 78,
+      "name": "Cotton mechanical recycling",
+      "conditions": {
+        "material": ["cotton"],
+        "condition": ["poor", "fair"],
+        "contamination": ["none", "low", "medium"],
+        "damage_level": ["moderate", "severe"]
+      },
+      "recommendation": "Mechanical Recycling",
+      "recovery_category": "Recycling",
+      "reason": "Cotton fibers can often be mechanically recovered when the textile is no longer suitable for reuse.",
+      "requires_manual_review": false
+    },
+
+    {
+      "rule_id": "RULE-008",
+      "priority": 78,
+      "name": "Linen mechanical recycling",
+      "conditions": {
+        "material": ["linen"],
+        "condition": ["poor", "fair"],
+        "contamination": ["none", "low", "medium"],
+        "damage_level": ["moderate", "severe"]
+      },
+      "recommendation": "Mechanical Recycling",
+      "recovery_category": "Recycling",
+      "reason": "Linen textiles may be processed through mechanical fiber recovery when reuse is not appropriate.",
+      "requires_manual_review": false
+    },
+
+    {
+      "rule_id": "RULE-009",
+      "priority": 76,
+      "name": "Wool fiber recovery",
+      "conditions": {
+        "material": ["wool"],
+        "condition": ["poor", "fair"],
+        "contamination": ["none", "low", "medium"]
+      },
+      "recommendation": "Fiber Recovery",
+      "recovery_category": "Recycling",
+      "reason": "Wool fibers can be recovered and reused in lower-grade textile applications.",
+      "requires_manual_review": false
+    },
+
+    {
+      "rule_id": "RULE-010",
+      "priority": 76,
+      "name": "Silk reuse and upcycling",
+      "conditions": {
+        "material": ["silk"],
+        "condition": ["fair", "good", "excellent"],
+        "contamination": ["none", "low"]
+      },
+      "recommendation": "Upcycling",
+      "recovery_category": "Upcycling",
+      "reason": "Silk has high reuse value and is suitable for creative reuse or upcycling when direct reuse is limited.",
+      "requires_manual_review": false
+    },
+
+    {
+      "rule_id": "RULE-011",
+      "priority": 75,
+      "name": "Denim upcycling",
+      "conditions": {
+        "material": ["denim"],
+        "condition": ["fair", "poor"],
+        "contamination": ["none", "low"],
+        "damage_level": ["minor", "moderate"]
+      },
+      "recommendation": "Upcycling",
+      "recovery_category": "Upcycling",
+      "reason": "Denim is durable and can be converted into bags, accessories, patchwork products, or home-decor items.",
+      "requires_manual_review": false
+    },
+
+    {
+      "rule_id": "RULE-012",
+      "priority": 74,
+      "name": "Denim mechanical recycling",
+      "conditions": {
+        "material": ["denim"],
+        "condition": ["poor"],
+        "contamination": ["none", "low", "medium"],
+        "damage_level": ["severe"]
+      },
+      "recommendation": "Mechanical Recycling",
+      "recovery_category": "Recycling",
+      "reason": "Severely damaged denim may be shredded and processed for fiber recovery.",
+      "requires_manual_review": false
+    },
+
+    {
+      "rule_id": "RULE-013",
+      "priority": 75,
+      "name": "Polyester chemical recycling",
+      "conditions": {
+        "material": ["polyester"],
+        "condition": ["poor", "fair"],
+        "contamination": ["none", "low", "medium"],
+        "damage_level": ["moderate", "severe"]
+      },
+      "recommendation": "Chemical Recycling",
+      "recovery_category": "Recycling",
+      "reason": "Polyester can be processed through chemical recycling when suitable infrastructure is available.",
+      "requires_manual_review": false
+    },
+
+    {
+      "rule_id": "RULE-014",
+      "priority": 72,
+      "name": "Polyester mechanical recycling",
+      "conditions": {
+        "material": ["polyester"],
+        "condition": ["good", "fair"],
+        "contamination": ["none", "low"]
+      },
+      "recommendation": "Mechanical Recycling",
+      "recovery_category": "Recycling",
+      "reason": "Clean polyester textiles may be processed through mechanical recycling.",
+      "requires_manual_review": false
+    },
+
+    {
+      "rule_id": "RULE-015",
+      "priority": 75,
+      "name": "Nylon chemical recycling",
+      "conditions": {
+        "material": ["nylon"],
+        "condition": ["poor", "fair"],
+        "contamination": ["none", "low", "medium"]
+      },
+      "recommendation": "Chemical Recycling",
+      "recovery_category": "Recycling",
+      "reason": "Nylon may be suitable for specialized chemical recycling or polymer recovery.",
+      "requires_manual_review": false
+    },
+
+    {
+      "rule_id": "RULE-016",
+      "priority": 70,
+      "name": "Rayon specialized recycling",
+      "conditions": {
+        "material": ["rayon"],
+        "condition": ["poor", "fair"],
+        "contamination": ["none", "low", "medium"]
+      },
+      "recommendation": "Specialized Recycling",
+      "recovery_category": "Recycling",
+      "reason": "Rayon may require specialized fiber recovery depending on its composition and condition.",
+      "requires_manual_review": true
+    },
+
+    {
+      "rule_id": "RULE-017",
+      "priority": 70,
+      "name": "Acrylic industrial recovery",
+      "conditions": {
+        "material": ["acrylic"],
+        "condition": ["poor", "fair"],
+        "contamination": ["none", "low", "medium"]
+      },
+      "recommendation": "Industrial Recovery",
+      "recovery_category": "Industrial Recovery",
+      "reason": "Acrylic recycling options are limited and may require specialized industrial recovery.",
+      "requires_manual_review": true
+    },
+
+    {
+      "rule_id": "RULE-018",
+      "priority": 85,
+      "name": "Mixed fabric material separation",
+      "conditions": {
+        "material": ["mixed_fabric"],
+        "condition": ["poor", "fair", "good"],
+        "contamination": ["none", "low", "medium"]
+      },
+      "recommendation": "Material Separation",
+      "recovery_category": "Specialized Recycling",
+      "reason": "Blended textiles should be separated by fiber composition before selecting a recycling process.",
+      "requires_manual_review": true
+    },
+
+    {
+      "rule_id": "RULE-019",
+      "priority": 68,
+      "name": "Low contamination general upcycling",
+      "conditions": {
+        "condition": ["fair"],
+        "contamination": ["none", "low"],
+        "damage_level": ["minor", "moderate"]
+      },
+      "recommendation": "Upcycling",
+      "recovery_category": "Upcycling",
+      "reason": "Textiles that are unsuitable for direct reuse may still be converted into new products.",
+      "requires_manual_review": false
+    },
+
+    {
+      "rule_id": "RULE-020",
+      "priority": 60,
+      "name": "Medium contamination cleaning",
+      "conditions": {
+        "contamination": ["medium"],
+        "condition": ["fair", "good"]
+      },
+      "recommendation": "Cleaning and Reassessment",
+      "recovery_category": "Preprocessing",
+      "reason": "The textile should be cleaned before a final recovery pathway is selected.",
+      "requires_manual_review": true
+    },
+
+    {
+      "rule_id": "RULE-021",
+      "priority": 40,
+      "name": "General recyclable textile fallback",
+      "conditions": {
+        "recyclable": [true]
+      },
+      "recommendation": "Fiber Recovery",
+      "recovery_category": "Recycling",
+      "reason": "The textile is identified as recyclable, but no more specific rule was matched.",
+      "requires_manual_review": true
+    }
+  ]
+}

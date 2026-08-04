@@ -1,0 +1,305 @@
+.recommendation-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
+  display: flex;
+  justify-content: flex-end;
+
+  background: rgba(15, 23, 42, 0.42);
+
+  backdrop-filter: blur(3px);
+}
+
+
+.recommendation-drawer {
+  width: min(520px, 100%);
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  background: #f8fbfa;
+
+  box-shadow:
+    -22px 0 55px
+    rgba(15, 23, 42, 0.18);
+
+  animation:
+    drawer-slide-in
+    0.24s ease;
+}
+
+
+.recommendation-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+
+  padding: 22px 24px;
+
+  background: #ffffff;
+
+  border-bottom: 1px solid #dfeae7;
+}
+
+
+.recommendation-drawer-header span {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #0f766e;
+
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+
+  text-transform: uppercase;
+}
+
+
+.recommendation-drawer-header h2 {
+  margin: 0;
+
+  color: #18312f;
+
+  font-size: 23px;
+}
+
+
+.recommendation-drawer-close {
+  width: 38px;
+  height: 38px;
+
+  display: grid;
+  place-items: center;
+
+  color: #526966;
+  background: #f1f6f4;
+
+  border: 0;
+  border-radius: 11px;
+
+  cursor: pointer;
+}
+
+
+.recommendation-drawer-close:hover {
+  color: #0f766e;
+  background: #e5f2ee;
+}
+
+
+.recommendation-drawer-body {
+  min-height: 0;
+
+  padding: 20px;
+
+  overflow-y: auto;
+}
+
+
+.drawer-primary-decision,
+.drawer-section {
+  padding: 18px;
+
+  background: #ffffff;
+
+  border: 1px solid #dce9e6;
+  border-radius: 18px;
+
+  box-shadow:
+    0 8px 22px
+    rgba(15, 23, 42, 0.035);
+}
+
+
+.drawer-section {
+  margin-top: 14px;
+}
+
+
+.drawer-primary-decision > span,
+.drawer-section-heading > span {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: #0f766e;
+
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+
+  text-transform: uppercase;
+}
+
+
+.drawer-primary-decision h3,
+.drawer-section-heading h3 {
+  margin: 0;
+
+  color: #1d3734;
+}
+
+
+.drawer-primary-decision h3 {
+  font-size: 23px;
+}
+
+
+.drawer-section-heading h3 {
+  font-size: 16px;
+}
+
+
+.drawer-score {
+  margin-top: 16px;
+}
+
+
+.drawer-score > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+
+  margin-bottom: 7px;
+}
+
+
+.drawer-score span {
+  color: #718683;
+
+  font-size: 10px;
+}
+
+
+.drawer-score strong {
+  color: #0f766e;
+
+  font-size: 12px;
+}
+
+
+.drawer-score > div:last-child {
+  height: 7px;
+
+  overflow: hidden;
+
+  background: #e4eeeb;
+
+  border-radius: 999px;
+}
+
+
+.drawer-score > div:last-child span {
+  display: block;
+  height: 100%;
+
+  background:
+    linear-gradient(
+      90deg,
+      #0f766e,
+      #84cc16
+    );
+
+  border-radius: inherit;
+}
+
+
+.drawer-detail-grid,
+.drawer-impact-grid,
+.drawer-evidence-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 10px;
+
+  margin-top: 14px;
+}
+
+
+.drawer-detail-grid > div,
+.drawer-impact-grid > div,
+.drawer-evidence-grid > div {
+  min-width: 0;
+
+  padding: 12px;
+
+  background: #f8fbfa;
+
+  border: 1px solid #e3ece9;
+  border-radius: 12px;
+}
+
+
+.drawer-detail-grid span,
+.drawer-impact-grid span,
+.drawer-evidence-grid span {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #7a8f8c;
+
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+
+  text-transform: uppercase;
+}
+
+
+.drawer-detail-grid strong,
+.drawer-impact-grid strong,
+.drawer-evidence-grid strong {
+  color: #29413f;
+
+  font-size: 11px;
+
+  overflow-wrap: anywhere;
+}
+
+
+.drawer-explanation {
+  margin: 13px 0 0;
+
+  color: #607572;
+
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+
+@keyframes drawer-slide-in {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+
+@media (max-width: 600px) {
+  .recommendation-drawer {
+    width: 100%;
+  }
+
+  .drawer-detail-grid,
+  .drawer-impact-grid,
+  .drawer-evidence-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .recommendation-drawer {
+    animation: none;
+  }
+}

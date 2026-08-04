@@ -1,0 +1,127 @@
+{
+  "cotton": {
+    "display_name": "Cotton",
+    "category": "Natural Fiber",
+    "biodegradable": true,
+    "recyclable": true,
+    "reuse_potential": "High",
+    "common_recycling_methods": [
+      "Mechanical Recycling",
+      "Fiber Recovery",
+      "Fabric Reuse",
+      "Upcycling"
+    ]
+  },
+  "polyester": {
+    "display_name": "Polyester",
+    "category": "Synthetic Fiber",
+    "biodegradable": false,
+    "recyclable": true,
+    "reuse_potential": "Medium",
+    "common_recycling_methods": [
+      "Mechanical Recycling",
+      "Chemical Recycling",
+      "Fabric Reuse",
+      "Industrial Recovery"
+    ]
+  },
+  "wool": {
+    "display_name": "Wool",
+    "category": "Natural Animal Fiber",
+    "biodegradable": true,
+    "recyclable": true,
+    "reuse_potential": "High",
+    "common_recycling_methods": [
+      "Fiber Recovery",
+      "Fabric Reuse",
+      "Repair",
+      "Upcycling"
+    ]
+  },
+  "silk": {
+    "display_name": "Silk",
+    "category": "Natural Animal Fiber",
+    "biodegradable": true,
+    "recyclable": true,
+    "reuse_potential": "High",
+    "common_recycling_methods": [
+      "Fabric Reuse",
+      "Repair",
+      "Upcycling"
+    ]
+  },
+  "linen": {
+    "display_name": "Linen",
+    "category": "Natural Fiber",
+    "biodegradable": true,
+    "recyclable": true,
+    "reuse_potential": "High",
+    "common_recycling_methods": [
+      "Mechanical Recycling",
+      "Fiber Recovery",
+      "Fabric Reuse"
+    ]
+  },
+  "denim": {
+    "display_name": "Denim",
+    "category": "Woven Textile",
+    "biodegradable": "Depends on Fiber Composition",
+    "recyclable": true,
+    "reuse_potential": "High",
+    "common_recycling_methods": [
+      "Fabric Reuse",
+      "Repair",
+      "Upcycling",
+      "Mechanical Recycling"
+    ]
+  },
+  "nylon": {
+    "display_name": "Nylon",
+    "category": "Synthetic Fiber",
+    "biodegradable": false,
+    "recyclable": true,
+    "reuse_potential": "Medium",
+    "common_recycling_methods": [
+      "Chemical Recycling",
+      "Mechanical Recycling",
+      "Industrial Recovery"
+    ]
+  },
+  "rayon": {
+    "display_name": "Rayon",
+    "category": "Regenerated Cellulosic Fiber",
+    "biodegradable": "Condition Dependent",
+    "recyclable": true,
+    "reuse_potential": "Medium",
+    "common_recycling_methods": [
+      "Fabric Reuse",
+      "Fiber Recovery",
+      "Specialized Recycling"
+    ]
+  },
+  "acrylic": {
+    "display_name": "Acrylic",
+    "category": "Synthetic Fiber",
+    "biodegradable": false,
+    "recyclable": "Limited",
+    "reuse_potential": "Medium",
+    "common_recycling_methods": [
+      "Fabric Reuse",
+      "Upcycling",
+      "Specialized Recycling"
+    ]
+  },
+  "mixed_fabric": {
+    "display_name": "Mixed Fabric",
+    "category": "Blended Textile",
+    "biodegradable": "Depends on Composition",
+    "recyclable": "Specialized Processing Required",
+    "reuse_potential": "Medium",
+    "common_recycling_methods": [
+      "Fabric Reuse",
+      "Upcycling",
+      "Material Separation",
+      "Specialized Recycling"
+    ]
+  }
+}

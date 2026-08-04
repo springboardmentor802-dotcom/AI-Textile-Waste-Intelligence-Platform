@@ -17,6 +17,12 @@ API.interceptors.request.use(
         const token = localStorage.getItem("token");
 
 
+        console.log(
+            "TOKEN FROM STORAGE:",
+            token
+        );
+
+
         if(token){
 
             config.headers.Authorization =
@@ -25,17 +31,25 @@ API.interceptors.request.use(
         }
 
 
+        console.log(
+            "FINAL REQUEST HEADERS:",
+            config.headers
+        );
+
+
         return config;
+
 
     },
 
-    (error) => {
+    (error)=>{
 
         return Promise.reject(error);
 
     }
 
 );
+
 
 
 export default API;

@@ -1,0 +1,144 @@
+
+========================================================================
+MILESTONE 3 DATASET VALIDATION
+========================================================================
+Dataset: D:\SpringboardProjects\AI-textile waste management system\backend\data\synthetic_textile_sustainability_dataset.csv
+Records: 10,000
+Columns: 23
+
+========================================================================
+1. DATASET SIZE
+========================================================================
+Expected records : 10,000
+Actual records   : 10,000
+STATUS: PASS
+
+========================================================================
+2. MISSING VALUE CHECK
+========================================================================
+Columns containing missing values:
+matched_rule_id      110
+matched_rule_name    110
+dtype: int64
+Total missing cells: 220
+
+========================================================================
+3. DUPLICATE RECORD CHECK
+========================================================================
+Duplicate record IDs: 0
+Duplicate complete rows: 0
+STATUS: PASS
+
+========================================================================
+4. WEIGHT VALIDATION
+========================================================================
+Invalid/non-positive weights: 0
+Minimum weight: 0.20 kg
+Maximum weight: 49.99 kg
+STATUS: PASS
+
+========================================================================
+5. SUSTAINABILITY SCORE VALIDATION
+========================================================================
+Invalid sustainability scores: 0
+Minimum score: 0.00
+Maximum score: 95.00
+Average score: 46.82
+STATUS: PASS
+
+========================================================================
+6. ENVIRONMENTAL METRIC VALIDATION
+========================================================================
+estimated_co2_saved_kg: 0 invalid values
+estimated_water_saved_liters: 0 invalid values
+estimated_energy_saved_kwh: 0 invalid values
+estimated_landfill_diverted_kg: 0 invalid values
+STATUS: PASS
+
+========================================================================
+7. RULE COVERAGE
+========================================================================
+Expected rules: 21
+Expected rules triggered: 21
+Rule coverage: 100.00%
+Rules not triggered: []
+
+Rule distribution:
+NO_RULE        110 (  1.10%)
+RULE-001       503 (  5.03%)
+RULE-002       974 (  9.74%)
+RULE-003       943 (  9.43%)
+RULE-004       503 (  5.03%)
+RULE-005     1,058 ( 10.58%)
+RULE-006     1,121 ( 11.21%)
+RULE-007       137 (  1.37%)
+RULE-008       146 (  1.46%)
+RULE-009       343 (  3.43%)
+RULE-010       239 (  2.39%)
+RULE-011       142 (  1.42%)
+RULE-012        29 (  0.29%)
+RULE-013       163 (  1.63%)
+RULE-014       151 (  1.51%)
+RULE-015       358 (  3.58%)
+RULE-016       250 (  2.50%)
+RULE-017       277 (  2.77%)
+RULE-018       740 (  7.40%)
+RULE-019       117 (  1.17%)
+RULE-020       744 (  7.44%)
+RULE-021       952 (  9.52%)
+
+========================================================================
+8. RECOMMENDATION CONSISTENCY
+========================================================================
+Unique input combinations: 792
+Inconsistent combinations: 0
+Recommendation consistency: 100.00%
+STATUS: PASS
+
+========================================================================
+9. MANUAL REVIEW ANALYSIS
+========================================================================
+Automatic/completed records: 5,450
+Manual-review records: 4,550
+Manual-review rate: 45.50%
+
+========================================================================
+10. ASSESSMENT STATUS DISTRIBUTION
+========================================================================
+assessment_status
+Completed                 5450
+Manual Review Required    4550
+
+========================================================================
+11. RECOVERY CATEGORY DISTRIBUTION
+========================================================================
+recovery_category
+Recycling                3472
+Reuse                    1561
+Industrial Recovery      1251
+Repair                   1121
+Preprocessing             744
+Specialized Recycling     740
+Specialized Disposal      503
+Upcycling                 498
+Unknown                   110
+
+========================================================================
+12. ENVIRONMENTAL TOTALS
+========================================================================
+Total textile weight: 99,101.35 kg
+CO2 saved: 351,856.53 kg
+Water saved: 83,557,660.80 L
+Energy saved: 790,096.30 kWh
+Landfill diverted: 70,340.16 kg
+
+========================================================================
+FINAL VALIDATION RESULT
+========================================================================
+PASS - No critical dataset consistency errors detected.
+
+Reports generated in:
+D:\SpringboardProjects\AI-textile waste management system\backend\validation\results
+
+IMPORTANT: Rule coverage measures how many recommendation rules are represented in the synthetic dataset.
+It is NOT CNN model accuracy.

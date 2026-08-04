@@ -12,8 +12,18 @@ app = Flask(__name__)
 CORS(app)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-MODEL_PATH = os.path.join(BASE_DIR, "..", "ml", "fabric_quality_model.pkl")
+DEFAULT_CATEGORICAL_VALUES = {
+    "fabric_type": "cotton",
+    "weave_type": "plain",
+    "finish_type": "raw",
+    "production_method": "handloom",
+    "warehouse_id": "WH-A",
+    "operator_name": "Suresh",
+    "inspection_shift": "Morning",
+    "inspection_notes": "Looks fine"
+}
 
+MODEL_PATH = os.path.join(BASE_DIR, "..", "ml", "fabric_quality_model.pkl")
 ENCODER_DIR = os.path.join(BASE_DIR, "..", "ml", "encoders")
 
 model = joblib.load(MODEL_PATH)
@@ -27,6 +37,46 @@ operator_name_encoder = joblib.load(os.path.join(ENCODER_DIR, "operator_name_enc
 inspection_shift_encoder = joblib.load(os.path.join(ENCODER_DIR, "inspection_shift_encoder.pkl"))
 inspection_notes_encoder = joblib.load(os.path.join(ENCODER_DIR, "inspection_notes_encoder.pkl"))
 fabric_quality_encoder = joblib.load(os.path.join(ENCODER_DIR, "fabric_quality_encoder.pkl"))
+
+CATEGORY_ENCODERS = {
+    "fabric_type": fabric_type_encoder,
+    "weave_type": weave_type_encoder,
+    "finish_type": finish_type_encoder,
+    "production_method": production_method_encoder,
+    "warehouse_id": warehouse_id_encoder,
+    "operator_name": operator_name_encoder,
+    "inspection_shift": inspection_shift_encoder,
+    "inspection_notes": inspection_notes_encoder
+}
+
+
+def _coerce_numeric(value, fallback=0.0):
+    if value in (None, ""):
+        return fallback
+
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return fallback
+
+
+def _normalize_categorical_value(value, encoder, fallback):
+    if value in (None, ""):
+        return fallback
+
+    if isinstance(value, str):
+        value = value.strip()
+
+    if value in encoder.classes_:
+        return value
+
+    normalized_value = str(value).strip().lower()
+    for candidate in encoder.classes_:
+        if str(candidate).strip().lower() == normalized_value:
+            return candidate
+
+    return fallback
+
 
 @app.route("/")
 def home():
@@ -47,7 +97,6 @@ def inventory():
     return jsonify(rows)
 
 
-# ADD HERE 
 @app.route("/tables")
 def tables():
 
@@ -62,7 +111,6 @@ def tables():
     return jsonify(tables)
 
 
-# REGISTER USER
 @app.route("/register", methods=["POST"])
 def register():
 
@@ -107,7 +155,8 @@ def register():
 
     finally:
         conn.close()
-        
+
+
 @app.route("/login", methods=["POST"])
 def login():
 
@@ -163,6 +212,7 @@ def login():
         "message": "Invalid Password"
     }), 401
 
+
 @app.route("/add_inventory", methods=["POST"])
 def add_inventory():
 
@@ -200,6 +250,8 @@ def add_inventory():
     return jsonify({
         "message": "Inventory Added Successfully"
     })
+
+
 @app.route("/delete_inventory/<int:id>", methods=["DELETE"])
 def delete_inventory(id):
 
@@ -216,49 +268,53 @@ def delete_inventory(id):
 
     return jsonify({
         "message": "Inventory Deleted Successfully"
-    })   
+    })
+
 
 @app.route("/predict", methods=["POST"])
 def predict():
 
     try:
+        data = request.get_json(silent=True) or {}
 
-        data = request.get_json()
+        categorical_values = {}
+        for field, fallback_value in DEFAULT_CATEGORICAL_VALUES.items():
+            raw_value = data.get(field)
+            encoder = CATEGORY_ENCODERS[field]
+            categorical_values[field] = _normalize_categorical_value(raw_value, encoder, fallback_value)
 
         input_data = {
-            "thread_count": data["thread_count"],
-            "gsm": data["gsm"],
-            "tensile_strength": data["tensile_strength"],
-            "shrinkage_percent": data["shrinkage_percent"],
-            "color_fastness": data["color_fastness"],
-            "fabric_thickness": data["fabric_thickness"],
-            "defect_count": data["defect_count"],
-            "elongation_percent": data["elongation_percent"],
-            "moisture_absorption": data["moisture_absorption"],
+            "thread_count": _coerce_numeric(data.get("thread_count")),
+            "gsm": _coerce_numeric(data.get("gsm")),
+            "tensile_strength": _coerce_numeric(data.get("tensile_strength")),
+            "shrinkage_percent": _coerce_numeric(data.get("shrinkage_percent")),
+            "color_fastness": _coerce_numeric(data.get("color_fastness")),
+            "fabric_thickness": _coerce_numeric(data.get("fabric_thickness")),
+            "defect_count": _coerce_numeric(data.get("defect_count")),
+            "elongation_percent": _coerce_numeric(data.get("elongation_percent")),
+            "moisture_absorption": _coerce_numeric(data.get("moisture_absorption")),
 
-            "fabric_type": fabric_type_encoder.transform([data["fabric_type"]])[0],
-            "weave_type": weave_type_encoder.transform([data["weave_type"]])[0],
-            "finish_type": finish_type_encoder.transform([data["finish_type"]])[0],
-            "production_method": production_method_encoder.transform([data["production_method"]])[0],
+            "fabric_type": fabric_type_encoder.transform([categorical_values["fabric_type"]])[0],
+            "weave_type": weave_type_encoder.transform([categorical_values["weave_type"]])[0],
+            "finish_type": finish_type_encoder.transform([categorical_values["finish_type"]])[0],
+            "production_method": production_method_encoder.transform([categorical_values["production_method"]])[0],
 
-            "batch_id": data["batch_id"],
-            "roll_number": data["roll_number"],
-            "inspection_time_minutes": data["inspection_time_minutes"],
+            "batch_id": _coerce_numeric(data.get("batch_id")),
+            "roll_number": _coerce_numeric(data.get("roll_number")),
+            "inspection_time_minutes": _coerce_numeric(data.get("inspection_time_minutes")),
 
-            "warehouse_id": warehouse_id_encoder.transform([data["warehouse_id"]])[0],
-            "operator_name": operator_name_encoder.transform([data["operator_name"]])[0],
-            "inspection_shift": inspection_shift_encoder.transform([data["inspection_shift"]])[0],
+            "warehouse_id": warehouse_id_encoder.transform([categorical_values["warehouse_id"]])[0],
+            "operator_name": operator_name_encoder.transform([categorical_values["operator_name"]])[0],
+            "inspection_shift": inspection_shift_encoder.transform([categorical_values["inspection_shift"]])[0],
 
-            "machine_temperature": data["machine_temperature"],
-            "humidity_level": data["humidity_level"],
+            "machine_temperature": _coerce_numeric(data.get("machine_temperature")),
+            "humidity_level": _coerce_numeric(data.get("humidity_level")),
 
-            "inspection_notes": inspection_notes_encoder.transform([data["inspection_notes"]])[0]
+            "inspection_notes": inspection_notes_encoder.transform([categorical_values["inspection_notes"]])[0]
         }
 
         input_df = pd.DataFrame([input_data])
-
         prediction = model.predict(input_df)
-
         predicted_quality = fabric_quality_encoder.inverse_transform(prediction)
 
         return jsonify({
@@ -266,10 +322,49 @@ def predict():
         })
 
     except Exception as e:
-
         return jsonify({
             "error": str(e)
         }), 400
-    
+
+
+@app.route("/recommend", methods=["POST"])
+def recommend():
+
+    data = request.get_json(silent=True) or {}
+    quality = str(data.get("fabric_quality", "")).strip()
+
+    if quality.lower() == "high":
+        recommendation = "Reuse or Donate"
+        sustainability_score = 95
+        circularity_score = 90
+        co2_saved = 18.5
+        water_saved = 120
+        energy_saved = 8.2
+    elif quality.lower() == "medium":
+        recommendation = "Mechanical Recycling"
+        sustainability_score = 75
+        circularity_score = 70
+        co2_saved = 12.3
+        water_saved = 90
+        energy_saved = 5.4
+    else:
+        recommendation = "Chemical Recycling"
+        sustainability_score = 55
+        circularity_score = 50
+        co2_saved = 6.4
+        water_saved = 45
+        energy_saved = 2.8
+
+    return jsonify({
+        "recommendation": recommendation,
+        "sustainability_score": sustainability_score,
+        "circularity_score": circularity_score,
+        "co2_saved": co2_saved,
+        "water_saved": water_saved,
+        "energy_saved": energy_saved
+    })
+
+
 if __name__ == "__main__":
     app.run(debug=True)
+    

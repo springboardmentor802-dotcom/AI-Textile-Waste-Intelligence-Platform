@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { LayoutGrid, Boxes, UploadCloud, ScanEye, History, BarChart3, Settings as SettingsIcon, User, LogOut, Leaf } from 'lucide-react'
+import { LayoutGrid, Boxes, UploadCloud, ScanEye, History, BarChart3, Sprout, Settings as SettingsIcon, User, LogOut, Leaf } from 'lucide-react'
 
 const links = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutGrid },
@@ -7,6 +7,7 @@ const links = [
   { to: '/upload', label: 'Upload Waste', icon: UploadCloud },
   { to: '/history', label: 'History', icon: History },
   { to: '/reports', label: 'Reports', icon: BarChart3 },
+  { to: '/sustainability', label: 'Sustainability', icon: Sprout },
   { to: '/profile', label: 'Profile', icon: User },
   { to: '/settings', label: 'Settings', icon: SettingsIcon },
 ]

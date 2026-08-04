@@ -1,100 +1,154 @@
-# Textile Waste Intelligence Platform - Milestone 1
+# Textile Waste Intelligence Platform
 
-A containerized full-stack platform designed to closed-loop textile waste pipelines using material sorting logs, analytical dashboard reports, and role-based access controls. Ready for computer vision modeling extensions in Milestone 2.
+An AI-powered platform for analyzing textile waste through computer vision — classifying material type, assessing damage and contamination, recommending recycling strategies, and scoring each item's circularity potential. Built across Milestones 1–3 of the Infosys Springboard ML internship.
 
 ---
 
 ## 1. Architecture Overview
 
-This project is structured as a monorepo containing:
-* **`/backend`**: Python + FastAPI REST API using SQLAlchemy ORM to connect to PostgreSQL.
-  * Security: JWT authorization with password hashing (bcrypt).
-  * Validation: Strong schema validation using Pydantic.
-  * Seeding: Automount database initialization seeding four roles and inventory items.
-  * Unit Testing: Containerized / local testing using Pytest and TestClient over SQLite.
-* **`/frontend`**: React + JavaScript + Vite + Tailwind CSS SPA.
-  * Design System: Custom eco-friendly earthy/green palette configured in `tailwind.config.js` using Outfit and Inter fonts.
-  * State: Global `AuthContext` to handle authorization tokens and toasts.
-  * Layout: Sidebar + Navbar authenticated layout containing alert trackers and profile overlays.
-  * Pages: Form validation pipelines, pagination lists, dashboards, and dataset previews.
-* **`docker-compose.yml`**: Provisions PostgreSQL db, FastAPI backend, and React dev server.
+This project is structured as a monorepo:
+
+* **`/backend`**: Python + FastAPI REST API.
+  * **Database**: SQLAlchemy ORM against PostgreSQL, with automatic fallback to local SQLite if Postgres is unreachable — no manual setup required to run locally.
+  * **Secondary store**: MongoDB for raw analysis JSON documents (optional; the app degrades gracefully if MongoDB isn't running).
+  * **Security**: JWT authentication with OAuth2 password flow, bcrypt password hashing.
+  * **Computer Vision**: OpenCV, Pillow, and scikit-image for color, texture, damage, and contamination analysis.
+  * **Material Classification**: XGBoost model (trainable via `scripts/train_material_classifier.py`) with a deterministic rule-based fallback classifier that requires zero training and is always available.
+  * **PDF Reports**: Generated with `reportlab`, both single-image and combined multi-image reports.
+* **`/frontend`**: React + Vite + Tailwind CSS SPA.
+  * Dark theme with a green sustainability-focused design.
+  * Pages: Dashboard, Inventory, Upload Waste (AI Prediction), History, Reports, Sustainability, Profile, Settings.
 
 ---
 
 ## 2. Quick Setup & Run Instructions
 
-Make sure you have [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed on your machine.
-
-### Build and Launch Services
-From the root directory of the project, run:
-```bash
-docker compose up --build
-```
-
-Once Docker completes building and initializing:
-* **Frontend Portal**: Navigate to `http://localhost:3000`
-* **REST API OpenAPI Docs**: Navigate to `http://localhost:8000/docs`
-* **PostgreSQL Database**: Accessible internally in compose network at port `5432`
-
----
-
-## 3. Demo Accounts & Credentials
-
-The system seeds four demo accounts to test role-based access rules (RBAC). 
-* **Password for all demo accounts**: `Password123!`
-
-| Role Name | Email Address | Organization / Facility | Core Access Scope |
-| :--- | :--- | :--- | :--- |
-| **Administrator** | `admin@textile.com` | Circular Waste HQ | Full CRUD access, view user registry, edit roles. |
-| **Textile Manufacturer** | `manufacturer@textile.com` | Apex Textiles Inc | Create batches, list and edit *their own* batches (if status is Pending/Sorting). |
-| **Recycling Facility Operator** | `operator@textile.com` | Green Cycle Recycling | View all batches, update batch processing status and notes (primary fields locked). |
-| **Sustainability Manager** | `manager@textile.com` | EcoFashion Alliance | Read-only analytics dashboard and inventory audits. |
-
----
-
-## 4. Implemented API Endpoints
-
-### Authentication (`/api/auth`)
-* `POST /api/auth/register`: Create a new user account.
-* `POST /api/auth/login`: OAuth2 password form-encoded login returning JWT token.
-* `POST /api/auth/login-json`: JSON login alternative for API clients.
-* `GET /api/auth/me`: Retrieve currently logged-in user details.
-* `POST /api/auth/logout`: Confirm logout sequence.
-
-### Users (`/api/users`)
-* `PUT /api/users/profile`: Modify current user name and organization.
-* `GET /api/users` (Admin only): Retrieve list of all registered users.
-* `PUT /api/users/{user_id}/role` (Admin only): Re-assign role permissions.
-
-### Inventory (`/api/inventory`)
-* `GET /api/inventory/dashboard`: Fetch aggregated charts metrics and alert queues.
-* `GET /api/inventory`: Fetch batches list with search, sorting, filtering, and pagination support.
-* `POST /api/inventory`: Register a new batch (auto-generates human-readable ID like `TXT-2026-0001`).
-* `GET /api/inventory/{batch_id}`: Fetch detailed batch attributes.
-* `PUT /api/inventory/{batch_id}`: Modify batch attributes (enforces role rules).
-* `DELETE /api/inventory/{batch_id}`: Remove batch from records (enforces role rules).
-
-### Datasets (`/api/datasets`)
-* `GET /api/datasets`: Retrieve metadata list of integration targets.
-* `POST /api/datasets/{dataset_id}/ingest`: Mock endpoint for file uploads queueing.
-
----
-
-## 5. Local Testing
-
-To run backend tests locally, navigate to the `/backend` directory, create a virtual environment, install requirements, and execute:
+### Backend
 ```bash
 cd backend
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
-pytest
+uvicorn app.main:app --reload --port 8000
 ```
-*Tests automatically configure a local SQLite database (`test.db`) and verify authentication, permission check overrides, and batch modification rules.*
+The backend will attempt to connect to PostgreSQL first; if unavailable, it automatically falls back to a local SQLite database (`textile_waste_fallback.db`) so the app runs out of the box with no database setup required.
+
+Optional — start Postgres + MongoDB via Docker Compose if you want the primary/secondary datastores instead of the SQLite fallback:
+```bash
+docker compose up -d
+```
+
+### Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+* **Frontend**: `http://localhost:5173`
+* **Backend API docs (Swagger)**: `http://localhost:8000/docs`
+
+### Demo Login
+Register a new account from the frontend, or use:
+* Email: `admin@textilewaste.ai`
+* Password: `Admin@123`
 
 ---
 
-## 6. Milestone 2 Extension Points
+## 3. Core Analysis Pipeline
 
-Milestone 1 lays a production-ready framework to ingest datasets and classify fibers. In **Milestone 2**, the following integration modules will be built:
-1. **Computer Vision classification**: Mount image files uploaded in `POST /api/datasets/{id}/ingest` into a background worker (e.g. Celery + Redis). Run a PyTorch/YOLO inference pass to predict material composition ratios (e.g., % Cotton vs % Polyester).
-2. **Dataset downloads**: Add async download tasks to pull raw benchmark repositories (TIPS, DeepFashion, etc.) directly into a shared mount storage volume.
-3. **Refined Recyclability Score**: Run XGBoost or standard linear models using condition variables (e.g. damaged, contaminated) and fabric composition to output a weighted overall Circularity Index.
+Every uploaded image runs through a 12-stage pipeline:
+
+1. Image Preview
+2. Material Classification
+3. Texture Analysis
+4. Color Analysis
+5. Damage Detection
+6. Contamination Detection
+7. Waste Classification
+8. Recycling Recommendation
+9. Sustainability Assessment
+10. Environmental Impact
+11. Circularity Score
+12. Overall Report
+
+Images can be analyzed one at a time or in a batch of up to 5 at once, each receiving its own full report, switchable via tabs on the Upload Waste page.
+
+---
+
+## 4. Feature Modules
+
+### Waste Classification Engine
+Predicts waste category, assesses recyclability, detects contamination, estimates reuse potential, and recommends disposal method.
+
+**Categories**: Recyclable · Reusable · Repairable · Upcyclable · Compostable · Hazardous
+
+### Recycling Recommendation Engine
+Recommends a recycling strategy, detects reuse opportunities, suggests upcycling paths, and proposes waste reduction strategies tiered by circularity score.
+
+**Recycling Options**: Fiber Recycling · Mechanical Recycling · Chemical Recycling · Fabric Reuse · Upcycling · Donation · Industrial Recovery
+
+### Sustainability Intelligence Engine
+Estimates carbon footprint and water savings, analyzes waste diversion and circular economy metrics, and benchmarks the user's average circularity score against an industry average and best-in-class reference.
+
+### Environmental Impact Assessment Engine
+Estimates CO₂ savings, water savings, landfill reduction percentage, and produces an overall environmental rating.
+
+### Waste Scoring Engine
+Combines five weighted factors into a single Circularity Score (0–100):
+
+```
+Circularity Score =
+  Material Recyclability (35%)
++ Material Condition      (20%)
++ Reuse Potential          (20%)
++ Environmental Benefit    (15%)
++ Processing Feasibility   (10%)
+```
+
+**Circularity Categories**: Excellent Recovery Potential · High Recovery Potential · Moderate Recovery Potential · Limited Recovery Potential · Disposal Recommended
+
+---
+
+## 5. Key API Endpoints
+
+### Auth (`/api/auth`)
+* `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/token`, `POST /api/auth/refresh`, `POST /api/auth/logout`
+* `GET /api/auth/profile`, `PUT /api/auth/profile`, `POST /api/auth/change-password`
+
+### Analysis
+* `POST /api/analyze`: Analyze a single image through the full pipeline.
+* `POST /api/analyze-batch`: Analyze up to 5 images at once, each returning its own full report.
+
+### Inventory
+* `GET /api/inventory`, `POST /api/inventory`, `PUT /api/inventory/{item_id}`, `DELETE /api/inventory/{item_id}`
+
+### History & Reports
+* `GET /api/history`
+* `GET /api/reports`, `GET /api/reports/summary`, `GET /api/reports/export/csv`
+* `GET /api/report/{analysis_id}/pdf`: Single-image PDF report.
+* `GET /api/report/batch/pdf?ids=1,2,3`: Combined multi-page PDF for several analyses at once.
+
+### Sustainability
+* `GET /api/sustainability/summary`: Aggregated carbon/water savings, trend data, and distribution charts.
+* `GET /api/sustainability/benchmark`: User's average circularity score vs. industry benchmark and best-in-class reference.
+
+### Settings
+* `GET /api/settings`, `PUT /api/settings`
+
+---
+
+## 6. Local Testing
+
+```bash
+cd backend
+source venv/bin/activate
+python -c "import ast; ast.parse(open('app/main.py').read())"
+```
+
+---
+
+## 7. Roadmap
+
+* Train the material classifier on a properly labeled dataset (single-fiber material-type labels, not defect-detection labels) to replace/augment the rule-based fallback with higher-accuracy predictions.
+* Extend batch upload beyond 5 images if needed.

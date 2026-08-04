@@ -229,6 +229,81 @@ def delete_inventory(item_id: int, user=Depends(require_roles("admin", "recyclin
 
 
 # ================================================================ ANALYZE ====
+@app.post("/api/analyze-batch")
+async def analyze_batch(files: list[UploadFile] = File(...), user=Depends(get_current_user)):
+    if len(files) > 5:
+        raise HTTPException(400, "Maximum 5 images per batch")
+
+    results = []
+    for f in files:
+        start = datetime.utcnow()
+        image_bytes = await f.read()
+        try:
+            img = cv_analysis.load_image(image_bytes)
+        except ValueError as e:
+            results.append({"filename": f.filename, "error": str(e)})
+            continue
+
+        h, w = img.shape[:2]
+
+        color_result = cv_analysis.analyze_color(img)
+        texture_result = cv_analysis.analyze_texture(img)
+        damage_result = cv_analysis.analyze_damage(img)
+        contamination_result = cv_analysis.analyze_contamination(img)
+        material_result = classify_material(img, color_result, texture_result)
+
+        scores = scoring.compute_scores(material_result, texture_result, damage_result, contamination_result)
+        waste_result = scoring.classify_waste(material_result, damage_result, contamination_result, scores)
+        recycling_result = scoring.recommend_recycling(material_result, waste_result, scores, damage_result, contamination_result)
+        sustainability_result = scoring.sustainability_assessment(material_result, scores)
+        environmental_result = scoring.environmental_impact(sustainability_result, scores)
+
+        processing_time_ms = round((datetime.utcnow() - start).total_seconds() * 1000, 1)
+
+        result = {
+            "filename": f.filename,
+            "image_info": {"width": w, "height": h, "size_bytes": len(image_bytes),
+                            "processing_time_ms": processing_time_ms},
+            "material_classification": material_result,
+            "texture_analysis": texture_result,
+            "color_analysis": color_result,
+            "damage_detection": damage_result,
+            "contamination_detection": contamination_result,
+            "waste_classification": waste_result,
+            "recycling_recommendation": recycling_result,
+            "sustainability_assessment": sustainability_result,
+            "environmental_impact": environmental_result,
+            "scores": scores,
+        }
+
+        mongo_doc_id = mongo.save_analysis_document(result)
+        result["mongo_doc_id"] = mongo_doc_id
+
+        with db_session() as conn:
+            conn.execute(
+                text("""INSERT INTO analyses (filename, material, confidence, fiber_composition, recyclability,
+                        circularity_score, waste_category, recommendation, mongo_doc_id, created_by)
+                        VALUES (:filename,:material,:confidence,:fiber,:recyclability,:circ,:waste,:rec,:mongo_id,:uid)"""),
+                {
+                    "filename": f.filename,
+                    "material": material_result["material"],
+                    "confidence": material_result["confidence"],
+                    "fiber": material_result["fiber_composition"],
+                    "recyclability": material_result["recyclability"],
+                    "circ": scores["circularity_score"],
+                    "waste": waste_result["waste_category"],
+                    "rec": recycling_result["best_recommendation"],
+                    "mongo_id": mongo_doc_id,
+                    "uid": user["id"],
+                },
+            )
+
+        results.append(result)
+
+    return {"count": len(results), "results": results}
+
+
+
 @app.post("/api/analyze")
 async def analyze_image(file: UploadFile = File(...), user=Depends(get_current_user)):
     start = datetime.utcnow()
@@ -248,7 +323,7 @@ async def analyze_image(file: UploadFile = File(...), user=Depends(get_current_u
 
     scores = scoring.compute_scores(material_result, texture_result, damage_result, contamination_result)
     waste_result = scoring.classify_waste(material_result, damage_result, contamination_result, scores)
-    recycling_result = scoring.recommend_recycling(material_result, waste_result, scores)
+    recycling_result = scoring.recommend_recycling(material_result, waste_result, scores, damage_result, contamination_result)
     sustainability_result = scoring.sustainability_assessment(material_result, scores)
     environmental_result = scoring.environmental_impact(sustainability_result, scores)
 
@@ -293,7 +368,6 @@ async def analyze_image(file: UploadFile = File(...), user=Depends(get_current_u
         )
 
     return result
-
 
 @app.get("/api/history")
 def history(user=Depends(get_current_user)):
@@ -379,7 +453,59 @@ def dashboard_summary(user=Depends(get_current_user)):
     }
 
 
-# ================================================================== REPORT ====
+@app.get("/api/report/batch/pdf")
+def download_batch_report(ids: str, user=Depends(get_current_user)):
+    from reportlab.lib.pagesizes import A4
+    from reportlab.pdfgen import canvas
+
+    id_list = [int(i) for i in ids.split(",") if i.strip()]
+    if not id_list:
+        raise HTTPException(400, "No analysis ids provided")
+
+    with db_session() as conn:
+        rows = []
+        for analysis_id in id_list:
+            row = conn.execute(text("SELECT * FROM analyses WHERE id=:id"), {"id": analysis_id}).mappings().first()
+            if row:
+                rows.append(row)
+
+    if not rows:
+        raise HTTPException(404, "No matching analyses found")
+
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=A4)
+    width, height = A4
+
+    for idx, row in enumerate(rows):
+        y = height - 60
+        c.setFont("Helvetica-Bold", 16)
+        c.drawString(50, y, "Textile Waste Intelligence Platform - Analysis Report")
+        y -= 20
+        c.setFont("Helvetica", 9)
+        c.drawString(50, y, f"Item {idx + 1} of {len(rows)}")
+        y -= 30
+        c.setFont("Helvetica", 11)
+        for label, value in [
+            ("File", row["filename"]),
+            ("Material", row["material"]),
+            ("Confidence", f"{row['confidence']}%"),
+            ("Fiber Composition", row["fiber_composition"]),
+            ("Recyclability", row["recyclability"]),
+            ("Circularity Score", f"{row['circularity_score']}/100"),
+            ("Waste Category", row["waste_category"]),
+            ("Recommendation", row["recommendation"]),
+            ("Generated", str(row["created_at"])),
+        ]:
+            c.drawString(50, y, f"{label}: {value}")
+            y -= 22
+        c.showPage()
+
+    c.save()
+    buf.seek(0)
+    return StreamingResponse(buf, media_type="application/pdf",
+                              headers={"Content-Disposition": "attachment; filename=analysis_batch_report.pdf"})
+
+
 @app.get("/api/report/{analysis_id}/pdf")
 def download_report(analysis_id: int, user=Depends(get_current_user)):
     from reportlab.lib.pagesizes import A4
@@ -418,3 +544,67 @@ def download_report(analysis_id: int, user=Depends(get_current_user)):
     buf.seek(0)
     return StreamingResponse(buf, media_type="application/pdf",
                               headers={"Content-Disposition": f"attachment; filename=analysis_{analysis_id}.pdf"})
+
+
+@app.get("/api/sustainability/benchmark")
+def sustainability_benchmark(user=Depends(get_current_user)):
+    with db_session() as conn:
+        avg = conn.execute(text("SELECT AVG(circularity_score) a FROM analyses")).mappings().first()["a"] or 0
+    from . import scoring
+    return scoring.benchmark_against_industry(avg)
+
+
+# ========================================================= SUSTAINABILITY ====
+@app.get("/api/sustainability/summary")
+def sustainability_summary(user=Depends(get_current_user)):
+    with db_session() as conn:
+        rows = conn.execute(text(
+            "SELECT circularity_score, recyclability, waste_category, recommendation, created_at FROM analyses"
+        )).mappings().all()
+
+    if not rows:
+        return {
+            "total_carbon_saved_kg": 0, "total_water_saved_liters": 0,
+            "avg_waste_diversion_pct": 0, "avg_circularity_score": 0,
+            "avg_resource_recovery_pct": 0, "trend": [],
+            "recommendation_distribution": [], "waste_category_distribution": [],
+        }
+
+    recyclability_score_map = {"High": 90, "Medium": 60, "Low": 30}
+    total_carbon = total_water = total_diversion = total_recovery = 0.0
+    trend = []
+    rec_counts = {}
+    waste_counts = {}
+
+    for r in rows:
+        score = r["circularity_score"] or 0
+        base = score / 100
+        carbon = round(base * 4.2, 2)
+        water = round(base * 2650, 0)
+        diversion = min(98, score + 8)
+        recovery = recyclability_score_map.get(r["recyclability"], 50)
+
+        total_carbon += carbon
+        total_water += water
+        total_diversion += diversion
+        total_recovery += recovery
+
+        trend.append({"date": str(r["created_at"])[:10], "circularity_score": score})
+
+        rec = r["recommendation"] or "Unspecified"
+        rec_counts[rec] = rec_counts.get(rec, 0) + 1
+
+        wc = r["waste_category"] or "Unspecified"
+        waste_counts[wc] = waste_counts.get(wc, 0) + 1
+
+    n = len(rows)
+    return {
+        "total_carbon_saved_kg": round(total_carbon, 1),
+        "total_water_saved_liters": round(total_water, 0),
+        "avg_waste_diversion_pct": round(total_diversion / n, 1),
+        "avg_circularity_score": round(sum(r["circularity_score"] or 0 for r in rows) / n, 1),
+        "avg_resource_recovery_pct": round(total_recovery / n, 1),
+        "trend": trend,
+        "recommendation_distribution": [{"recommendation": k, "count": v} for k, v in rec_counts.items()],
+        "waste_category_distribution": [{"waste_category": k, "count": v} for k, v in waste_counts.items()],
+    }

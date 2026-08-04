@@ -7,6 +7,22 @@ import { Badge, StatCard } from '../components/ui.jsx'
 
 ChartJS.register(ArcElement, Tooltip, Legend)
 
+async function downloadReportPdf(id) {
+  try {
+    const response = await api.get(`/report/${id}/pdf`, { responseType: 'blob' })
+    const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }))
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `analysis_${id}.pdf`
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  } catch (err) {
+    alert('Failed to download PDF report')
+  }
+}
+
 export default function Reports() {
   const [rows, setRows] = useState([])
   const [summary, setSummary] = useState(null)
@@ -109,10 +125,10 @@ export default function Reports() {
                   <td className="py-2 px-3">{r.circularity_score}</td>
                   <td className="py-2 px-3 text-white/50">{String(r.created_at).slice(0, 19)}</td>
                   <td className="py-2 px-3">
-                    <a href={`http://localhost:8000/api/report/${r.id}/pdf`} target="_blank" rel="noreferrer"
+                    <button onClick={() => downloadReportPdf(r.id)}
                       className="text-mint-400 hover:underline flex items-center gap-1">
                       <FileText size={14} /> PDF
-                    </a>
+                    </button>
                   </td>
                 </tr>
               ))}

@@ -114,7 +114,9 @@ CREATE TABLE IF NOT EXISTS analyses (
 
 SQLITE_SCHEMA = PG_SCHEMA.replace("SERIAL PRIMARY KEY", "INTEGER PRIMARY KEY AUTOINCREMENT") \
                          .replace("BOOLEAN DEFAULT FALSE", "INTEGER DEFAULT 0") \
-                         .replace("TIMESTAMP", "TEXT")
+                         .replace("CURRENT_TIMESTAMP", "@@NOWDEFAULT@@") \
+                         .replace("TIMESTAMP", "TEXT") \
+                         .replace("@@NOWDEFAULT@@", "CURRENT_TIMESTAMP")
 
 
 def init_db():

@@ -7,6 +7,7 @@ import UploadWaste from './pages/UploadWaste.jsx'
 import History from './pages/History.jsx'
 import Reports from './pages/Reports.jsx'
 import Settings from './pages/Settings.jsx'
+import Sustainability from './pages/Sustainability.jsx'
 import Profile from './pages/Profile.jsx'
 import Sidebar from './components/Sidebar.jsx'
 
@@ -35,6 +36,7 @@ export default function App() {
       <Route path="/history" element={<ProtectedLayout><History /></ProtectedLayout>} />
       <Route path="/reports" element={<ProtectedLayout><Reports /></ProtectedLayout>} />
       <Route path="/settings" element={<ProtectedLayout><Settings /></ProtectedLayout>} />
+      <Route path="/sustainability" element={<ProtectedLayout><Sustainability /></ProtectedLayout>} />
       <Route path="/profile" element={<ProtectedLayout><Profile /></ProtectedLayout>} />
       <Route path="*" element={<Navigate to={isAuthed() ? '/dashboard' : '/login'} replace />} />
     </Routes>

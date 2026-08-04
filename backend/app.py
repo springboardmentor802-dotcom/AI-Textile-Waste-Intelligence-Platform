@@ -11,6 +11,13 @@ import os
 app = Flask(__name__)
 CORS(app)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, ".."))
+DATABASE_PATH = os.path.join(PROJECT_ROOT, "textile_waste.db")
+
+
+def get_db_connection():
+    return sqlite3.connect(DATABASE_PATH)
+
 
 DEFAULT_CATEGORICAL_VALUES = {
     "fabric_type": "cotton",
@@ -86,7 +93,7 @@ def home():
 @app.route("/inventory")
 def inventory():
 
-    conn = sqlite3.connect("textile_waste.db")
+    conn = get_db_connection()
     cursor = conn.cursor()
 
     cursor.execute("SELECT * FROM waste_inventory")
@@ -100,7 +107,7 @@ def inventory():
 @app.route("/tables")
 def tables():
 
-    conn = sqlite3.connect("textile_waste.db")
+    conn = get_db_connection()
     cursor = conn.cursor()
 
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
@@ -126,7 +133,7 @@ def register():
         bcrypt.gensalt()
     )
 
-    conn = sqlite3.connect("textile_waste.db")
+    conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
@@ -165,7 +172,7 @@ def login():
     email = data["email"]
     password = data["password"]
 
-    conn = sqlite3.connect("textile_waste.db")
+    conn = get_db_connection()
     cursor = conn.cursor()
 
     cursor.execute(
@@ -226,7 +233,7 @@ def add_inventory():
     condition = data["condition"]
     collection_date = data["collection_date"]
 
-    conn = sqlite3.connect("textile_waste.db")
+    conn = get_db_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
@@ -255,7 +262,7 @@ def add_inventory():
 @app.route("/delete_inventory/<int:id>", methods=["DELETE"])
 def delete_inventory(id):
 
-    conn = sqlite3.connect("textile_waste.db")
+    conn = get_db_connection()
     cursor = conn.cursor()
 
     cursor.execute(

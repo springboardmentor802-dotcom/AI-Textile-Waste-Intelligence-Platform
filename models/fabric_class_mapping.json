@@ -1,0 +1,150 @@
+{
+  "metadata": {
+    "dataset": "Ten Fabrics Dataset (TFD)",
+    "mapping_type": "application_assigned_representative_material",
+    "mapping_scope": "academic_prototype",
+    "dataset_provides_fibre_ground_truth": false,
+    "description": "The CNN predicts visual TFD classes 001-010. Each class is assigned one representative material by this application to enable provisional sustainability recommendations. These assignments are not fibre-composition ground truth from TFD."
+  },
+  "classes": {
+    "001": {
+      "name": "Blue Basket-Weave Fabric",
+      "construction": "Woven",
+      "visual_family": "Basket Weave",
+      "assigned_material": "Cotton",
+      "likely_fibres": [
+        "Cotton",
+        "Polyester",
+        "Nylon",
+        "Blended Fibre"
+      ],
+      "material_source": "application_class_mapping",
+      "material_verified": false
+    },
+    "002": {
+      "name": "Fine Blue Plain-Weave Fabric",
+      "construction": "Woven",
+      "visual_family": "Plain Weave",
+      "assigned_material": "Polyester",
+      "likely_fibres": [
+        "Polyester",
+        "Cotton",
+        "Viscose",
+        "Blended Fibre"
+      ],
+      "material_source": "application_class_mapping",
+      "material_verified": false
+    },
+    "003": {
+      "name": "Blue-White Ribbed Fabric",
+      "construction": "Woven",
+      "visual_family": "Ribbed Weave",
+      "assigned_material": "Wool",
+      "likely_fibres": [
+        "Wool",
+        "Cotton",
+        "Polyester",
+        "Cotton-Polyester Blend"
+      ],
+      "material_source": "application_class_mapping",
+      "material_verified": false
+    },
+    "004": {
+      "name": "Dark Vertical-Rib Fabric",
+      "construction": "Woven",
+      "visual_family": "Vertical-Rib Weave",
+      "assigned_material": "Nylon",
+      "likely_fibres": [
+        "Nylon",
+        "Polyester",
+        "Cotton",
+        "Blended Fibre"
+      ],
+      "material_source": "application_class_mapping",
+      "material_verified": false
+    },
+    "005": {
+      "name": "Navy Patterned Woven Fabric",
+      "construction": "Woven",
+      "visual_family": "Patterned Weave",
+      "assigned_material": "Viscose",
+      "likely_fibres": [
+        "Viscose",
+        "Polyester",
+        "Cotton",
+        "Blended Fibre"
+      ],
+      "material_source": "application_class_mapping",
+      "material_verified": false
+    },
+    "006": {
+      "name": "Blue-White Striped Woven Fabric",
+      "construction": "Woven",
+      "visual_family": "Striped Plain Weave",
+      "assigned_material": "Linen",
+      "likely_fibres": [
+        "Linen",
+        "Cotton",
+        "Polyester",
+        "Cotton-Polyester Blend"
+      ],
+      "material_source": "application_class_mapping",
+      "material_verified": false
+    },
+    "007": {
+      "name": "Dark Fine Plain-Weave Fabric",
+      "construction": "Woven",
+      "visual_family": "Fine Plain Weave",
+      "assigned_material": "Acrylic",
+      "likely_fibres": [
+        "Acrylic",
+        "Polyester",
+        "Nylon",
+        "Cotton"
+      ],
+      "material_source": "application_class_mapping",
+      "material_verified": false
+    },
+    "008": {
+      "name": "Dark Diagonal-Pattern Fabric",
+      "construction": "Twill/Woven",
+      "visual_family": "Diagonal Twill",
+      "assigned_material": "Polyester",
+      "likely_fibres": [
+        "Polyester",
+        "Nylon",
+        "Cotton",
+        "Blended Fibre"
+      ],
+      "material_source": "application_class_mapping",
+      "material_verified": false
+    },
+    "009": {
+      "name": "Blue Denim-Style Twill",
+      "construction": "Twill/Woven",
+      "visual_family": "Denim-Style Twill",
+      "assigned_material": "Denim",
+      "likely_fibres": [
+        "Cotton",
+        "Cotton-Polyester Blend",
+        "Cotton-Elastane Blend"
+      ],
+      "material_source": "application_class_mapping",
+      "material_verified": false
+    },
+    "010": {
+      "name": "Blue Patterned Knit Fabric",
+      "construction": "Knitted",
+      "visual_family": "Patterned Knit",
+      "assigned_material": "Mixed Fabric",
+      "likely_fibres": [
+        "Polyester Blend",
+        "Cotton Blend",
+        "Viscose Blend",
+        "Elastane Blend"
+      ],
+      "material_source": "application_class_mapping",
+      "material_verified": false
+    }
+  }
+}

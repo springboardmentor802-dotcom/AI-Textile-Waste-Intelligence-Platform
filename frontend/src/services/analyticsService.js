@@ -1,15 +1,11 @@
-import axios from "axios";
-
-
-const API_URL = "http://127.0.0.1:8000";
-
+import api from "./api";
 
 export const getAnalytics = async () => {
+  const response = await api.get("/analytics/");
+  return response.data;
+};
 
-    const response = await axios.get(
-        `${API_URL}/analytics/`
-    );
-
-    return response.data;
-
+export const getDatasetAnalytics = async () => {
+  const response = await api.get("/analytics/dataset");
+  return response.data;
 };

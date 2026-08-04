@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import prediction, analytics
 
+
 from app.routes import (
     users,
     inventory,
@@ -17,20 +18,12 @@ from app.routes import (
 from app.database import Base, engine
 
 
-# Import models so tables are created
+# Import models so SQLAlchemy knows all tables
 
 from app.models.user import User
 from app.models.textile_inventory import TextileInventory
 from app.models.waste_upload import WasteUpload
 from app.models.recommendation import Recommendation
-
-
-
-# Create database tables
-
-Base.metadata.create_all(
-    bind=engine
-)
 
 
 
@@ -44,6 +37,21 @@ app = FastAPI(
     version="1.0"
 
 )
+
+
+
+
+# --------------------------------
+# Database Initialization
+# --------------------------------
+
+@app.on_event("startup")
+def create_tables():
+
+    Base.metadata.create_all(
+        bind=engine
+    )
+
 
 
 
@@ -94,58 +102,43 @@ app.add_middleware(
 
 
 
-
 # --------------------------------
 # API Routers
 # --------------------------------
 
 
 app.include_router(
-
     analytics.router
-
 )
 
 
 app.include_router(
-
     prediction.router
-
 )
 
 
 app.include_router(
-
     users.router
-
 )
 
 
 app.include_router(
-
     inventory.router
-
 )
 
 
 app.include_router(
-
     uploads.router
-
 )
 
 
 app.include_router(
-
     recommendations.router
-
 )
 
 
 app.include_router(
-
     auth.router
-
 )
 
 
@@ -164,7 +157,6 @@ def home():
     return {
 
         "message":
-
         "AI Textile Waste Intelligence Backend Running"
 
     }
@@ -179,7 +171,6 @@ def health_check():
     return {
 
         "status":
-
         "Backend is healthy"
 
     }

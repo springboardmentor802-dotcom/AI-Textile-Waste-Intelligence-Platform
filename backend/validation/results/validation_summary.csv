@@ -1,0 +1,18 @@
+metric,value
+Total records,10000.0
+Dataset columns,23.0
+Duplicate record IDs,0.0
+Invalid weights,0.0
+Invalid sustainability scores,0.0
+Environmental invalid cells,0.0
+Expected rules triggered,21.0
+Rule coverage percentage,100.0
+Recommendation consistency,100.0
+Manual review records,4550.0
+Manual review percentage,45.5
+Average sustainability score,46.82
+Total textile weight kg,99101.35
+Total CO2 saved kg,351856.53
+Total water saved liters,83557660.8
+Total energy saved kWh,790096.3
+Total landfill diverted kg,70340.16

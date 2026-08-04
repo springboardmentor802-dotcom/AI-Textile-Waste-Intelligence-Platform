@@ -1,334 +1,343 @@
 import {
-  FaTachometerAlt,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
+import {
   FaBoxes,
-  FaUpload,
+  FaChartBar,
+  FaCog,
   FaLayerGroup,
   FaLightbulb,
-  FaChartBar,
+  FaSignOutAlt,
+  FaTachometerAlt,
+  FaTimes,
+  FaUpload,
   FaUser,
-  FaCog,
-  FaSignOutAlt
 } from "react-icons/fa";
 
+import {
+  NavLink,
+  useLocation,
+} from "react-router-dom";
 
-import { NavLink } from "react-router-dom";
+import {
+  useAuth,
+} from "../../contexts/AuthContext";
 
-import { useAuth } from "../../contexts/AuthContext";
-
-import { hasPermission } from "../../utils/permissions";
+import {
+  hasPermission,
+} from "../../utils/permissions";
 
 import "./Sidebar.css";
 
 
+const MENU_ITEMS = [
+  {
+    path: "/dashboard",
+    name: "Dashboard",
+    description: "Platform overview",
+    icon: FaTachometerAlt,
+    end: true,
+  },
+  {
+    path: "/inventory",
+    name: "Inventory",
+    description: "Textile stock records",
+    icon: FaBoxes,
+    permission: "VIEW_INVENTORY",
+  },
+  {
+    path: "/upload-waste",
+    name: "Upload Waste",
+    description: "Single-sample analysis",
+    icon: FaUpload,
+    permission: "UPLOAD_WASTE",
+  },
+  {
+    path: "/batch-analysis",
+    name: "Batch Analysis",
+    description: "Multi-sample processing",
+    icon: FaLayerGroup,
+    permission: "UPLOAD_WASTE",
+  },
+  {
+    path: "/analytics",
+    name: "Analytics",
+    description: "Circularity intelligence",
+    icon: FaChartBar,
+    permission: "VIEW_ANALYTICS",
+  },
+  {
+    path: "/recommendations",
+    name: "Recommendations",
+    description: "Recovery guidance",
+    icon: FaLightbulb,
+    permission: "VIEW_RECOMMENDATIONS",
+  },
+  {
+    path: "/profile",
+    name: "Profile",
+    description: "Account information",
+    icon: FaUser,
+  },
+  {
+    path: "/settings",
+    name: "Settings",
+    description: "Workspace preferences",
+    icon: FaCog,
+    permission: "VIEW_SETTINGS",
+  },
+];
 
 
-function Sidebar(){
+function Sidebar() {
+  const {
+    logout,
+    user,
+  } = useAuth();
 
+  const location = useLocation();
 
-  const { logout, user } = useAuth();
+  const [
+    mobileOpen,
+    setMobileOpen,
+  ] = useState(false);
 
   const role = user?.role;
 
-
-
-
-
-  const menuItems = [
-
-
-
-    {
-      path:"/dashboard",
-      name:"Dashboard",
-      icon:<FaTachometerAlt/>
-    },
-
-
-
-
-
-    {
-      path:"/inventory",
-      name:"Inventory",
-      icon:<FaBoxes/>,
-      permission:"VIEW_INVENTORY"
-    },
-
-
-
-
-
-    {
-      path:"/upload-waste",
-      name:"Upload Waste",
-      icon:<FaUpload/>,
-      permission:"UPLOAD_WASTE"
-    },
-
-
-
-
-
-    {
-      path:"/batch-analysis",
-      name:"Batch Analysis",
-      icon:<FaLayerGroup/>,
-      permission:"UPLOAD_WASTE"
-    },
-
-
-
-
-
-    {
-      path:"/analytics",
-      name:"Analytics",
-      icon:<FaChartBar/>,
-      permission:"VIEW_ANALYTICS"
-    },
-
-
-
-
-
-    {
-      path:"/recommendations",
-      name:"Recommendations",
-      icon:<FaLightbulb/>,
-      permission:"VIEW_RECOMMENDATIONS"
-    },
-
-
-
-
-
-    {
-      path:"/profile",
-      name:"Profile",
-      icon:<FaUser/>
-    },
-
-
-
-
-
-    {
-      path:"/settings",
-      name:"Settings",
-      icon:<FaCog/>,
-      permission:"VIEW_SETTINGS"
-    }
-
-
-
-
-  ];
-
-
-
-
-
-
-
-  return(
-
-
-
-    <aside className="sidebar">
-
-
-
-
-
-      <div className="sidebar-title">
-
-        Navigation
-
-      </div>
-
-
-
-
-
-
-
-      <nav className="sidebar-menu">
-
-
-
-        {
-
-          menuItems.map((item,index)=>{
-
-
-
-
-
-            if(
-
-              item.permission &&
-
-              !hasPermission(role,item.permission)
-
-            ){
-
-              return null;
-
-            }
-
-
-
-
-
-
-
-            return(
-
-
-
-              <NavLink
-
-
-                key={index}
-
-
-                to={item.path}
-
-
-
-                className={({isActive})=>
-
-                  isActive
-
-                  ?
-
-                  "sidebar-link active"
-
-                  :
-
-                  "sidebar-link"
-
-                }
-
-
-              >
-
-
-
-
-
-
-                <span className="sidebar-icon">
-
-
-                  {item.icon}
-
-
-                </span>
-
-
-
-
-
-
-
-
-                <span className="sidebar-text">
-
-
-                  {item.name}
-
-
-                </span>
-
-
-
-
-
-              </NavLink>
-
-
-
-            );
-
-
-
-          })
-
-        }
-
-
-
-
-      </nav>
-
-
-
-
-
-
-
-
-      <div className="sidebar-footer">
-
-
-
-
-
-        <button
-
-
-          className="logout-btn"
-
-
-          onClick={logout}
-
-
-        >
-
-
-
-
-
-          <FaSignOutAlt/>
-
-
-
-
-
-          <span>
-
-            Logout
-
-          </span>
-
-
-
-
-
-        </button>
-
-
-
-
-
-      </div>
-
-
-
-
-
-
-    </aside>
-
-
-
+  const visibleItems = useMemo(
+    () =>
+      MENU_ITEMS.filter(
+        (item) =>
+          !item.permission ||
+          hasPermission(
+            role,
+            item.permission,
+          ),
+      ),
+    [role],
   );
 
 
+  useEffect(() => {
+    const handleOpenSidebar = () => {
+      setMobileOpen(true);
+    };
 
+    window.addEventListener(
+      "app-sidebar:open",
+      handleOpenSidebar,
+    );
+
+    return () => {
+      window.removeEventListener(
+        "app-sidebar:open",
+        handleOpenSidebar,
+      );
+    };
+  }, []);
+
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
+
+
+  useEffect(() => {
+    if (!mobileOpen) {
+      document.body.classList.remove(
+        "sidebar-mobile-lock",
+      );
+
+      return undefined;
+    }
+
+    document.body.classList.add(
+      "sidebar-mobile-lock",
+    );
+
+    const handleEscape = (event) => {
+      if (event.key === "Escape") {
+        setMobileOpen(false);
+      }
+    };
+
+    window.addEventListener(
+      "keydown",
+      handleEscape,
+    );
+
+    return () => {
+      document.body.classList.remove(
+        "sidebar-mobile-lock",
+      );
+
+      window.removeEventListener(
+        "keydown",
+        handleEscape,
+      );
+    };
+  }, [mobileOpen]);
+
+
+  const handleLogout = () => {
+    setMobileOpen(false);
+    logout();
+  };
+
+
+  return (
+    <>
+      <button
+        type="button"
+        className={`app-sidebar-backdrop ${
+          mobileOpen
+            ? "is-visible"
+            : ""
+        }`}
+        onClick={() =>
+          setMobileOpen(false)
+        }
+        aria-label="Close navigation"
+        tabIndex={
+          mobileOpen
+            ? 0
+            : -1
+        }
+      />
+
+      <aside
+        id="primary-sidebar"
+        className={`app-sidebar ${
+          mobileOpen
+            ? "is-mobile-open"
+            : ""
+        }`}
+        aria-label="Primary navigation"
+        aria-hidden={
+          mobileOpen
+            ? "false"
+            : undefined
+        }
+      >
+        <div className="app-sidebar-mobile-header">
+          <div>
+            <strong>
+              AI Textile Intelligence
+            </strong>
+
+            <small>
+              Workspace navigation
+            </small>
+          </div>
+
+          <button
+            type="button"
+            onClick={() =>
+              setMobileOpen(false)
+            }
+            aria-label="Close navigation"
+          >
+            <FaTimes aria-hidden="true" />
+          </button>
+        </div>
+
+        <div className="app-sidebar-heading">
+          <span>Navigation</span>
+
+          <small>
+            {visibleItems.length} modules
+          </small>
+        </div>
+
+        <nav
+          className="app-sidebar-menu"
+          aria-label="Workspace modules"
+        >
+          {visibleItems.map(
+            (item) => {
+              const Icon = item.icon;
+
+              return (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  end={item.end}
+                  title={item.name}
+                  aria-label={item.name}
+                  onClick={() =>
+                    setMobileOpen(false)
+                  }
+                  className={({
+                    isActive,
+                    isPending,
+                  }) =>
+                    [
+                      "app-sidebar-link",
+                      isActive
+                        ? "is-active"
+                        : "",
+                      isPending
+                        ? "is-pending"
+                        : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")
+                  }
+                >
+                  <span className="app-sidebar-active-mark" />
+
+                  <span className="app-sidebar-icon">
+                    <Icon aria-hidden="true" />
+                  </span>
+
+                  <span className="app-sidebar-copy">
+                    <strong>
+                      {item.name}
+                    </strong>
+
+                    <small>
+                      {item.description}
+                    </small>
+                  </span>
+                </NavLink>
+              );
+            },
+          )}
+        </nav>
+
+        <div className="app-sidebar-footer">
+          <div className="app-sidebar-status">
+            <span className="app-sidebar-status-dot" />
+
+            <div>
+              <strong>
+                Intelligence online
+              </strong>
+
+              <small>
+                AI + CV services ready
+              </small>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            className="app-sidebar-logout"
+            onClick={handleLogout}
+            title="Logout"
+            aria-label="Logout"
+          >
+            <FaSignOutAlt aria-hidden="true" />
+            <span>Logout</span>
+          </button>
+        </div>
+      </aside>
+    </>
+  );
 }
-
 
 
 export default Sidebar;

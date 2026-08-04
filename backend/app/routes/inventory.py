@@ -4,77 +4,109 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.textile_inventory import TextileInventory
 
+from app.schemas.inventory import InventoryCreate
+
 from app.utils.auth_dependency import get_current_user
 from app.utils.role_dependency import require_role
 
 
+
 router = APIRouter(
+
     prefix="/inventory",
+
     tags=["Inventory"]
+
 )
 
 
+
+
+
 # ============================
-# GET ALL INVENTORY
-# Allowed: All Roles
+# GET ALL BATCHES
 # ============================
 
 @router.get("/")
 def get_inventory(
+
     db: Session = Depends(get_db),
+
     current_user: dict = Depends(get_current_user)
+
 ):
 
-    items = db.query(TextileInventory).all()
+    return db.query(TextileInventory).all()
 
-    return items
+
+
+
 
 
 
 # ============================
-# ADD INVENTORY
-# Allowed: Admin, Industry
+# ADD NEW BATCH
 # ============================
 
 @router.post("/")
 def add_inventory(
-    item: dict,
+
+    item: InventoryCreate,
+
     db: Session = Depends(get_db),
+
     current_user: dict = Depends(
-        require_role(["Admin", "Industry"])
+        require_role(["Admin","Industry"])
     )
+
 ):
 
-    new_item = TextileInventory(
 
-        material_type=item["material"],
+    new_batch = TextileInventory(
 
-        fabric_type=item["type"],
 
-        quantity=item["weight"],
+        batch_id=item.batch_id,
 
-        condition_status=item["status"],
 
-        uploaded_by=current_user.get("user_id", 1)
+        material_profile=item.material_profile,
+
+
+        waste_origin=item.waste_origin,
+
+
+        condition_grade=item.condition_grade,
+
+
+        recovery_potential=item.recovery_potential,
+
+
+        processing_status=item.processing_status,
+
+
+        waste_weight=item.waste_weight
 
     )
 
 
-    db.add(new_item)
+
+    db.add(new_batch)
 
     db.commit()
 
-    db.refresh(new_item)
+    db.refresh(new_batch)
 
 
-    return new_item
+
+    return new_batch
+
+
+
 
 
 
 
 # ============================
-# DELETE INVENTORY
-# Allowed: Admin only
+# DELETE BATCH
 # ============================
 
 @router.delete("/{item_id}")
@@ -90,17 +122,25 @@ def delete_inventory(
 
 ):
 
+
     item = db.query(TextileInventory).filter(
+
         TextileInventory.textile_id == item_id
+
     ).first()
+
 
 
     if not item:
 
         raise HTTPException(
+
             status_code=404,
-            detail="Inventory item not found"
+
+            detail="Batch not found"
+
         )
+
 
 
     db.delete(item)
@@ -108,16 +148,24 @@ def delete_inventory(
     db.commit()
 
 
+
     return {
-        "message": "Inventory deleted successfully"
+
+        "message":
+        "Batch deleted successfully"
+
     }
 
 
 
 
+
+
+
+
+
 # ============================
-# UPDATE INVENTORY
-# Allowed: Admin, Industry
+# UPDATE BATCH
 # ============================
 
 @router.put("/{item_id}")
@@ -125,45 +173,63 @@ def update_inventory(
 
     item_id: int,
 
-    item: dict,
+    item: InventoryCreate,
 
     db: Session = Depends(get_db),
 
     current_user: dict = Depends(
-        require_role(["Admin", "Industry"])
+        require_role(["Admin","Industry"])
     )
 
 ):
 
 
-    inventory = db.query(TextileInventory).filter(
+    batch = db.query(TextileInventory).filter(
+
         TextileInventory.textile_id == item_id
+
     ).first()
 
 
 
-    if not inventory:
+    if not batch:
 
         raise HTTPException(
+
             status_code=404,
-            detail="Inventory item not found"
+
+            detail="Batch not found"
+
         )
 
 
 
-    inventory.material_type = item["material"]
+    batch.batch_id = item.batch_id
 
-    inventory.fabric_type = item["type"]
 
-    inventory.quantity = item["weight"]
+    batch.material_profile = item.material_profile
 
-    inventory.condition_status = item["status"]
+
+    batch.waste_origin = item.waste_origin
+
+
+    batch.condition_grade = item.condition_grade
+
+
+    batch.recovery_potential = item.recovery_potential
+
+
+    batch.processing_status = item.processing_status
+
+
+    batch.waste_weight = item.waste_weight
 
 
 
     db.commit()
 
-    db.refresh(inventory)
+    db.refresh(batch)
 
 
-    return inventory
+
+    return batch

@@ -7,6 +7,7 @@ import datetime
 import joblib
 import pandas as pd
 import os
+from sustainability_engine import compute_recommendation
 
 app = Flask(__name__)
 CORS(app)
@@ -340,36 +341,43 @@ def recommend():
     data = request.get_json(silent=True) or {}
     quality = str(data.get("fabric_quality", "")).strip()
 
-    if quality.lower() == "high":
-        recommendation = "Reuse or Donate"
-        sustainability_score = 95
-        circularity_score = 90
-        co2_saved = 18.5
-        water_saved = 120
-        energy_saved = 8.2
-    elif quality.lower() == "medium":
-        recommendation = "Mechanical Recycling"
-        sustainability_score = 75
-        circularity_score = 70
-        co2_saved = 12.3
-        water_saved = 90
-        energy_saved = 5.4
-    else:
-        recommendation = "Chemical Recycling"
-        sustainability_score = 55
-        circularity_score = 50
-        co2_saved = 6.4
-        water_saved = 45
-        energy_saved = 2.8
+    # Delegate to the dynamic sustainability engine which returns the same
+    # response keys as the original /recommend endpoint.
+    try:
+        result = compute_recommendation(quality, data)
+        return jsonify(result)
+    except Exception as e:
+        # Fall back to the original simple mapping in case of unexpected errors
+        q = quality.lower()
+        if q == "high":
+            base = {
+                "recommendation": "Reuse or Donate",
+                "sustainability_score": 95,
+                "circularity_score": 90,
+                "co2_saved": 18.5,
+                "water_saved": 120,
+                "energy_saved": 8.2,
+            }
+        elif q == "medium":
+            base = {
+                "recommendation": "Mechanical Recycling",
+                "sustainability_score": 75,
+                "circularity_score": 70,
+                "co2_saved": 12.3,
+                "water_saved": 90,
+                "energy_saved": 5.4,
+            }
+        else:
+            base = {
+                "recommendation": "Chemical Recycling",
+                "sustainability_score": 55,
+                "circularity_score": 50,
+                "co2_saved": 6.4,
+                "water_saved": 45,
+                "energy_saved": 2.8,
+            }
 
-    return jsonify({
-        "recommendation": recommendation,
-        "sustainability_score": sustainability_score,
-        "circularity_score": circularity_score,
-        "co2_saved": co2_saved,
-        "water_saved": water_saved,
-        "energy_saved": energy_saved
-    })
+        return jsonify(base)
 
 
 if __name__ == "__main__":

@@ -21,6 +21,10 @@ The platform is designed to help users monitor waste inventory, analyze fabric q
 - AI prediction API for fabric quality classification
 - Recommendation workflow for reuse, recycling, and sustainability impact
 - Responsive frontend experience built with React and Vite
+- Dynamic Sustainability Intelligence Engine
+- Circularity Calculator for manual sustainability assessment
+- Environmental impact estimation (CO₂, Water, Energy)
+- Dynamic sustainability scoring based on textile properties
 
 ## Tech Stack
 
@@ -66,11 +70,17 @@ Completed:
 
 ### Milestone 3 - Sustainability Intelligence Workflow
 
-In progress:
-- Sustainability intelligence engine development
-- Recycling recommendation workflow
-- Environmental impact assessment logic
-- Circular economy analytics and dashboard enhancements
+Completed:
+
+- Dynamic Sustainability Intelligence Engine
+- AI-powered recycling recommendation workflow
+- Environmental impact assessment
+- Dynamic sustainability score calculation
+- Circularity score calculation
+- CO₂, water, and energy savings estimation
+- Circularity Calculator for manual sustainability analysis
+- React frontend integrated with Flask recommendation API
+- Sustainability dashboard displaying recommendation and impact metrics
 
 ## AI Model Details
 
@@ -85,22 +95,46 @@ The prediction module uses a machine learning pipeline based on a Random Forest 
   - fabric_quality_model.pkl
   - label encoders in the ml/encoders folder
 
-## Recommendation Workflow
+The recommendation workflow dynamically computes sustainability metrics based on:
 
-The recommendation logic evaluates predicted fabric quality and suggests one of the following actions:
+- Fabric Type
+- Production Method
+- Finish Type
+- Defect Count
+- Quantity / Weight
 
-- High quality: Reuse or Donate
-- Medium quality: Mechanical Recycling
-- Low quality: Chemical Recycling
+The engine estimates:
 
-The workflow also estimates sustainability and circularity impact indicators such as:
+- Sustainability Score
+- Circularity Score
+- CO₂ Saved
+- Water Saved
+- Energy Saved
 
-- sustainability score
-- circularity score
-- CO2 saved
-- water saved
-- energy saved
+This enables users to evaluate the environmental benefits of different recycling strategies before processing textile waste.
 
+## Circularity Calculator
+
+The Circularity Calculator enables users to calculate sustainability metrics without uploading an image.
+
+Users can manually enter:
+
+- Fabric Type
+- Weight
+- Production Method
+- Finish Type
+- Defect Count
+
+The system communicates with the Flask recommendation API and generates:
+
+- Recommended recycling strategy
+- Sustainability Score
+- Circularity Score
+- CO₂ Saved
+- Water Saved
+- Energy Saved
+
+This feature is intended for manually sorted textile waste where image-based prediction is not required.
 ## Dashboard Features
 
 The dashboard displays:
@@ -145,8 +179,9 @@ The backend uses a SQLite database file for inventory and user data. Ensure the 
 - Branch: 24A31A05IZ
 - Core platform: completed
 - AI prediction module: completed
-- Sustainability recommendation workflow: in progress
-- Dashboard and inventory workflow: active and integrated
+- Sustainability recommendation workflow: completed
+- Dynamic Sustainability Intelligence Engine: completed
+- Circularity Calculator: completed
 
 ## Future Scope
 
@@ -157,4 +192,8 @@ Planned enhancements include:
 - expanding sustainability analytics with real-world environmental metrics
 - deploying the application with Docker and cloud platforms
 - generating downloadable sustainability reports
-- optimizing the recommendation engine with more advanced models
+- Single image textile waste estimation
+- Batch image processing for warehouse-scale analysis
+- Automated sustainability report generation
+- Real-time analytics dashboard
+- Cloud deployment and scalability

@@ -10,7 +10,7 @@ import {
 import { 
   Package, BarChart3, Shield, LogOut, Leaf, Scale, 
   RefreshCw, Upload, FileText, CheckCircle2, Image as ImageIcon, 
-  Droplet, Box, Activity, Search
+  Droplet, Box, Activity, Search, Users
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -30,6 +30,10 @@ const Dashboard = () => {
   const [analyzingImage, setAnalyzingImage] = useState(false);
   const [imageAnalysisResult, setImageAnalysisResult] = useState(null);
   
+  // Single vs Batch Upload Mode State
+  const [isBatchUpload, setIsBatchUpload] = useState(false);
+  const [batchWeightInput, setBatchWeightInput] = useState(100.0);
+
   // Selected Engine Dropdown State
   const [selectedEngine, setSelectedEngine] = useState('image_analysis_engine');
 
@@ -40,7 +44,7 @@ const Dashboard = () => {
     { id: 'recycling_recommendation_engine', label: '4. Recycling Recommendation Engine' },
     { id: 'sustainability_intelligence_engine', label: '5. Sustainability Intelligence Engine' },
     { id: 'environmental_impact_engine', label: '6. Environmental Impact Assessment Engine' },
-    { id: 'waste_scoring_engine', label: '7. Waste Scoring Engine (5-Tier Weighted Model)' }
+    { id: 'waste_scoring_engine', label: '7. Waste Scoring Engine' }
   ];
 
   // Inventory Form State
@@ -93,9 +97,6 @@ const Dashboard = () => {
     }
   };
 
-  // ---------------- REAL-TIME DYNAMIC DATA AGGREGATION FROM POSTGRESQL ----------------
-
-  // 1. Dynamic Material Distribution for Pie / Doughnut Chart
   const calculateFabricDistribution = () => {
     const combinedItems = [
       ...dataset.map(d => ({ fabric: d.material_type || d.Material_Type || 'Cotton' })),
@@ -127,7 +128,6 @@ const Dashboard = () => {
     }));
   };
 
-  // 2. Dynamic Monthly Waste Diversion Line Chart
   const calculateMonthlyDiversion = () => {
     if (!inventory || inventory.length === 0) {
       return [
@@ -172,7 +172,6 @@ const Dashboard = () => {
       .map(m => ({ month: m, weightKg: monthsMap[m] }));
   };
 
-  // 3. Dynamic Circularity Score Tiers for Bar Chart
   const calculateScoreDistribution = () => {
     const combinedItems = [
       ...dataset.map(d => ({ score: parseFloat(d.recyclability_score || d.Recyclability_Score || 75) })),
@@ -207,7 +206,6 @@ const Dashboard = () => {
   const dynamicMonthlyData = calculateMonthlyDiversion();
   const dynamicScoreData = calculateScoreDistribution();
 
-  // Calculated Dynamic Environmental & ESG Metrics from PostgreSQL
   const totalDatasetWeight = dataset.reduce((acc, curr) => acc + (parseFloat(curr.waste_weight_kg || curr.Waste_Weight_KG) || 0), 0);
   const totalInventoryWeight = inventory.reduce((acc, curr) => acc + (parseFloat(curr.quantity) || 0), 0);
   const combinedTotalWeight = totalDatasetWeight + totalInventoryWeight;
@@ -216,7 +214,6 @@ const Dashboard = () => {
   const liveWaterSaved = Math.round(combinedTotalWeight * 1200);
   const liveLandfillVolume = (combinedTotalWeight * 0.0025).toFixed(2);
 
-  // Handlers
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -234,21 +231,22 @@ const Dashboard = () => {
     }
     setAnalyzingImage(true);
     try {
-      const res = await analyticsService.uploadTextileImage(selectedFile);
+      const res = await analyticsService.uploadTextileImage(selectedFile, isBatchUpload, batchWeightInput);
       if (res && res.results) {
         setImageAnalysisResult(res);
 
         const fabricTypeStr = (res.results.material_classification_engine?.fabric_type_classification || "Cotton").toLowerCase();
         const recyclabilityVal = parseFloat(res.results.waste_classification_engine?.recyclability_assessment) || 85.0;
-        const co2Val = parseFloat(res.results.environmental_impact_engine?.co2_savings_estimation) || 145.0;
+        const co2Val = parseFloat(res.results.environmental_impact_engine?.co2_savings_estimation) || 1.35;
         const gradeVal = res.results.material_classification_engine?.material_quality_estimation || "Grade A - Premium Quality";
 
         let catKey = 'cotton';
         if (fabricTypeStr.includes('denim')) catKey = 'denim';
         else if (fabricTypeStr.includes('poly') || fabricTypeStr.includes('synthetic')) catKey = 'polyester';
-        else if (fabricTypeStr.includes('wool')) catKey = 'wool';
+        else if (fabricTypeStr.includes('wool') || fabricTypeStr.includes('jute') || fabricTypeStr.includes('fleece') || fabricTypeStr.includes('textured')) catKey = 'wool';
         else if (fabricTypeStr.includes('linen')) catKey = 'linen';
-        else if (fabricTypeStr.includes('canvas') || fabricTypeStr.includes('jute')) catKey = 'canvas';
+        else if (fabricTypeStr.includes('canvas') || fabricTypeStr.includes('dyed') || fabricTypeStr.includes('woven')) catKey = 'canvas';
+        else if (fabricTypeStr.includes('silk')) catKey = 'silk';
 
         const latestScanPayload = {
           categoryKey: catKey,
@@ -373,23 +371,36 @@ const Dashboard = () => {
         </div>
       </header>
 
-      {/* Main Layout Container */}
+      {/* Main Layout Container with Always Visible Sidebar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* Sidebar Navigation */}
         <aside className="lg:col-span-3 space-y-2">
           <nav className="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-1">
             {userRole === 'Admin' && (
-              <button
-                onClick={() => setActiveTab('admin')}
-                className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition ${
-                  activeTab === 'admin'
-                    ? 'bg-emerald-600 text-white font-semibold shadow-md'
-                    : 'text-slate-600 hover:bg-slate-50'
-                }`}
-              >
-                <Shield className="w-4 h-4 mr-3" /> Overview
-              </button>
+              <>
+                <button
+                  onClick={() => setActiveTab('admin')}
+                  className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition ${
+                    activeTab === 'admin'
+                      ? 'bg-emerald-600 text-white font-semibold shadow-md'
+                      : 'text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <Shield className="w-4 h-4 mr-3" /> Overview
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('users')}
+                  className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition ${
+                    activeTab === 'users'
+                      ? 'bg-emerald-600 text-white font-semibold shadow-md'
+                      : 'text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <Users className="w-4 h-4 mr-3" /> User Management
+                </button>
+              </>
             )}
 
             <button
@@ -411,7 +422,7 @@ const Dashboard = () => {
                   : 'text-slate-600 hover:bg-slate-50'
               }`}
             >
-              <ImageIcon className="w-4 h-4 mr-3" /> AI Vision Fabric Scanner
+              <ImageIcon className="w-4 h-4 mr-3" /> AI Fabric Scanner
             </button>
 
             <button
@@ -422,7 +433,7 @@ const Dashboard = () => {
                   : 'text-slate-600 hover:bg-slate-50'
               }`}
             >
-              <Scale className="w-4 h-4 mr-3" /> Circularity Calculator
+              <Scale className="w-4 h-4 mr-3" /> Sustainability Calculator
             </button>
 
             <button
@@ -441,22 +452,21 @@ const Dashboard = () => {
         {/* Content Area */}
         <main className="lg:col-span-9 space-y-6">
           
-          {/* TAB 0: OVERVIEW (ADMIN COMMAND CENTER) */}
-          {activeTab === 'admin' && <AdminDashboard />}
+          {/* TAB 0: OVERVIEW (ADMIN MONITORING GRID) */}
+          {activeTab === 'admin' && <AdminDashboard viewMode="overview" />}
 
-          {/* TAB 1: PLATFORM ANALYTICS (CHARTS & ESG METRICS) */}
+          {/* TAB 0.5: USER MANAGEMENT (SIDEBAR CLICKABLE TAB) */}
+          {activeTab === 'users' && <AdminDashboard viewMode="users" />}
+
+          {/* TAB 1: PLATFORM ANALYTICS */}
           {activeTab === 'overview' && (
             <div className="space-y-6">
-              
-              {/* SECTION 1: ENVIRONMENTAL & ESG IMPACT METRICS CARDS */}
               <div className="space-y-2">
                 <h2 className="text-lg font-bold text-slate-800 flex items-center">
                   <Leaf className="w-5 h-5 mr-2 text-emerald-600" />
-                  Environmental & ESG Impact Metrics (Live DB)
+                  Environmental Metrics
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                  
-                  {/* Card 1: Carbon Offset */}
                   <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
                     <div className="flex items-center justify-between text-slate-500 text-xs font-bold uppercase tracking-wider">
                       <span>Total Carbon Offset</span>
@@ -468,7 +478,6 @@ const Dashboard = () => {
                     </span>
                   </div>
 
-                  {/* Card 2: Water Preserved */}
                   <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
                     <div className="flex items-center justify-between text-slate-500 text-xs font-bold uppercase tracking-wider">
                       <span>Water Footprint Preserved</span>
@@ -480,7 +489,6 @@ const Dashboard = () => {
                     </span>
                   </div>
 
-                  {/* Card 3: Landfill Volume Saved */}
                   <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
                     <div className="flex items-center justify-between text-slate-500 text-xs font-bold uppercase tracking-wider">
                       <span>Landfill Volume Saved</span>
@@ -491,24 +499,19 @@ const Dashboard = () => {
                       📦 Landfill Space Reduction Index
                     </span>
                   </div>
-
                 </div>
               </div>
 
-              {/* SECTION 2: VISUAL ANALYTICAL CHARTS (INTERACTIVE GRAPHS) */}
               <div className="space-y-4">
                 <h2 className="text-lg font-bold text-slate-800 flex items-center">
                   <BarChart3 className="w-5 h-5 mr-2 text-emerald-600" />
-                  Visual Analytical Charts & Intelligence Breakdown
+                  Analytical Charts
                 </h2>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  
-                  {/* Chart 1: Material Distribution (Doughnut Chart) */}
                   <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
                     <div>
                       <h3 className="font-bold text-slate-800 text-sm">Material Distribution Index</h3>
-                      <p className="text-slate-400 text-xs">Live percentages calculated from {dataset.length + inventory.length} entries</p>
                     </div>
                     <div className="h-64 w-full">
                       <ResponsiveContainer width="100%" height="100%">
@@ -533,11 +536,9 @@ const Dashboard = () => {
                     </div>
                   </div>
 
-                  {/* Chart 2: Monthly Waste Diversion (Line Chart) */}
                   <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
                     <div>
                       <h3 className="font-bold text-slate-800 text-sm">Monthly Waste Diversion (KG)</h3>
-                      <p className="text-slate-400 text-xs">Month-wise textile waste prevented from landfills</p>
                     </div>
                     <div className="h-64 w-full">
                       <ResponsiveContainer width="100%" height="100%">
@@ -552,11 +553,9 @@ const Dashboard = () => {
                     </div>
                   </div>
 
-                  {/* Chart 3: Circularity Score Distribution (Bar Chart - Full Width) */}
                   <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3 lg:col-span-2">
                     <div>
                       <h3 className="font-bold text-slate-800 text-sm">Circularity Score Distribution (%)</h3>
-                      <p className="text-slate-400 text-xs">Calculated dynamically across active database items</p>
                     </div>
                     <div className="h-64 w-full">
                       <ResponsiveContainer width="100%" height="100%">
@@ -574,20 +573,18 @@ const Dashboard = () => {
                       </ResponsiveContainer>
                     </div>
                   </div>
-
                 </div>
               </div>
-
             </div>
           )}
 
-          {/* TAB 2: AI VISION SCANNER */}
+          {/* TAB 2: AI FABRIC SCANNER */}
           {activeTab === 'scanner' && (
             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
               <div className="border-b border-slate-100 pb-4">
                 <h2 className="text-xl font-bold text-slate-800 flex items-center">
                   <ImageIcon className="w-5 h-5 mr-2 text-emerald-600" />
-                  AI Textile Vision & Fabric Analysis Engine
+                  Fabric Analysis Engine
                 </h2>
                 <p className="text-slate-500 text-sm mt-1">
                   Upload fabric photos once to generate multi-engine sustainability diagnostics across all 7 processing engines.
@@ -595,6 +592,35 @@ const Dashboard = () => {
               </div>
 
               <form onSubmit={handleImageUploadAndAnalyze} className="space-y-4">
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Scan Mode</label>
+                    <select
+                      value={isBatchUpload ? 'batch' : 'single'}
+                      onChange={(e) => setIsBatchUpload(e.target.value === 'batch')}
+                      className="w-full bg-white border border-slate-300 rounded-xl p-2 text-xs font-semibold focus:ring-2 focus:ring-emerald-500"
+                    >
+                      <option value="single">Single Garment Scan (Dynamic Reference Lookup)</option>
+                      <option value="batch">Industrial Batch Scan (Dataset Benchmark)</option>
+                    </select>
+                  </div>
+
+                  {isBatchUpload && (
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Total Batch Weight (KG)</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={batchWeightInput}
+                        onChange={(e) => setBatchWeightInput(parseFloat(e.target.value) || 100.0)}
+                        placeholder="e.g. 100.0"
+                        className="w-full bg-white border border-slate-300 rounded-xl p-2 text-xs font-semibold focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+                  )}
+                </div>
+
                 <div className="border-2 border-dashed border-slate-300 hover:border-emerald-500 rounded-2xl p-8 text-center transition bg-slate-50 cursor-pointer">
                   <input
                     type="file"
@@ -682,17 +708,14 @@ const Dashboard = () => {
             </div>
           )}
 
-          {/* TAB 3: CIRCULARITY CALCULATOR */}
+          {/* TAB 3: SUSTAINABILITY CALCULATOR */}
           {activeTab === 'calculator' && (
             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
               <div className="border-b border-slate-100 pb-4">
                 <h2 className="text-xl font-bold text-slate-800 flex items-center">
                   <Scale className="w-5 h-5 mr-2 text-emerald-600" />
-                  Sustainability Intelligence Calculator
+                  Sustainability Calculator
                 </h2>
-                <p className="text-slate-500 text-sm mt-1">
-                  Compute the 5-Tier Weighted Circularity Score.
-                </p>
               </div>
 
               <form onSubmit={handleAssessmentSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -707,8 +730,12 @@ const Dashboard = () => {
                     <option value="Polyester">Polyester</option>
                     <option value="Wool">Wool</option>
                     <option value="Silk">Silk</option>
+                    <option value="Linen">Linen</option>
                     <option value="Denim">Denim</option>
                     <option value="Nylon">Nylon</option>
+                    <option value="Rayon">Rayon</option>
+                    <option value="Acrylic">Acrylic</option>
+                    <option value="Mixed Fabrics">Mixed Fabrics</option>
                   </select>
                 </div>
 
@@ -789,7 +816,7 @@ const Dashboard = () => {
                   <Package className="w-5 h-5 mr-2 text-emerald-600" />
                   Log New Textile Waste Batch
                 </h2>
-                <p className="text-slate-500 text-xs">Add a new waste shipment to the PostgreSQL database inventory</p>
+                <p className="text-slate-500 text-xs">Add a new waste shipment</p>
 
                 {registerSuccess && (
                   <div className="p-3 bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs rounded-xl font-medium flex items-center">
@@ -821,8 +848,12 @@ const Dashboard = () => {
                       <option value="Polyester">Polyester</option>
                       <option value="Wool">Wool</option>
                       <option value="Silk">Silk</option>
+                      <option value="Linen">Linen</option>
                       <option value="Denim">Denim</option>
                       <option value="Nylon">Nylon</option>
+                      <option value="Rayon">Rayon</option>
+                      <option value="Acrylic">Acrylic</option>
+                      <option value="Mixed Fabrics">Mixed Fabrics</option>
                     </select>
                   </div>
 
@@ -911,7 +942,13 @@ const Dashboard = () => {
                       <option value="Cotton">Cotton</option>
                       <option value="Polyester">Polyester</option>
                       <option value="Wool">Wool</option>
+                      <option value="Silk">Silk</option>
+                      <option value="Linen">Linen</option>
                       <option value="Denim">Denim</option>
+                      <option value="Nylon">Nylon</option>
+                      <option value="Rayon">Rayon</option>
+                      <option value="Acrylic">Acrylic</option>
+                      <option value="Mixed Fabrics">Mixed Fabrics</option>
                     </select>
                   </div>
                 </div>

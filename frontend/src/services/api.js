@@ -54,12 +54,20 @@ export const analyticsService = {
     const response = await API.post('/analytics/assess', payload);
     return response.data;
   },
-  uploadTextileImage: async (file) => {
+  
+  // ⚡ UPDATED SERVICE FUNCTION FOR SINGLE vs BATCH SCANNING
+  uploadTextileImage: async (file, isBatch = false, batchWeight = 100) => {
     const formData = new FormData();
     formData.append('file', file);
-    const response = await API.post('/analytics/upload-image', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    
+    // Query params me passes is_batch and batch_weight
+    const response = await API.post(
+      `/analytics/upload-image?is_batch=${isBatch}&batch_weight=${batchWeight}`, 
+      formData, 
+      {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }
+    );
     return response.data;
   },
 };
@@ -77,6 +85,14 @@ export const sustainabilityService = {
 export const adminService = {
   getUsers: async () => {
     const response = await API.get('/admin/users');
+    return response.data;
+  },
+  createUser: async (userData) => {
+    const response = await API.post('/admin/users', userData);
+    return response.data;
+  },
+  deleteUser: async (userId) => {
+    const response = await API.delete(`/admin/users/${userId}`);
     return response.data;
   },
   updateUserRole: async (userId, newRole) => {

@@ -1,6 +1,7 @@
 import os
+import numpy as np
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -103,16 +104,21 @@ def get_inventory(db: Session = Depends(get_db), current_user: User = Depends(ge
 # ==========================================
 
 @analytics_router.post("/upload-image")
-async def analyze_textile_image(file: UploadFile = File(...)):
+async def analyze_textile_image(
+    file: UploadFile = File(...),
+    is_batch: bool = Query(False),
+    batch_weight: float = Query(100.0)
+):
     """
-    Receives uploaded textile image, processes it via computer vision engine, 
-    and returns multi-engine analysis across all 7 diagnostic engines.
+    Receives uploaded textile image, accepts single vs batch mode flag and batch_weight,
+    processes via computer vision engine, and returns dynamic multi-engine analysis.
     """
     contents = await file.read()
-    analysis_data = process_textile_image(contents)
+    analysis_data = process_textile_image(contents, is_batch=is_batch, batch_weight=batch_weight)
     return {
         "status": "Success",
         "filename": file.filename,
+        "is_batch": is_batch,
         "results": analysis_data
     }
 
@@ -120,7 +126,7 @@ async def analyze_textile_image(file: UploadFile = File(...)):
 def assess_material_sustainability(payload: MaterialAssessmentInput):
     row_dict = payload.dict()
     
-    # 1. Circularity Score & 5 Category Classification
+    # 1. Circularity Score & Classification
     scoring_res = calculate_circularity_score(row_dict)
     
     # 2. Recycling Recommendation Strategy
@@ -167,12 +173,14 @@ async def export_multi_engine_pdf(payload: dict):
 @sustainability_router.get("/")
 def get_sustainability_dataset(limit: int = 25):
     df = load_sustainability_dataset()
-    records = df.head(limit).to_dict(orient="records")
+    # Replace NaN/Inf values with None for JSON compliance
+    df_clean = df.replace([np.nan, np.inf, -np.inf], None)
+    records = df_clean.head(limit).to_dict(orient="records")
     return {"status": "Success", "data": records}
 
 
 # ==========================================
-# 👑 ADMIN DASHBOARD ENDPOINTS (USER MGMT & MONITORING)
+# 👑 ADMIN DASHBOARD ENDPOINTS (USER MANAGEMENT & MONITORING)
 # ==========================================
 
 @admin_router.get("/users")
@@ -180,7 +188,48 @@ def get_all_users(db: Session = Depends(get_db), current_user: User = Depends(ge
     if current_user.role != UserRole.ADMIN:
         raise HTTPException(status_code=403, detail="Admin authorization required.")
     users = db.query(User).all()
-    return [{"id": u.id, "email": u.email, "role": u.role.value if hasattr(u.role, 'value') else str(u.role)} for u in users]
+    return [
+        {
+            "id": u.id, 
+            "email": u.email, 
+            "role": u.role.value if hasattr(u.role, 'value') else str(u.role),
+            "created_at": u.created_at.strftime("%Y-%m-%d %H:%M") if hasattr(u, 'created_at') and u.created_at else "N/A"
+        } 
+        for u in users
+    ]
+
+@admin_router.post("/users", status_code=status.HTTP_201_CREATED)
+def create_user_by_admin(user_data: UserCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    if current_user.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Admin authorization required.")
+    
+    existing_user = db.query(User).filter(User.email == user_data.email).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="User with this email address already exists.")
+    
+    hashed_password = get_password_hash(user_data.password)
+    new_user = User(email=user_data.email, hashed_password=hashed_password, role=user_data.role)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return {"message": "User created successfully", "user_id": new_user.id}
+
+@admin_router.delete("/users/{user_id}")
+def delete_user_by_admin(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    if current_user.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Admin authorization required.")
+    
+    # Self-deletion guard
+    if current_user.id == user_id:
+        raise HTTPException(status_code=400, detail="Action prohibited: Admin cannot delete their own active session.")
+    
+    user_to_delete = db.query(User).filter(User.id == user_id).first()
+    if not user_to_delete:
+        raise HTTPException(status_code=404, detail="User not found.")
+    
+    db.delete(user_to_delete)
+    db.commit()
+    return {"message": f"User {user_to_delete.email} successfully deleted."}
 
 @admin_router.put("/users/{user_id}/role")
 def update_user_role(user_id: int, new_role: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):

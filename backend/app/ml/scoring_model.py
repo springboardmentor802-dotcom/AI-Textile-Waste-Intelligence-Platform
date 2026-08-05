@@ -1,12 +1,44 @@
 import os
+import numpy as np
 import pandas as pd
 
-DATASET_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "datasets", "sustainable_fashion_dataset.csv")
+DATASET_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 
+    "datasets", 
+    "sustainable_fashion_dataset.csv"
+)
+
+def clean_dict(data):
+    """
+    Recursively replaces NaN, Inf, and -Inf values in a dictionary or list
+    with None so that FastAPI can safely serialize it to JSON.
+    """
+    if isinstance(data, dict):
+        return {k: clean_dict(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [clean_dict(item) for item in data]
+    elif isinstance(data, float):
+        if np.isnan(data) or np.isinf(data):
+            return None
+        return data
+    return data
 
 def load_sustainability_dataset():
+    """
+    Loads dataset and safely replaces all Pandas/Numpy NaNs with None 
+    to prevent JSON serialization crashes.
+    """
     if os.path.exists(DATASET_PATH):
-        return pd.read_csv(DATASET_PATH)
-    
+        try:
+            df = pd.read_csv(DATASET_PATH)
+            # Safe JSON conversion: replace NaN and Infinite values with None
+            df = df.replace([np.nan, np.inf, -np.inf], None)
+            df = df.where(pd.notnull(df), None)
+            return df
+        except Exception as e:
+            print(f"Error loading dataset CSV: {e}")
+
+    # Fallback Default Dataset
     data = {
         "Material_Type": ["Cotton", "Polyester", "Wool", "Silk", "Denim"],
         "Material_Condition": ["Excellent", "Good", "Fair", "Poor", "Contaminated"],
@@ -78,7 +110,7 @@ def calculate_circularity_score(input_data: dict) -> dict:
     else:
         category = "Disposal Recommended"
 
-    return {
+    result = {
         "circularity_score": final_score,
         "category": category,
         "breakdown": {
@@ -89,6 +121,8 @@ def calculate_circularity_score(input_data: dict) -> dict:
             "feasibility_score": feasibility_score
         }
     }
+    
+    return clean_dict(result)
 
 
 # =====================================================================
@@ -130,11 +164,12 @@ def generate_recycling_recommendation(mat_type: str, condition: str, score: floa
         secondary = "Chemical Recycling"
         strategy = "Material suitability for closed-loop textiles is low. Divert to acoustic padding or automotive felt."
 
-    return {
+    result = {
         "primary_strategy": primary,
         "secondary_strategy": secondary,
         "action_plan": strategy
     }
+    return clean_dict(result)
 
 
 # =====================================================================
@@ -144,6 +179,7 @@ def calculate_environmental_impact(weight_kg: float, mat_type: str) -> dict:
     """
     Calculates estimated CO2 savings, water saved, and landfill space diverted.
     """
+    weight_kg = weight_kg if weight_kg is not None else 0.0
     co2_factor = 3.5 if mat_type in ["Cotton", "Denim"] else (2.1 if mat_type in ["Polyester", "Nylon"] else 2.8)
     water_factor = 2500.0 if mat_type in ["Cotton", "Denim"] else (500.0 if mat_type in ["Polyester", "Nylon"] else 1200.0)
 
@@ -151,8 +187,9 @@ def calculate_environmental_impact(weight_kg: float, mat_type: str) -> dict:
     water_saved_liters = round(weight_kg * water_factor, 2)
     landfill_diverted_kg = round(weight_kg, 2)
 
-    return {
+    result = {
         "co2_savings_kg": co2_saved_kg,
         "water_savings_liters": water_saved_liters,
         "landfill_diverted_kg": landfill_diverted_kg
     }
+    return clean_dict(result)

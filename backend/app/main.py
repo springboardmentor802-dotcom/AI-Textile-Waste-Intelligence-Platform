@@ -11,7 +11,7 @@ app = FastAPI(title="AI Textile Waste Intelligence Platform")
 # CORS Configuration taaki React Frontend safely connect ho sake
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # React server ka URL
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],  # React server ka URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

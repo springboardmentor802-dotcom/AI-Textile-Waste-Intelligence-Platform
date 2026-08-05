@@ -1,0 +1,14 @@
+{
+  "cotton": 0.2,
+  "polyester": 0.3,
+  "wool": 0.5,
+  "silk": 0.15,
+  "linen": 0.25,
+  "denim": 0.6,
+  "nylon": 0.25,
+  "rayon": 0.2,
+  "acrylic": 0.4,
+  "mixed fabrics": 0.4,
+  "blend": 0.4,
+  "default": 0.5
+}

@@ -1,7 +1,9 @@
+import os
 import sqlite3
 
 # Connect to database
-conn = sqlite3.connect("textile_waste.db")
+DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "textile_waste.db"))
+conn = sqlite3.connect(DB_PATH)
 
 cursor = conn.cursor()
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import PredictionForm from "./components/PredictionForm";
+import CircularityCalculator from "./components/CircularityCalculator";
 
 function App() {
   const [fullName, setFullName] = useState("");
@@ -225,6 +226,7 @@ function App() {
         </section>
 
         <PredictionForm />
+        <CircularityCalculator />
       </div>
     </div>
   );

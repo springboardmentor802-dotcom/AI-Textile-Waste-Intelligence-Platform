@@ -8,10 +8,12 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
 import Inventory from "../pages/Inventory";
+import Analytics from "../pages/Analytics";
 
 import ProtectedRoute from "./ProtectedRoute";
 import WasteClassification from "../pages/WasteClassification";
 import Sustainability from "../pages/Sustainability";
+import TextileIntelligence from "../pages/TextileIntelligence";
 
 function AppRoutes() {
   return (
@@ -41,6 +43,14 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+<Route
+  path="/analytics"
+  element={
+    <ProtectedRoute>
+      <Analytics />
+    </ProtectedRoute>
+  }
+/>
 
         {/* ADD THESE 3 ROUTES HERE */}
 
@@ -98,11 +108,20 @@ function AppRoutes() {
           }
         />
 
-        <Route
+        {/* <Route
           path="/sustainability"
           element={
             <ProtectedRoute>
               <Sustainability />
+            </ProtectedRoute>
+          }
+        /> */}
+
+        <Route
+          path="/textile-intelligence"
+          element={
+            <ProtectedRoute>
+              <TextileIntelligence />
             </ProtectedRoute>
           }
         />

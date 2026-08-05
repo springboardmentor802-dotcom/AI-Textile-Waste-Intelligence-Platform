@@ -1,70 +1,101 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 function Sidebar() {
+  const location = useLocation();
+
+  const menuItems = [
+    {
+      name: "Dashboard",
+      path: "/dashboard",
+      icon: "🏠",
+    },
+    {
+      name: "AI Textile Intelligence",
+      path: "/textile-intelligence",
+      icon: "🤖",
+    },
+    {
+      name: "Inventory",
+      path: "/inventory",
+      icon: "📦",
+    },
+    {
+      name: "Analytics",
+      path: "/analytics",
+      icon: "📈",
+    },
+    {
+      name: "Reports",
+      path: "/reports",
+      icon: "📄",
+    },
+    {
+      name: "Profile",
+      path: "/profile",
+      icon: "👤",
+    },
+  ];
+
   return (
-    <div className="w-64 bg-green-700 text-white h-screen p-6">
+    <div className="w-72 bg-green-700 text-white min-h-screen shadow-2xl">
 
-      <h1 className="text-2xl font-bold mb-8">
-        Textile Waste
-      </h1>
+      {/* Logo */}
 
-      <nav className="space-y-4">
+      <div className="p-6 border-b border-green-600">
 
-        <Link
-          to="/dashboard"
-          className="block p-3 rounded-lg hover:bg-green-600 transition"
-        >
-          🏠 Dashboard
-        </Link>
+        <h1 className="text-3xl font-bold">
+          IntelliTex
+        </h1>
 
-        <Link
-          to="/inventory"
-          className="block p-3 rounded-lg hover:bg-green-600 transition"
-        >
-          📦 Inventory
-        </Link>
+        <p className="text-green-100 text-sm mt-2">
+          AI Textile Intelligence
+        </p>
 
-        <Link
-          to="/upload"
-          className="block p-3 rounded-lg hover:bg-green-600 transition"
-        >
-          🧵 Material Analysis
-        </Link>
+      </div>
 
-        <Link
-          to="/defect-analysis"
-          className="block p-3 rounded-lg hover:bg-green-600 transition"
-        >
-          🔍 Defect Analysis
-        </Link>
+      {/* Navigation */}
 
-        <Link
-          to="/reports"
-          className="block p-3 rounded-lg hover:bg-green-600 transition"
-        >
-          📊 Reports
-        </Link>
+      <nav className="p-4 space-y-2">
 
-        <Link
-          to="/profile"
-          className="block p-3 rounded-lg hover:bg-green-600 transition"
-        >
-          👤 Profile
-        </Link>
-        <Link
-          to="/waste-classification"
-          className="block p-3 rounded-lg hover:bg-green-600 transition"
-        >
-          ♻️ Waste Classification
-        </Link>
-        <Link
-          to="/sustainability"
-          className="block p-3 rounded-lg hover:bg-green-600 transition"
-        >
-          🌱 Sustainability Intelligence
-        </Link>
+        {menuItems.map((item) => (
+
+          <Link
+            key={item.path}
+            to={item.path}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium
+              ${
+                location.pathname === item.path
+                  ? "bg-white text-green-700 shadow-lg"
+                  : "hover:bg-green-600"
+              }`}
+          >
+            <span className="text-xl">
+              {item.icon}
+            </span>
+
+            <span>
+              {item.name}
+            </span>
+
+          </Link>
+
+        ))}
 
       </nav>
+
+      {/* Footer */}
+
+      <div className="absolute bottom-0 w-72 p-5 border-t border-green-600">
+
+        <div className="text-sm text-green-100">
+          Textile Waste Intelligence
+        </div>
+
+        <div className="text-xs text-green-200 mt-1">
+          Version 1.0
+        </div>
+
+      </div>
 
     </div>
   );

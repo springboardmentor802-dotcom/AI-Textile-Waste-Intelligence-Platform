@@ -227,3 +227,14 @@ frontend/.env
 
 uploads/
 backend/uploads/
+
+# Large ML artifacts
+dataset/
+scratch/
+docs/
+
+ml_model/textile_model.keras
+models/textile_model.keras
+models/model_weights.weights.h5
+models/temp_ResNet50.keras
+models/*.keras

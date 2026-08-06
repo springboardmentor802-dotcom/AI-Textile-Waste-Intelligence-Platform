@@ -1,0 +1,16 @@
+{
+  "model_name": "ResNet50",
+  "input_shape": [
+    224,
+    224,
+    3
+  ],
+  "normalization": "Min-Max [0, 1]",
+  "confidence_threshold": 40.0,
+  "top_k": 5,
+  "num_classes": 10,
+  "validation_accuracy": 0.8235294117647058,
+  "test_accuracy": 0.8205128205128205,
+  "top5_accuracy": 1.0000000000000000,
+  "timestamp": "2026-08-06 19:24:00"
+}

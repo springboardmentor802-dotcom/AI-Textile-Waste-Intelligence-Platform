@@ -1,0 +1,38 @@
+{
+  "classes": [
+    "Cotton",
+    "Polyester",
+    "Wool",
+    "Silk",
+    "Linen",
+    "Denim",
+    "Nylon",
+    "Rayon",
+    "Acrylic",
+    "Mixed Fabrics"
+  ],
+  "label_to_index": {
+    "Cotton": 0,
+    "Polyester": 1,
+    "Wool": 2,
+    "Silk": 3,
+    "Linen": 4,
+    "Denim": 5,
+    "Nylon": 6,
+    "Rayon": 7,
+    "Acrylic": 8,
+    "Mixed Fabrics": 9
+  },
+  "index_to_label": {
+    "0": "Cotton",
+    "1": "Polyester",
+    "2": "Wool",
+    "3": "Silk",
+    "4": "Linen",
+    "5": "Denim",
+    "6": "Nylon",
+    "7": "Rayon",
+    "8": "Acrylic",
+    "9": "Mixed Fabrics"
+  }
+}

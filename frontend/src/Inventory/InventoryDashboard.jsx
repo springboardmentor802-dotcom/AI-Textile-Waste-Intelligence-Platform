@@ -51,6 +51,15 @@ const InventoryDashboard = () => {
 
   useEffect(() => {
     fetchInventories();
+
+    const handleHistoryUpdate = () => {
+      fetchInventories();
+    };
+
+    window.addEventListener("history-updated", handleHistoryUpdate);
+    return () => {
+      window.removeEventListener("history-updated", handleHistoryUpdate);
+    };
   }, [fabricFilter, conditionFilter]);
 
   const handleSearchSubmit = (e) => {
@@ -100,9 +109,6 @@ const InventoryDashboard = () => {
               <h1 className="text-2xl font-bold text-slate-900">
                 Textile Waste Inventory Management
               </h1>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
-                Enterprise Dashboard
-              </span>
             </div>
             <p className="text-sm text-slate-600 mt-1">
               Log, track, and categorize post-industrial and post-consumer textile batches

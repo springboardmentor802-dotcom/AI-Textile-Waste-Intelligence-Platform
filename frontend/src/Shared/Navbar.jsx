@@ -21,8 +21,8 @@ const Navbar = () => {
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10">
+        <div className="flex items-center justify-between h-18">
           <Link to="/" className="flex items-center space-x-3">
             <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
               TI
@@ -46,6 +46,12 @@ const Navbar = () => {
             </Link>
             <Link to="/inventory" className={navLinkClass("/inventory")}>
               Inventory Portal
+            </Link>
+            <Link to="/dashboard" className={navLinkClass("/dashboard")}>
+              Analytics Dashboard
+            </Link>
+            <Link to="/history" className={navLinkClass("/history")}>
+              History
             </Link>
           </nav>
 

@@ -3,6 +3,8 @@ import React, { useState, useRef, useEffect } from "react";
 const ImageDropzone = ({
   onFileSelect,
   selectedFile,
+  restoredImageUrl,
+  restoredFileName,
   onClearFile,
   onAnalyze,
   status,
@@ -15,25 +17,44 @@ const ImageDropzone = ({
   const [previewUrl, setPreviewUrl] = useState(null);
   const fileInputRef = useRef(null);
 
-  // Generate and clean up object URL for instant preview
+  // Generate and clean up object URL for instant preview or use restored URL
   useEffect(() => {
     if (selectedFile) {
       const url = URL.createObjectURL(selectedFile);
       setPreviewUrl(url);
       return () => URL.revokeObjectURL(url);
+    } else if (restoredImageUrl) {
+      const fullUrl = restoredImageUrl.startsWith("http")
+        ? restoredImageUrl
+        : `http://localhost:5000${restoredImageUrl}`;
+      setPreviewUrl(fullUrl);
     } else {
       setPreviewUrl(null);
     }
-  }, [selectedFile]);
+  }, [selectedFile, restoredImageUrl]);
 
   const validateAndHandleFile = (file) => {
     setError("");
     if (!file) return;
 
-    // Format validation
-    const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
-    if (!allowedTypes.includes(file.type.toLowerCase())) {
-      setError("Invalid file format. Please upload JPG, JPEG, or PNG images only.");
+    // Allowed MIME types & Extensions (JPG, JPEG, PNG, WEBP)
+    const allowedMimeTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/webp",
+      "image/pjpeg",
+    ];
+    const allowedExtensions = ["jpg", "jpeg", "png", "webp"];
+
+    const fileMimeType = (file.type || "").toLowerCase();
+    const ext = (file.name.split(".").pop() || "").toLowerCase();
+
+    const isMimeValid = allowedMimeTypes.includes(fileMimeType);
+    const isExtValid = allowedExtensions.includes(ext);
+
+    if (!isMimeValid && !isExtValid) {
+      setError("Invalid file format. Please upload JPG, JPEG, PNG, or WEBP images only.");
       return;
     }
 
@@ -91,7 +112,7 @@ const ImageDropzone = ({
   return (
     <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6 md:p-8 transition-all">
       {/* Dropzone Container */}
-      {!selectedFile ? (
+      {!selectedFile && !restoredImageUrl ? (
         <div
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -106,7 +127,7 @@ const ImageDropzone = ({
           <input
             ref={fileInputRef}
             type="file"
-            accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+            accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
             onChange={handleFileInputChange}
             className="hidden"
           />
@@ -131,11 +152,11 @@ const ImageDropzone = ({
             Drag & Drop your textile image here
           </h3>
           <p className="text-sm text-slate-500 mb-4 max-w-sm">
-            Or click to browse from your device. Support for high-resolution fabric texture scans or garment photos.
+            Or click to browse from your device. Support for JPG, JPEG, PNG, and WEBP fabric texture scans or garment photos.
           </p>
 
           <div className="flex items-center space-x-2 text-xs font-semibold text-slate-400">
-            <span className="px-2.5 py-1 bg-slate-100 rounded-lg">JPG, JPEG, PNG</span>
+            <span className="px-2.5 py-1 bg-slate-100 rounded-lg">JPG, JPEG, PNG, WEBP</span>
             <span className="px-2.5 py-1 bg-slate-100 rounded-lg">Max 10 MB</span>
           </div>
         </div>
@@ -168,15 +189,15 @@ const ImageDropzone = ({
             <div className="flex-1 w-full space-y-4">
               <div>
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
-                  Ready for AI Analysis
+                  {selectedFile ? "Ready for AI Analysis" : "Active Session Sample Image"}
                 </span>
                 <h4 className="text-lg font-bold text-slate-900 mt-2 truncate">
-                  {selectedFile.name}
+                  {selectedFile ? selectedFile.name : (restoredFileName || "Uploaded Sample Image")}
                 </h4>
                 <div className="flex items-center space-x-3 text-xs text-slate-500 font-medium mt-1">
-                  <span>Size: {formatFileSize(selectedFile.size)}</span>
+                  <span>Size: {selectedFile ? formatFileSize(selectedFile.size) : "Standard Image"}</span>
                   <span>•</span>
-                  <span>Format: {selectedFile.type.replace("image/", "").toUpperCase()}</span>
+                  <span>Format: {selectedFile ? (selectedFile.type || selectedFile.name.split('.').pop()).replace("image/", "").toUpperCase() : "IMAGE"}</span>
                 </div>
               </div>
 
@@ -221,7 +242,7 @@ const ImageDropzone = ({
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
                     onChange={handleFileInputChange}
                     className="hidden"
                   />

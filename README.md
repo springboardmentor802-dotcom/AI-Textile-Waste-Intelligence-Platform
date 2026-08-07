@@ -152,3 +152,16 @@ python -c "import ast; ast.parse(open('app/main.py').read())"
 
 * Train the material classifier on a properly labeled dataset (single-fiber material-type labels, not defect-detection labels) to replace/augment the rule-based fallback with higher-accuracy predictions.
 * Extend batch upload beyond 5 images if needed.
+
+## Recent Updates (Milestone 3 continued)
+
+- Fixed material classifier bug where Cotton was being misidentified as Polyester due to overlapping rule thresholds in the fallback classifier
+- Added Inventory Edit functionality (previously only Add and Delete were available)
+- Fixed CSV export authentication bug — Export All now correctly downloads instead of showing "Not authenticated"
+- Built a full Notification & Alert System:
+  - Recycling opportunity alerts (triggered when an item scores 75+ circularity)
+  - Inventory warnings (triggered when a Hazardous item is detected)
+  - Sustainability milestone alerts (triggered at 10, 25, 50, 100, 250, 500 total items analyzed)
+  - Waste collection alerts (triggered when a new inventory batch is registered)
+  - All alerts respect per-user notification preferences set in Settings
+  - Notification bell icon in the sidebar with live unread count, mark-as-read, mark-all-read, and delete

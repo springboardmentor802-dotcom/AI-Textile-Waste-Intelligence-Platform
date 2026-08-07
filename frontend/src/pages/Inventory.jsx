@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, Search, Trash2 } from 'lucide-react'
+import { Plus, Search, Trash2, Pencil } from 'lucide-react'
 import api from '../api'
 
 const empty = { batch_id: '', fabric_type: '', source: '', quantity: '', color: '', condition: '', collection_date: '' }
@@ -10,6 +10,7 @@ export default function Inventory() {
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState(empty)
   const [error, setError] = useState('')
+  const [editingId, setEditingId] = useState(null)
 
   const load = (q = '') => {
     api.get('/inventory', { params: { search: q } }).then(({ data }) => setItems(data)).catch(() => {})
@@ -22,19 +23,37 @@ export default function Inventory() {
     load(e.target.value)
   }
 
-  const handleCreate = async (e) => {
+  const handleSave = async (e) => {
     e.preventDefault()
     setError('')
     try {
-      await api.post('/inventory', { ...form, quantity: parseFloat(form.quantity) })
+      if (editingId) {
+        await api.put(`/inventory/${editingId}`, { ...form, quantity: parseFloat(form.quantity) })
+      } else {
+        await api.post('/inventory', { ...form, quantity: parseFloat(form.quantity) })
+      }
       setForm(empty)
       setShowForm(false)
+      setEditingId(null)
       load(search)
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to create record')
+      setError(err.response?.data?.detail || 'Failed to save record')
     }
   }
 
+  const handleEditClick = (it) => {
+    setForm({
+      batch_id: it.batch_id || '',
+      fabric_type: it.fabric_type || '',
+      source: it.source || '',
+      quantity: it.quantity ?? '',
+      color: it.color || '',
+      condition: it.condition || '',
+      collection_date: it.collection_date || '',
+    })
+    setEditingId(it.id)
+    setShowForm(true)
+  }
   const handleDelete = async (id) => {
     await api.delete(`/inventory/${id}`)
     load(search)
@@ -44,14 +63,14 @@ export default function Inventory() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">Textile Inventory</h1>
-        <button onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-2 bg-mint-600 hover:bg-mint-500 transition rounded-xl px-4 py-2 text-sm font-semibold">
-          <Plus size={16} /> Add Waste
+        <button onClick={() => { setShowForm(!showForm); setEditingId(null); setForm(empty) }}
+            className="flex items-center gap-2 bg-mint-600 hover:bg-mint-500 transition rounded-xl px-4 py-2 text-sm font-semibold">
+            <Plus size={16} /> Add Waste
         </button>
       </div>
 
       {showForm && (
-        <form onSubmit={handleCreate} className="glass-card p-6 grid grid-cols-2 md:grid-cols-4 gap-3">
+        <form onSubmit={handleSave} className="glass-card p-6 grid grid-cols-2 md:grid-cols-4 gap-3">
           {['batch_id', 'fabric_type', 'source', 'quantity', 'color', 'condition', 'collection_date'].map((field) => (
             <input
               key={field}
@@ -64,7 +83,7 @@ export default function Inventory() {
             />
           ))}
           <button type="submit" className="col-span-2 md:col-span-4 bg-mint-600 hover:bg-mint-500 transition rounded-xl py-2 text-sm font-semibold">
-            Save Record
+              {editingId ? 'Update Record' : 'Save Record'}
           </button>
           {error && <div className="col-span-4 text-xs text-red-400">{error}</div>}
         </form>
@@ -96,9 +115,14 @@ export default function Inventory() {
                   <td className="py-2 px-3">{it.condition}</td>
                   <td className="py-2 px-3">{it.collection_date}</td>
                   <td className="py-2 px-3">
-                    <button onClick={() => handleDelete(it.id)} className="text-red-400/70 hover:text-red-400">
-                      <Trash2 size={15} />
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <button onClick={() => handleEditClick(it)} className="text-white/50 hover:text-mint-400">
+                        <Pencil size={15} />
+                      </button>
+                      <button onClick={() => handleDelete(it.id)} className="text-red-400/70 hover:text-red-400">
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

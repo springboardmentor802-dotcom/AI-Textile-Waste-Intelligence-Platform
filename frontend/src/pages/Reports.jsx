@@ -41,8 +41,20 @@ export default function Reports() {
 
   useEffect(() => { load() }, [material, wasteCategory])
 
-  const exportCsv = () => {
-    window.open('http://localhost:8000/api/reports/export/csv', '_blank')
+  const exportCsv = async () => {
+    try {
+      const response = await api.get('/reports/export/csv', { responseType: 'blob' })
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'text/csv' }))
+      const link = document.createElement('a')
+      link.href = url
+      link.download = 'reports_export.csv'
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+    } catch (err) {
+      alert('Failed to export CSV')
+    }
   }
 
   const materialOptions = summary?.by_material.map((m) => m.material) || []

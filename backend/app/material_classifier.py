@@ -85,14 +85,16 @@ def _rule_based_classify(img, color_result: dict, texture_result: dict) -> tuple
         return "Denim", 78.5
     if smoothness > 78 and uniformity > 75 and saturation > 40:
         return "Silk", 74.0
-    if smoothness > 70 and uniformity > 80:
+    # Cotton checked before Polyester -- cotton has a matte finish (lower saturation)
+    if uniformity > 70 and smoothness > 55 and saturation < 35:
+        return "Cotton", 72.0
+    # Polyester needs a synthetic sheen: high smoothness + high uniformity + noticeably higher saturation
+    if smoothness > 70 and uniformity > 80 and saturation >= 35:
         return "Polyester", 71.5
     if roughness > 55 and texture_result["pattern_regularity_pct"] < 40:
         return "Wool", 69.0
     if smoothness > 60 and roughness < 30 and saturation < 30:
         return "Linen", 66.5
-    if uniformity > 70 and smoothness > 55:
-        return "Cotton", 72.0
     if roughness > 45:
         return "Nylon", 63.0
     if smoothness > 65:
@@ -100,7 +102,6 @@ def _rule_based_classify(img, color_result: dict, texture_result: dict) -> tuple
     if uniformity < 45:
         return "Mixed Fabric", 58.0
     return "Acrylic", 55.0
-
 
 def classify_material(img, color_result: dict, texture_result: dict) -> dict:
     _try_load_model()

@@ -10,6 +10,7 @@ from sqlalchemy import text
 
 from .database import db_session, init_db, USING_POSTGRES
 from . import auth
+from . import notifications as notif
 from .auth import (
     hash_password, verify_password, create_access_token, create_refresh_token,
     decode_token, get_current_user, require_roles, ROLES,
@@ -177,6 +178,57 @@ def update_settings(payload: NotificationPreferences, user=Depends(get_current_u
     return {"message": "Settings saved"}
 
 
+# ========================================================= NOTIFICATIONS ====
+@app.get("/api/notifications")
+def list_notifications(unread_only: bool = False, user=Depends(get_current_user)):
+    with db_session() as conn:
+        query = "SELECT * FROM notifications WHERE user_id=:uid"
+        if unread_only:
+            query += " AND is_read=0" if not USING_POSTGRES else " AND is_read=FALSE"
+        query += " ORDER BY created_at DESC LIMIT 50"
+        rows = conn.execute(text(query), {"uid": user["id"]}).mappings().all()
+    return [dict(r) for r in rows]
+
+
+@app.get("/api/notifications/unread-count")
+def unread_notification_count(user=Depends(get_current_user)):
+    with db_session() as conn:
+        query = "SELECT COUNT(*) c FROM notifications WHERE user_id=:uid AND is_read="
+        query += "0" if not USING_POSTGRES else "FALSE"
+        count = conn.execute(text(query), {"uid": user["id"]}).mappings().first()["c"]
+    return {"unread_count": count}
+
+
+@app.put("/api/notifications/{notification_id}/read")
+def mark_notification_read(notification_id: int, user=Depends(get_current_user)):
+    with db_session() as conn:
+        conn.execute(
+            text("UPDATE notifications SET is_read=:val WHERE id=:id AND user_id=:uid"),
+            {"val": True, "id": notification_id, "uid": user["id"]},
+        )
+    return {"message": "Marked as read"}
+
+
+@app.put("/api/notifications/mark-all-read")
+def mark_all_notifications_read(user=Depends(get_current_user)):
+    with db_session() as conn:
+        conn.execute(
+            text("UPDATE notifications SET is_read=:val WHERE user_id=:uid"),
+            {"val": True, "uid": user["id"]},
+        )
+    return {"message": "All notifications marked as read"}
+
+
+@app.delete("/api/notifications/{notification_id}")
+def delete_notification(notification_id: int, user=Depends(get_current_user)):
+    with db_session() as conn:
+        conn.execute(
+            text("DELETE FROM notifications WHERE id=:id AND user_id=:uid"),
+            {"id": notification_id, "uid": user["id"]},
+        )
+    return {"message": "Notification deleted"}
+
+
 # ============================================================ INVENTORY ====
 @app.get("/api/inventory")
 def list_inventory(search: str = "", user=Depends(get_current_user)):
@@ -206,6 +258,7 @@ def create_inventory(payload: InventoryCreate,
                     :condition,:collection_date,:created_by)"""),
             {**payload.dict(), "created_by": user["id"]},
         )
+        notif.notify_waste_collection_alert(conn, user["id"], payload.batch_id, payload.fabric_type, payload.quantity)
     return {"message": "Inventory record created"}
 
 
@@ -297,11 +350,15 @@ async def analyze_batch(files: list[UploadFile] = File(...), user=Depends(get_cu
                     "uid": user["id"],
                 },
             )
+            notif.notify_recycling_opportunity(conn, user["id"], f.filename, scores["circularity_score"], recycling_result["best_recommendation"])
+            notif.notify_inventory_warning(conn, user["id"], f.filename, waste_result["waste_category"])
+            total = conn.execute(text("SELECT COUNT(*) c FROM analyses WHERE created_by=:uid"), {"uid": user["id"]}).mappings().first()["c"]
+            avg_circ = conn.execute(text("SELECT AVG(circularity_score) a FROM analyses WHERE created_by=:uid"), {"uid": user["id"]}).mappings().first()["a"] or 0
+            notif.notify_sustainability_milestone(conn, user["id"], total, avg_circ)
 
         results.append(result)
 
     return {"count": len(results), "results": results}
-
 
 
 @app.post("/api/analyze")
@@ -366,8 +423,14 @@ async def analyze_image(file: UploadFile = File(...), user=Depends(get_current_u
                 "uid": user["id"],
             },
         )
+        notif.notify_recycling_opportunity(conn, user["id"], file.filename, scores["circularity_score"], recycling_result["best_recommendation"])
+        notif.notify_inventory_warning(conn, user["id"], file.filename, waste_result["waste_category"])
+        total = conn.execute(text("SELECT COUNT(*) c FROM analyses WHERE created_by=:uid"), {"uid": user["id"]}).mappings().first()["c"]
+        avg_circ = conn.execute(text("SELECT AVG(circularity_score) a FROM analyses WHERE created_by=:uid"), {"uid": user["id"]}).mappings().first()["a"] or 0
+        notif.notify_sustainability_milestone(conn, user["id"], total, avg_circ)
 
     return result
+
 
 @app.get("/api/history")
 def history(user=Depends(get_current_user)):

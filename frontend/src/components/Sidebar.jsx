@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { LayoutGrid, Boxes, UploadCloud, ScanEye, History, BarChart3, Sprout, Settings as SettingsIcon, User, LogOut, Leaf } from 'lucide-react'
+import NotificationBell from './NotificationBell.jsx'
 
 const links = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutGrid },
@@ -28,10 +29,11 @@ export default function Sidebar() {
         <div className="w-9 h-9 rounded-xl bg-mint-600/20 flex items-center justify-center border border-mint-500/30">
           <Leaf size={18} className="text-mint-400" />
         </div>
-        <div>
+        <div className="flex-1">
           <div className="text-sm font-bold leading-tight">🧵 Textile Waste</div>
           <div className="text-[10px] text-white/50 leading-tight">Intelligence Platform</div>
         </div>
+        <NotificationBell />
       </div>
 
       <nav className="flex-1 flex flex-col gap-1">

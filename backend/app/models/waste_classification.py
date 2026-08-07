@@ -144,3 +144,6 @@ class WasteClassification(Base):
         back_populates="waste_classification",
         cascade="all, delete-orphan"
     )
+
+
+    

@@ -63,3 +63,5 @@ export const deleteManufacturer = async (id) => {
 
     return response.data;
 };
+
+

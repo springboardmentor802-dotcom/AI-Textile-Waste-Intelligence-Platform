@@ -80,3 +80,5 @@ class SustainabilityDataset(Base):
     certifications = Column(
         String(255)
     )
+
+    

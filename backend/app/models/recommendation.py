@@ -126,3 +126,5 @@ class Recommendation(Base):
         "WasteClassification",
         back_populates="recommendations"
     )
+
+    

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Settings, LogOut, Users, BarChart3, Server, FileText, ShieldAlert, CheckCircle2, RefreshCw } from "lucide-react";
+import { ThemeToggle } from "@/app/components/ThemeToggle";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -29,7 +30,7 @@ export default function AdminDashboard() {
           <div className="p-2 bg-orange-500 rounded-lg shadow-md shadow-orange-900/30">
             <Server className="w-6 h-6 text-white" />
           </div>
-          <h1 className="text-xl font-bold tracking-tight">Sortex<span className="text-orange-400">Admin</span></h1>
+          <h1 className="text-xl font-bold tracking-tight">Sortex<span className="text-orange-400">AI</span></h1>
         </div>
 
         <nav className="flex-1 px-4 py-6 space-y-2">
@@ -56,7 +57,8 @@ export default function AdminDashboard() {
           })}
         </nav>
 
-        <div className="p-4 border-t border-white/5">
+        <div className="p-4 border-t border-white/5 space-y-2">
+          <ThemeToggle variant="sidebar" />
           <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-all">
             <LogOut className="w-5 h-5" />
             <span className="font-medium">Log out</span>

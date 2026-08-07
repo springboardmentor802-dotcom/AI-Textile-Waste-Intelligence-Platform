@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Mail, Lock, ArrowRight, Loader2, Recycle, Briefcase, Cpu, Layers, LineChart } from "lucide-react";
 import { routeForRole } from "@/lib/roleRoutes";
+import { ThemeToggle } from "../components/ThemeToggle";
 
 type PlatformRole = "Admin" | "Recycling Facilitator" | "Sustainability Manager" | "Manufacturer";
 
@@ -291,6 +292,8 @@ export default function LoginPage() {
         <span className="font-semibold text-orange-400/80">JanKas</span>
       </div>
 
+      {/* FLOATING THEME TOGGLE — BOTTOM LEFT CORNER */}
+      <ThemeToggle variant="floating" />
     </div>
   );
 }

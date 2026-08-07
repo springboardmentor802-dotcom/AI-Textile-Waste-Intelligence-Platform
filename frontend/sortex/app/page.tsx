@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { ThemeToggle } from "./components/ThemeToggle";
 import {
   Recycle,
   Cpu,
@@ -247,6 +248,9 @@ export default function LandingPage() {
         <span>by</span>
         <span className="font-semibold text-orange-400/80">JanKas</span>
       </footer>
+
+      {/* FLOATING THEME TOGGLE — BOTTOM LEFT CORNER */}
+      <ThemeToggle variant="floating" />
     </div>
   );
 }

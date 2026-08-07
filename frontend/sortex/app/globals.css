@@ -1,0 +1,155 @@
+@import "tailwindcss";
+
+:root, html.dark, body.dark, [data-theme="dark"] {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  color-scheme: dark;
+}
+
+html.light, body.light, [data-theme="light"] {
+  --background: #FAF7F2;
+  --foreground: #1F1916;
+  color-scheme: light;
+
+  /* Tailwind CSS v4 Color Variable Overrides */
+  --color-black: #FAF7F2;
+  --color-neutral-950: #FAF7F2;
+  --color-neutral-900: #FFFFFF;
+  --color-neutral-800: #F3EFE6;
+  --color-neutral-700: #EAE3D5;
+  --color-neutral-600: #9C8E82;
+  --color-neutral-500: #82756A;
+  --color-neutral-400: #63584E;
+  --color-neutral-300: #4A4037;
+  --color-neutral-200: #38302A;
+  --color-neutral-100: #27221F;
+  --color-white: #1F1916;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   LIGHT CREAM MODE COMPREHENSIVE OVERRIDES
+   ───────────────────────────────────────────────────────────── */
+
+/* Root & Container Backgrounds */
+html.light body,
+html.light div.min-h-screen,
+html.light div.h-screen,
+html.light .bg-black,
+html.light .bg-neutral-950 {
+  background-color: #FAF7F2 !important;
+  color: #1F1916 !important;
+}
+
+/* Sidebar & Navigation Headers */
+html.light div.w-64,
+html.light header.h-20,
+html.light header.bg-neutral-950,
+html.light header.relative {
+  background-color: #F3EFE6 !important;
+  border-color: rgba(215, 202, 182, 0.7) !important;
+}
+
+/* Card Surfaces, Drawers, Modals & Floating Containers */
+html.light .bg-neutral-900,
+html.light .bg-neutral-950\/40,
+html.light .bg-neutral-950\/80,
+html.light .bg-black\/30,
+html.light .bg-black\/40,
+html.light .bg-black\/80,
+html.light .bg-neutral-900\/90,
+html.light .bg-neutral-950\/90 {
+  background-color: #FFFFFF !important;
+  border-color: rgba(215, 202, 182, 0.6) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+html.light .bg-neutral-900\/50 {
+  background-color: #F8F4EC !important;
+  border-color: rgba(215, 202, 182, 0.5) !important;
+}
+
+/* Typography Rules */
+html.light .text-white,
+html.light h1,
+html.light h2,
+html.light h3,
+html.light h4,
+html.light h5,
+html.light h6 {
+  color: #1F1916 !important;
+}
+
+html.light .text-neutral-200,
+html.light .text-neutral-300 {
+  color: #38302A !important;
+}
+
+html.light .text-neutral-400 {
+  color: #63584E !important;
+}
+
+html.light .text-neutral-500 {
+  color: #82756A !important;
+}
+
+html.light .text-neutral-600 {
+  color: #9C8E82 !important;
+}
+
+/* Border Overrides */
+html.light .border-white\/5,
+html.light .border-white\/10,
+html.light .border-white\/15,
+html.light .border-white\/20 {
+  border-color: rgba(215, 202, 182, 0.6) !important;
+}
+
+/* Interactive Hover States */
+html.light .hover\:bg-white\/5:hover,
+html.light .hover\:bg-neutral-800:hover,
+html.light .hover\:bg-neutral-700:hover,
+html.light .hover\:bg-neutral-900\/50:hover {
+  background-color: #EFE9DE !important;
+}
+
+/* Input, Select & Textarea Controls */
+html.light input,
+html.light select,
+html.light textarea {
+  background-color: #FFFFFF !important;
+  color: #1F1916 !important;
+  border-color: rgba(205, 192, 172, 0.8) !important;
+}
+
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #82756A !important;
+}
+
+/* Badges & Pill Accents in Light Mode */
+html.light .bg-white\/5 {
+  background-color: rgba(235, 226, 212, 0.7) !important;
+}
+
+html.light .bg-orange-500\/10 {
+  background-color: rgba(249, 115, 22, 0.12) !important;
+}
+
+html.light .bg-emerald-500\/10 {
+  background-color: rgba(16, 185, 129, 0.12) !important;
+}
+
+html.light .bg-blue-500\/10 {
+  background-color: rgba(59, 130, 246, 0.12) !important;
+}
+
+html.light .bg-amber-500\/10 {
+  background-color: rgba(245, 158, 11, 0.12) !important;
+}

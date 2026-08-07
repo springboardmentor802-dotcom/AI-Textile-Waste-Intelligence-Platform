@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { ThemeToggle } from "@/app/components/ThemeToggle";
 import {
   LogOut,
   UploadCloud,
@@ -22,6 +23,7 @@ import {
   Palette,
   Gauge,
   Leaf,
+  Scale,
   RefreshCw,
   Package,
   PieChart,
@@ -30,6 +32,10 @@ import {
   ChevronUp,
   ArrowRight,
   Trash2,
+  Wind,
+  Search,
+  LayoutGrid,
+  List,
 } from "lucide-react";
 
 interface BatchItem {
@@ -121,6 +127,29 @@ interface BatchAnalyzeResponse {
   summary: BatchSummary;
 }
 
+interface BatchAssessment {
+  batch_id: string;
+  batch_meta: {
+    batch_id: string;
+    fabric_type: string;
+    condition: string;
+    quantity_kg: number;
+    source?: string;
+    color?: string;
+    notes?: string;
+    created_at?: string;
+  } | null;
+  recyclability: RecyclabilityPayload;
+  impact: {
+    co2e_avoided_kg: number;
+    water_saved_l: number;
+    landfill_diverted_kg: number;
+    weight_kg: number;
+  };
+  scan_count: number;
+  scans: unknown[];
+}
+
 interface ScanHistoryItem {
   _id: string;
   filename: string;
@@ -192,6 +221,25 @@ const RECYCLABILITY_WEIGHTS = {
   materialRecovery: 0.1,
 };
 
+const GARMENT_AVERAGE_WEIGHT_KG: Record<string, number> = {
+  Dress: 0.40, Shorts: 0.25, Skirt: 0.30, "T-Shirt": 0.20, Shirt: 0.25,
+  Sweater: 0.45, Jacket: 0.70, Jeans: 0.60, Pants: 0.45, Blouse: 0.20,
+  "Tank Top": 0.15, Cardigan: 0.40, Top: 0.20, "Jumpsuit/Romper": 0.50,
+  Leggings: 0.20, Joggers: 0.40, Hoodie: 0.60, Other: 0.35,
+};
+
+const MATERIAL_WEIGHT_MULTIPLIER: Record<string, number> = {
+  Leather: 1.50, Denim: 1.30, Wool: 1.20, Cotton: 1.00, Polyester: 1.00,
+  Nylon: 0.90, Acrylic: 0.95, Linen: 0.85, Viscose: 0.85, Silk: 0.70,
+  "Mixed Fabrics": 1.00, "Mixed/Unknown": 1.00,
+};
+
+function getItemWeightKg(garmentLabel?: string | null, materialLabel?: string | null): number {
+  const base = GARMENT_AVERAGE_WEIGHT_KG[garmentLabel || "Other"] ?? 0.35;
+  const mult = MATERIAL_WEIGHT_MULTIPLIER[materialLabel || "Mixed/Unknown"] ?? 1.0;
+  return Math.round(base * mult * 100) / 100;
+}
+
 function categoryForCircularityScore(score: number): string {
   for (const [threshold, label] of CIRCULARITY_CATEGORIES) {
     if (score >= threshold) return label;
@@ -218,7 +266,7 @@ function determineRecyclingOption(materialLabel: string, wasteStatus: string): s
   return "Fiber Recycling";
 }
 
-interface BatchAssessment {
+interface LocalBatchScoring {
   recyclabilityScore: number;
   sustainabilityScore: number;
   materialRecoveryScore: number;
@@ -228,7 +276,7 @@ interface BatchAssessment {
   recommendedOption: string;
 }
 
-function assessBatch(batch: BatchItem): BatchAssessment {
+function assessBatch(batch: BatchItem): LocalBatchScoring {
   const material = batch.fabric_type;
   const condition = batch.condition;
 
@@ -268,6 +316,171 @@ const CONDITION_BADGE_STYLES: Record<string, string> = {
 };
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000";
+
+interface PieChartItem {
+  label: string;
+  value: number;
+  color: string;
+}
+
+interface PieChartWidgetProps {
+  data: PieChartItem[];
+  title: string;
+  subtitle?: string;
+  unit?: string;
+  centerText?: string;
+  centerSubtext?: string;
+}
+
+function PieChartWidget({ data, title, subtitle, unit = "", centerText, centerSubtext }: PieChartWidgetProps) {
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+  const total = data.reduce((sum, item) => sum + item.value, 0);
+
+  if (total === 0 || data.length === 0) {
+    return (
+      <div className="bg-neutral-900 rounded-2xl border border-white/5 shadow-sm p-6 flex flex-col items-center justify-center text-center">
+        <h4 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
+          <PieChart className="w-4 h-4 text-orange-400" /> {title}
+        </h4>
+        {subtitle && <p className="text-xs text-neutral-500 mb-4">{subtitle}</p>}
+        <div className="w-32 h-32 rounded-full border border-dashed border-white/10 flex items-center justify-center text-xs text-neutral-500">
+          No Data Available
+        </div>
+      </div>
+    );
+  }
+
+  const cx = 100;
+  const cy = 100;
+  const R = 80;
+  const r = 52;
+
+  let currentAngle = -Math.PI / 2;
+
+  const slices = [];
+  for (let idx = 0; idx < data.length; idx++) {
+    const item = data[idx];
+    const sliceAngle = (item.value / total) * 2 * Math.PI;
+    const startAngle = currentAngle;
+    const endAngle = startAngle + sliceAngle;
+    currentAngle = endAngle;
+
+    const x1o = cx + R * Math.cos(startAngle);
+    const y1o = cy + R * Math.sin(startAngle);
+    const x2o = cx + R * Math.cos(endAngle);
+    const y2o = cy + R * Math.sin(endAngle);
+
+    const x2i = cx + r * Math.cos(endAngle);
+    const y2i = cy + r * Math.sin(endAngle);
+    const x1i = cx + r * Math.cos(startAngle);
+    const y1i = cy + r * Math.sin(startAngle);
+
+    const largeArc = sliceAngle > Math.PI ? 1 : 0;
+
+    let pathData = "";
+    if (sliceAngle >= 2 * Math.PI - 0.0001) {
+      pathData = `M ${cx} ${cy - R} A ${R} ${R} 0 1 1 ${cx - 0.001} ${cy - R} Z M ${cx} ${cy - r} A ${r} ${r} 0 1 0 ${cx - 0.001} ${cy - r} Z`;
+    } else {
+      pathData = `M ${x1o} ${y1o} A ${R} ${R} 0 ${largeArc} 1 ${x2o} ${y2o} L ${x2i} ${y2i} A ${r} ${r} 0 ${largeArc} 0 ${x1i} ${y1i} Z`;
+    }
+
+    const pct = Math.round((item.value / total) * 100);
+
+    slices.push({
+      ...item,
+      pathData,
+      pct,
+      idx,
+    });
+  }
+
+  const activeSlice = hoveredIdx !== null ? slices[hoveredIdx] : null;
+
+  return (
+    <div className="bg-neutral-900 rounded-2xl border border-white/5 shadow-sm p-6 flex flex-col justify-between">
+      <div>
+        <h4 className="text-sm font-bold text-white flex items-center gap-2">
+          <PieChart className="w-4 h-4 text-orange-400" />
+          {title}
+        </h4>
+        {subtitle && <p className="text-xs font-semibold text-neutral-500 mb-4">{subtitle}</p>}
+      </div>
+
+      <div className="flex flex-col sm:flex-row items-center gap-6 my-2">
+        <div className="relative w-44 h-44 flex-shrink-0">
+          <svg viewBox="0 0 200 200" className="w-full h-full filter drop-shadow-md overflow-visible">
+            <defs>
+              <radialGradient id={`glow-${title.replace(/\s+/g, "-")}`} cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="#ffffff" stopOpacity="0.08" />
+                <stop offset="100%" stopColor="#000000" stopOpacity="0" />
+              </radialGradient>
+            </defs>
+
+            <circle cx="100" cy="100" r="82" fill={`url(#glow-${title.replace(/\s+/g, "-")})`} />
+
+            {slices.map((slice) => {
+              const isHovered = hoveredIdx === slice.idx;
+              return (
+                <path
+                  key={slice.idx}
+                  d={slice.pathData}
+                  fill={slice.color}
+                  className="transition-all duration-300 cursor-pointer stroke-neutral-950"
+                  strokeWidth="3"
+                  style={{
+                    transform: isHovered ? "scale(1.06)" : "scale(1)",
+                    transformOrigin: `${cx}px ${cy}px`,
+                    opacity: hoveredIdx !== null && !isHovered ? 0.55 : 1,
+                  }}
+                  onMouseEnter={() => setHoveredIdx(slice.idx)}
+                  onMouseLeave={() => setHoveredIdx(null)}
+                />
+              );
+            })}
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center px-2">
+            {activeSlice ? (
+              <>
+                <span className="text-[11px] font-bold text-neutral-400 truncate max-w-[100px]">{activeSlice.label}</span>
+                <span className="text-xl font-extrabold text-white">{activeSlice.pct}%</span>
+                <span className="text-[10px] font-semibold text-neutral-400">{activeSlice.value} {unit}</span>
+              </>
+            ) : (
+              <>
+                <span className="text-xl font-extrabold text-white">{centerText ?? (typeof total === "number" ? total.toFixed(0) : total)}</span>
+                <span className="text-xs font-semibold text-neutral-400">{centerSubtext ?? (unit || "Total")}</span>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="flex-1 w-full space-y-2 max-h-48 overflow-y-auto pr-1">
+          {slices.map((slice) => (
+            <div
+              key={slice.idx}
+              className={`flex items-center justify-between p-2 rounded-xl text-xs transition-all cursor-pointer border ${
+                hoveredIdx === slice.idx
+                  ? "bg-white/10 border-white/20 text-white"
+                  : "bg-neutral-950/50 border-white/5 text-neutral-300 hover:bg-neutral-800"
+              }`}
+              onMouseEnter={() => setHoveredIdx(slice.idx)}
+              onMouseLeave={() => setHoveredIdx(null)}
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: slice.color }} />
+                <span className="font-semibold truncate">{slice.label}</span>
+              </div>
+              <div className="flex items-center gap-2 font-bold text-right flex-shrink-0">
+                <span>{slice.value} {unit}</span>
+                <span className="text-neutral-400 font-normal text-[11px]">({slice.pct}%)</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function RecyclingFacilitatorDashboard() {
   const router = useRouter();
@@ -316,6 +529,78 @@ export default function RecyclingFacilitatorDashboard() {
   const [downloadingBatchId, setDownloadingBatchId] = useState<string | null>(null);
   const [expandedHistoryGroup, setExpandedHistoryGroup] = useState<string | null>(null);
   const [expandedHistoryScanId, setExpandedHistoryScanId] = useState<string | null>(null);
+
+  // Batch Assessment & Inventory View State
+  const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
+  const [selectedBatchAssessment, setSelectedBatchAssessment] = useState<BatchAssessment | null>(null);
+  const [isAssessmentLoading, setIsAssessmentLoading] = useState(false);
+  const [isExportingReport, setIsExportingReport] = useState(false);
+  const [inventoryViewMode, setInventoryViewMode] = useState<"grid" | "table">("grid");
+
+  const getCategoryBadge = (category?: string) => {
+    switch (category) {
+      case "Highly Recyclable":
+        return "px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+      case "Moderate Circularity":
+        return "px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20";
+      case "Low Circularity":
+        return "px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20";
+      default:
+        return "px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-500/10 text-red-400 border border-red-500/20";
+    }
+  };
+
+  const fetchBatchAssessment = useCallback(async (batchId: string) => {
+    setIsAssessmentLoading(true);
+    try {
+      const token = localStorage.getItem("access_token") || "";
+      const res = await fetch(`${API_BASE_URL}/api/sustainability/batch/${batchId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data: BatchAssessment = await res.json();
+        setSelectedBatchAssessment(data);
+        setSelectedBatchId(batchId);
+      }
+    } catch (err) {
+      console.error("Failed to fetch batch assessment:", err);
+    } finally {
+      setIsAssessmentLoading(false);
+    }
+  }, []);
+
+  const downloadReport = async (
+    type: "pdf" | "excel",
+    reportTitle: string = "waste_classification_report",
+    batchId?: string
+  ) => {
+    setIsExportingReport(true);
+    try {
+      const token = localStorage.getItem("access_token") || "";
+      let url = `${API_BASE_URL}/api/ml/export/${type}?report_type=${reportTitle}`;
+      if (batchId && type === "pdf") {
+        url = `${API_BASE_URL}/api/ml/export/pdf/batch/${batchId}?report_type=${reportTitle}`;
+      }
+      const filename = `${reportTitle}.${type === "pdf" ? "pdf" : "xlsx"}`;
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Report export failed");
+      const blob = await res.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.error("Export error:", err);
+    } finally {
+      setIsExportingReport(false);
+    }
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
@@ -528,12 +813,12 @@ export default function RecyclingFacilitatorDashboard() {
     window.URL.revokeObjectURL(objectUrl);
   };
 
-  const handleExport = async (type: "pdf" | "excel") => {
+  const handleExport = async (type: "pdf" | "excel", reportTitle: string = "waste_classification_report") => {
     setIsExporting(type);
     try {
       await _downloadBlob(
-        `${API_BASE_URL}/api/ml/export/${type}`,
-        type === "pdf" ? "waste_classification_report.pdf" : "waste_classification_report.xlsx"
+        `${API_BASE_URL}/api/ml/export/${type}?report_type=${reportTitle}`,
+        type === "pdf" ? `${reportTitle}.pdf` : `${reportTitle}.xlsx`
       );
     } catch (error: unknown) {
       setHistoryError(error instanceof Error ? error.message : "Export failed.");
@@ -564,12 +849,12 @@ export default function RecyclingFacilitatorDashboard() {
     }
   };
 
-  const handleDownloadBatchReport = async (batchId: string) => {
+  const handleDownloadBatchReport = async (batchId: string, reportTitle: string = "waste_classification_report") => {
     setDownloadingBatchId(batchId);
     try {
       await _downloadBlob(
-        `${API_BASE_URL}/api/ml/export/pdf/batch/${batchId}`,
-        `waste_batch_report_${batchId}.pdf`
+        `${API_BASE_URL}/api/ml/export/pdf/batch/${batchId}?report_type=${reportTitle}`,
+        `${reportTitle}_${batchId}.pdf`
       );
     } catch (error: unknown) {
       setHistoryError(error instanceof Error ? error.message : "Could not download batch report.");
@@ -612,6 +897,67 @@ export default function RecyclingFacilitatorDashboard() {
   const avgCircularityScore = batchesWithAssessment.length
     ? Math.round((batchesWithAssessment.reduce((sum, { assessment }) => sum + assessment.circularityScore, 0) / batchesWithAssessment.length) * 10) / 10
     : 0;
+
+  const PATHWAY_COLORS: Record<string, string> = {
+    "Mechanical Recycling": "#f97316",
+    "Chemical Recycling": "#38bdf8",
+    "Fiber Recycling": "#eab308",
+    "Fabric Reuse": "#10b981",
+    "Upcycling": "#a855f7",
+    "Donation": "#3b82f6",
+    "Industrial Recovery": "#ef4444",
+  };
+
+  const MATERIAL_COLORS: Record<string, string> = {
+    Cotton: "#10b981",
+    Polyester: "#38bdf8",
+    Denim: "#6366f1",
+    Wool: "#f59e0b",
+    Linen: "#a855f7",
+    Nylon: "#06b6d4",
+    Viscose: "#ec4899",
+    Leather: "#b45309",
+    "Mixed Fabrics": "#84cc16",
+    "Mixed/Unknown": "#6b7280",
+  };
+
+  const CONDITION_COLORS: Record<string, string> = {
+    Reusable: "#10b981",
+    Repairable: "#06b6d4",
+    Upcyclable: "#a855f7",
+    Recyclable: "#f97316",
+    Compostable: "#84cc16",
+    Hazardous: "#ef4444",
+    Degraded: "#6b7280",
+  };
+
+  const pathwayPieData: PieChartItem[] = Object.entries(recoveryByOption).map(([option, v]) => ({
+    label: option,
+    value: Math.round(v.kg * 10) / 10,
+    color: PATHWAY_COLORS[option] ?? "#f97316",
+  }));
+
+  const materialKgMap = batches.reduce<Record<string, number>>((acc, b) => {
+    acc[b.fabric_type] = (acc[b.fabric_type] || 0) + b.quantity_kg;
+    return acc;
+  }, {});
+
+  const materialPieData: PieChartItem[] = Object.entries(materialKgMap).map(([mat, kg]) => ({
+    label: mat,
+    value: Math.round(kg * 10) / 10,
+    color: MATERIAL_COLORS[mat] ?? "#f59e0b",
+  }));
+
+  const conditionKgMap = batches.reduce<Record<string, number>>((acc, b) => {
+    acc[b.condition] = (acc[b.condition] || 0) + b.quantity_kg;
+    return acc;
+  }, {});
+
+  const conditionPieData: PieChartItem[] = Object.entries(conditionKgMap).map(([cond, kg]) => ({
+    label: cond,
+    value: Math.round(kg * 10) / 10,
+    color: CONDITION_COLORS[cond] ?? "#6366f1",
+  }));
 
   const renderDetailedResult = (result: AnalyzeResponse) => {
     const { analysis, recyclability } = result;
@@ -656,19 +1002,26 @@ export default function RecyclingFacilitatorDashboard() {
         </div>
 
         {/* Classification cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           {[
             { icon: Shirt, title: "Garment Type", res: analysis.garment_type },
             { icon: Layers, title: "Material Type", res: analysis.material_type },
             { icon: Droplets, title: "Waste Condition", res: analysis.waste_status },
-          ].map(({ icon: Icon, title, res }) => (
+            {
+              icon: Scale,
+              title: "Estimated Weight",
+              customValue: `${getItemWeightKg(analysis.garment_type?.label, analysis.material_type?.label)} kg`,
+            },
+          ].map(({ icon: Icon, title, res, customValue }) => (
             <div key={title} className={`${cardClass} flex items-center gap-3`}>
               <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-400 flex-shrink-0 border border-orange-500/20">
                 <Icon className="w-5 h-5" />
               </div>
               <div className="min-w-0">
                 <p className="text-xs font-bold text-neutral-500 uppercase tracking-wide">{title}</p>
-                {res?.label ? (
+                {customValue ? (
+                  <p className="text-orange-400 font-bold truncate">{customValue}</p>
+                ) : res?.label ? (
                   <p className="text-white font-bold truncate">
                     {res.label}
                     {res.confidence != null && (
@@ -917,7 +1270,8 @@ export default function RecyclingFacilitatorDashboard() {
           })}
         </nav>
 
-        <div className="p-4 border-t border-white/5">
+        <div className="p-4 border-t border-white/5 space-y-2">
+          <ThemeToggle variant="sidebar" />
           <button onClick={() => { localStorage.clear(); router.replace("/login"); }} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-all">
             <LogOut className="w-5 h-5" />
             <span className="font-medium">Log out</span>
@@ -961,6 +1315,26 @@ export default function RecyclingFacilitatorDashboard() {
                 </div>
               </div>
 
+              {/* Overview Pie Charts */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <PieChartWidget
+                  data={pathwayPieData}
+                  title="Recycling Recommendation Pathways"
+                  subtitle="Distribution of waste by assigned recovery strategy"
+                  unit="kg"
+                  centerText={`${totalTrackedKg.toFixed(0)}`}
+                  centerSubtext="Total kg"
+                />
+                <PieChartWidget
+                  data={materialPieData}
+                  title="Inventory Fabric Composition"
+                  subtitle="Breakdown of registered inventory by fiber material"
+                  unit="kg"
+                  centerText={`${materialPieData.length}`}
+                  centerSubtext="Materials"
+                />
+              </div>
+
               {/* AI Scanner Card */}
               <div className="bg-neutral-900 rounded-3xl border border-white/5 shadow-sm overflow-hidden p-6">
                 <div className="flex items-center justify-between mb-4">
@@ -984,6 +1358,7 @@ export default function RecyclingFacilitatorDashboard() {
                   <div className="space-y-4">
                     <div className="flex flex-col items-center p-6 border border-white/10 rounded-2xl bg-neutral-950 shadow-sm">
                       {previewUrl && (
+                        /* eslint-disable-next-line @next/next/no-img-element */
                         <img src={previewUrl} alt="Preview" className="max-h-48 rounded-xl object-contain mx-auto mb-4 border border-white/10 shadow-sm" />
                       )}
                       <div className="flex items-center gap-2 text-white font-bold text-lg">
@@ -1029,101 +1404,329 @@ export default function RecyclingFacilitatorDashboard() {
           )}
 
           {activeTab === "batch-management" && (
-            <div className="bg-neutral-900 rounded-3xl border border-white/5 shadow-sm overflow-hidden p-6 space-y-6">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="text-lg font-bold text-white">Batch & Inventory Control Hub</h3>
-                  <p className="text-sm text-neutral-400">Integrated tracking across registered waste batches.</p>
+            <div className="space-y-6 animate-in fade-in duration-300">
+              <div className="bg-neutral-900 rounded-3xl border border-white/5 p-6 space-y-6">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                      <Boxes className="w-5 h-5 text-orange-400" /> Waste Inventory Control Hub
+                    </h3>
+                    <p className="text-sm text-neutral-400">Integrated batch tracking with live sustainability assessments and 2-way PDF reports.</p>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button
+                      onClick={() => setShowAddBatchModal(true)}
+                      className="flex items-center gap-2 bg-orange-600 hover:bg-orange-500 text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-sm transition-all"
+                    >
+                      <Plus className="w-4 h-4" /> Register New Batch
+                    </button>
+                  </div>
                 </div>
-                <button onClick={() => setShowAddBatchModal(true)} className="flex items-center gap-2 bg-orange-600 hover:bg-orange-500 text-white px-4 py-2.5 rounded-xl font-bold shadow-sm">
-                  <Plus className="w-4 h-4" /> Register New Batch
-                </button>
-              </div>
 
-              <div className="flex flex-col sm:flex-row gap-4">
-                <input
-                  type="text"
-                  placeholder="Search by fabric or source..."
-                  value={batchSearchQuery}
-                  onChange={(e) => setBatchSearchQuery(e.target.value)}
-                  className="px-4 py-2 border border-white/10 rounded-xl text-sm font-semibold text-white bg-neutral-950 w-full sm:w-72 outline-none focus:ring-2 focus:ring-orange-500"
-                />
-                <select
-                  value={batchConditionFilter}
-                  onChange={(e) => setBatchConditionFilter(e.target.value)}
-                  className="px-4 py-2 border border-white/10 rounded-xl text-sm font-semibold text-neutral-200 bg-neutral-950 outline-none"
-                >
-                  <option value="All">All Conditions</option>
-                  <option value="Recyclable">Recyclable</option>
-                  <option value="Reusable">Reusable</option>
-                  <option value="Repairable">Repairable</option>
-                  <option value="Upcyclable">Upcyclable</option>
-                  <option value="Compostable">Compostable</option>
-                  <option value="Hazardous">Hazardous</option>
-                </select>
-              </div>
+                {/* Filter and View Toggle Bar */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-white/5">
+                  <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+                    <div className="relative">
+                      <Search className="w-4 h-4 text-neutral-500 absolute left-3 top-2.5" />
+                      <input
+                        type="text"
+                        placeholder="Filter by fabric, condition, source..."
+                        value={batchSearchQuery}
+                        onChange={(e) => setBatchSearchQuery(e.target.value)}
+                        className="bg-neutral-950 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-orange-500/50 w-full sm:w-64"
+                      />
+                    </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead className="bg-neutral-950 text-neutral-400 font-bold border-b border-white/5">
-                    <tr>
-                      <th className="px-6 py-4">Fabric Type</th>
-                      <th className="px-6 py-4">Source</th>
-                      <th className="px-6 py-4">Quantity (kg)</th>
-                      <th className="px-6 py-4">Condition</th>
-                      <th className="px-6 py-4">Date Registered</th>
-                      <th className="px-6 py-4 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5">
-                    {filteredBatches.length === 0 ? (
-                      <tr>
-                        <td colSpan={6} className="px-6 py-12 text-center text-neutral-500 font-semibold">No batches registered. Click &quot;Register New Batch&quot; to begin.</td>
-                      </tr>
-                    ) : (
-                      filteredBatches.map((b) => (
-                        <tr key={b.batch_id} className="hover:bg-white/5">
-                          <td className="px-6 py-4">
-                            <p className="font-bold text-white">{b.fabric_type}</p>
-                            {b.reference_label && (
-                              <p className="text-xs font-semibold text-neutral-500 mt-0.5">{b.reference_label}</p>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 font-semibold text-neutral-300">{b.source}</td>
-                          <td className="px-6 py-4 font-bold text-white">{b.quantity_kg} kg</td>
-                          <td className="px-6 py-4">
-                            <span className="px-2.5 py-1 bg-orange-500/10 text-orange-400 rounded-lg text-xs font-bold border border-orange-500/20">
+                    <select
+                      value={batchConditionFilter}
+                      onChange={(e) => setBatchConditionFilter(e.target.value)}
+                      className="bg-neutral-950 border border-white/10 rounded-xl px-3 py-2 text-xs font-semibold text-neutral-200 outline-none"
+                    >
+                      <option value="All">All Conditions</option>
+                      <option value="Recyclable">Recyclable</option>
+                      <option value="Reusable">Reusable</option>
+                      <option value="Repairable">Repairable</option>
+                      <option value="Upcyclable">Upcyclable</option>
+                      <option value="Compostable">Compostable</option>
+                      <option value="Hazardous">Hazardous</option>
+                    </select>
+
+                    <button
+                      onClick={fetchBatches}
+                      className="p-2 bg-neutral-950 hover:bg-neutral-800 text-neutral-400 hover:text-white rounded-xl border border-white/5 transition-all"
+                      title="Refresh Batches"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-1 bg-neutral-950 p-1 rounded-xl border border-white/5">
+                    <button
+                      onClick={() => setInventoryViewMode("grid")}
+                      className={`p-1.5 rounded-lg text-xs font-bold transition-all ${inventoryViewMode === "grid" ? "bg-orange-600 text-white shadow-sm" : "text-neutral-400 hover:text-white"}`}
+                      title="Grid View"
+                    >
+                      <LayoutGrid className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setInventoryViewMode("table")}
+                      className={`p-1.5 rounded-lg text-xs font-bold transition-all ${inventoryViewMode === "table" ? "bg-orange-600 text-white shadow-sm" : "text-neutral-400 hover:text-white"}`}
+                      title="Table View"
+                    >
+                      <List className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {filteredBatches.length === 0 ? (
+                  <div className="p-8 text-center text-neutral-500 border border-dashed border-white/10 rounded-2xl">
+                    No batches found matching query. Click &quot;Register New Batch&quot; to begin.
+                  </div>
+                ) : inventoryViewMode === "grid" ? (
+                  /* GRID CARDS VIEW (Platform Inventory Design) */
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto pr-2">
+                    {filteredBatches.map((b) => {
+                      const isSelected = selectedBatchId === b.batch_id;
+                      return (
+                        <div
+                          key={b.batch_id}
+                          onClick={() => fetchBatchAssessment(b.batch_id)}
+                          className={`p-4 rounded-2xl border cursor-pointer transition-all ${
+                            isSelected
+                              ? "bg-orange-950/30 border-orange-500 shadow-md shadow-orange-950/50"
+                              : "bg-neutral-950 border-white/5 hover:border-white/20 hover:bg-neutral-900"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-bold text-white text-sm">{b.fabric_type} Batch</span>
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-neutral-900 border border-white/10 text-orange-400">
                               {b.condition}
                             </span>
-                          </td>
-                          <td className="px-6 py-4 font-semibold text-neutral-400">{new Date(b.collection_date).toLocaleDateString()}</td>
-                          <td className="px-6 py-4 text-right">
-                             <div className="flex justify-end gap-2">
-                               <button 
+                          </div>
+                          <div className="space-y-1 text-xs text-neutral-400 mb-3">
+                            <p><span className="text-neutral-500">Weight:</span> <strong className="text-white">{b.quantity_kg} kg</strong></p>
+                            {b.source && <p><span className="text-neutral-500">Source:</span> {b.source}</p>}
+                            {b.reference_label && <p><span className="text-neutral-500">Ref:</span> {b.reference_label}</p>}
+                            <p className="text-[10px] text-neutral-600 font-mono truncate">ID: {b.batch_id}</p>
+                          </div>
+                          <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/5">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setTargetBatchId(b.batch_id);
+                                setActiveTab("overview");
+                              }}
+                              className="text-[11px] font-bold text-neutral-300 bg-neutral-900 hover:bg-neutral-800 px-2.5 py-1 rounded-lg border border-white/10 transition-colors"
+                            >
+                              Analyze Photos
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteBatch(b.batch_id);
+                              }}
+                              disabled={deletingBatchId === b.batch_id}
+                              className="inline-flex items-center gap-1 text-[11px] font-bold text-red-400 bg-red-500/10 hover:bg-red-500/20 px-2.5 py-1 rounded-lg border border-red-500/20 transition-colors disabled:opacity-50"
+                            >
+                              {deletingBatchId === b.batch_id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  /* TABLE VIEW */
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm">
+                      <thead className="bg-neutral-950 text-neutral-400 font-bold border-b border-white/5">
+                        <tr>
+                          <th className="px-6 py-4">Fabric Type</th>
+                          <th className="px-6 py-4">Source</th>
+                          <th className="px-6 py-4">Quantity (kg)</th>
+                          <th className="px-6 py-4">Condition</th>
+                          <th className="px-6 py-4">Date Registered</th>
+                          <th className="px-6 py-4 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5">
+                        {filteredBatches.map((b) => (
+                          <tr
+                            key={b.batch_id}
+                            onClick={() => fetchBatchAssessment(b.batch_id)}
+                            className={`cursor-pointer transition-colors ${selectedBatchId === b.batch_id ? "bg-orange-950/20" : "hover:bg-white/5"}`}
+                          >
+                            <td className="px-6 py-4">
+                              <p className="font-bold text-white">{b.fabric_type}</p>
+                              {b.reference_label && (
+                                <p className="text-xs font-semibold text-neutral-500 mt-0.5">{b.reference_label}</p>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 font-semibold text-neutral-300">{b.source}</td>
+                            <td className="px-6 py-4 font-bold text-white">{b.quantity_kg} kg</td>
+                            <td className="px-6 py-4">
+                              <span className="px-2.5 py-1 bg-orange-500/10 text-orange-400 rounded-lg text-xs font-bold border border-orange-500/20">
+                                {b.condition}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 font-semibold text-neutral-400">{new Date(b.collection_date).toLocaleDateString()}</td>
+                            <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
+                              <div className="flex justify-end gap-2">
+                                <button
                                   onClick={() => {
-                                     setTargetBatchId(b.batch_id);
-                                     setActiveTab("overview");
+                                    setTargetBatchId(b.batch_id);
+                                    setActiveTab("overview");
                                   }}
                                   className="text-xs font-bold text-neutral-300 bg-neutral-800 hover:bg-neutral-700 px-3 py-1.5 rounded-lg border border-white/10 transition-colors shadow-sm"
-                               >
+                                >
                                   Analyze Photos
-                               </button>
-                               <button
+                                </button>
+                                <button
                                   onClick={() => handleDeleteBatch(b.batch_id)}
                                   disabled={deletingBatchId === b.batch_id}
                                   className="inline-flex items-center gap-1.5 text-xs font-bold text-red-400 bg-red-500/10 hover:bg-red-500/20 px-3 py-1.5 rounded-lg border border-red-500/20 transition-colors shadow-sm disabled:opacity-50"
-                               >
+                                >
                                   {deletingBatchId === b.batch_id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                                   Delete
-                               </button>
-                             </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
+
+              {/* Batch Assessment Detail Drawer */}
+              {isAssessmentLoading && (
+                <div className="p-12 bg-neutral-900 rounded-3xl border border-white/5 flex justify-center items-center gap-3 text-white font-bold">
+                  <Loader2 className="w-6 h-6 animate-spin text-orange-400" /> Computing batch sustainability & recycling assessment...
+                </div>
+              )}
+
+              {!isAssessmentLoading && selectedBatchAssessment && (
+                <div className="bg-neutral-900 rounded-3xl border border-white/5 p-6 space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-white/5 pb-4 gap-4">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-xl font-bold text-white">Sustainability & Recycling Assessment: {selectedBatchAssessment.batch_meta?.fabric_type || "Batch"}</h4>
+                        <span className={getCategoryBadge(selectedBatchAssessment.recyclability.circularity_category)}>
+                          {selectedBatchAssessment.recyclability.circularity_category}
+                        </span>
+                      </div>
+                      <p className="text-xs text-neutral-400 mt-1">
+                        Batch ID: <span className="font-mono text-orange-400">{selectedBatchAssessment.batch_id}</span> • Quantity: <strong className="text-white">{selectedBatchAssessment.batch_meta?.quantity_kg || selectedBatchAssessment.impact.weight_kg} kg</strong>
+                      </p>
+                    </div>
+
+                    {/* 2-WAY PDF REPORT EXPORT BUTTONS */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        onClick={() => downloadReport("pdf", "waste_classification_report", selectedBatchAssessment.batch_id)}
+                        disabled={isExportingReport}
+                        className="px-3.5 py-2 bg-orange-600 hover:bg-orange-500 text-xs font-bold text-white rounded-xl shadow-sm flex items-center gap-1.5 transition-all"
+                      >
+                        {isExportingReport ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileDown className="w-3.5 h-3.5" />}
+                        Waste Classification Report (PDF)
+                      </button>
+                      <button
+                        onClick={() => downloadReport("pdf", "recycling_report", selectedBatchAssessment.batch_id)}
+                        disabled={isExportingReport}
+                        className="px-3.5 py-2 bg-neutral-950 hover:bg-neutral-800 text-xs font-bold text-neutral-200 border border-white/10 rounded-xl flex items-center gap-1.5 transition-all"
+                      >
+                        {isExportingReport ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileDown className="w-3.5 h-3.5 text-orange-400" />}
+                        Recycling Pathway Report (PDF)
+                      </button>
+                      <button
+                        onClick={() => downloadReport("excel", "waste_classification_report", selectedBatchAssessment.batch_id)}
+                        disabled={isExportingReport}
+                        className="px-3.5 py-2 bg-neutral-950 hover:bg-neutral-800 text-xs font-bold text-emerald-400 border border-white/10 rounded-xl flex items-center gap-1.5 transition-all"
+                      >
+                        {isExportingReport ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />}
+                        Batch Excel
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Top Metrics Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="bg-neutral-950 p-4 rounded-2xl border border-white/5">
+                      <p className="text-xs font-bold text-neutral-500 uppercase flex items-center gap-1"><Wind className="w-3.5 h-3.5 text-orange-400" /> CO₂ Savings Est.</p>
+                      <p className="text-2xl font-extrabold text-white mt-1">{selectedBatchAssessment.impact.co2e_avoided_kg} kg</p>
+                    </div>
+                    <div className="bg-neutral-950 p-4 rounded-2xl border border-white/5">
+                      <p className="text-xs font-bold text-neutral-500 uppercase flex items-center gap-1"><Droplets className="w-3.5 h-3.5 text-blue-400" /> Water Saved</p>
+                      <p className="text-2xl font-extrabold text-white mt-1">{selectedBatchAssessment.impact.water_saved_l} L</p>
+                    </div>
+                    <div className="bg-neutral-950 p-4 rounded-2xl border border-white/5">
+                      <p className="text-xs font-bold text-neutral-500 uppercase flex items-center gap-1"><Package className="w-3.5 h-3.5 text-emerald-400" /> Landfill Reduction</p>
+                      <p className="text-2xl font-extrabold text-white mt-1">{selectedBatchAssessment.impact.landfill_diverted_kg} kg</p>
+                    </div>
+                    <div className="bg-neutral-950 p-4 rounded-2xl border border-white/5">
+                      <p className="text-xs font-bold text-neutral-500 uppercase flex items-center gap-1"><Activity className="w-3.5 h-3.5 text-amber-400" /> Overall Circularity</p>
+                      <p className="text-2xl font-extrabold text-orange-400 mt-1">{selectedBatchAssessment.recyclability.circularity_score} / 100</p>
+                    </div>
+                  </div>
+
+                  {/* Breakdown Grid */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="bg-neutral-950 p-6 rounded-2xl border border-white/5 space-y-4">
+                      <h5 className="font-bold text-white flex items-center gap-2">
+                        <Activity className="w-4 h-4 text-orange-400" /> Waste Scoring Engine Breakdown
+                      </h5>
+                      {[
+                        { label: "Material Recyclability", w: "35%", s: selectedBatchAssessment.recyclability.component_scores.recyclability_score },
+                        { label: "Material Condition", w: "20%", s: selectedBatchAssessment.recyclability.component_scores.reuse_score },
+                        { label: "Reuse Potential", w: "20%", s: selectedBatchAssessment.recyclability.component_scores.reuse_score },
+                        { label: "Environmental Benefit", w: "15%", s: selectedBatchAssessment.recyclability.component_scores.sustainability_score },
+                        { label: "Processing Feasibility", w: "10%", s: selectedBatchAssessment.recyclability.component_scores.material_recovery_score },
+                      ].map((sc) => (
+                        <div key={sc.label}>
+                          <div className="flex justify-between text-xs mb-1">
+                            <span className="text-neutral-400 font-medium">{sc.label} ({sc.w})</span>
+                            <span className="text-white font-bold">{sc.s}</span>
+                          </div>
+                          <div className="w-full h-2 rounded-full bg-neutral-900 overflow-hidden border border-white/5">
+                            <div className="h-full bg-orange-500 rounded-full" style={{ width: `${Math.min(sc.s, 100)}%` }} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="bg-neutral-950 p-6 rounded-2xl border border-white/5 space-y-4">
+                      <h5 className="font-bold text-white flex items-center gap-2">
+                        <Recycle className="w-4 h-4 text-emerald-400" /> Circular Routing & Recommendations
+                      </h5>
+                      <div className="space-y-3">
+                        <div className="p-3 bg-neutral-900 rounded-xl border border-white/5">
+                          <p className="text-xs font-bold text-neutral-500 uppercase">Recommended Recycling Workflow</p>
+                          <p className="text-lg font-extrabold text-white mt-0.5">{selectedBatchAssessment.recyclability.recommended_recycling_option}</p>
+                        </div>
+                        <div className="p-3 bg-neutral-900 rounded-xl border border-white/5">
+                          <p className="text-xs font-bold text-neutral-500 uppercase">Waste Status</p>
+                          <p className="text-sm font-bold text-emerald-400 mt-0.5">{selectedBatchAssessment.recyclability.waste_category}</p>
+                        </div>
+                        {selectedBatchAssessment.recyclability.waste_reduction_tips?.length > 0 && (
+                          <div className="pt-2">
+                            <p className="text-xs font-bold text-neutral-400 uppercase mb-2">Reduction Tips</p>
+                            <ul className="space-y-1">
+                              {selectedBatchAssessment.recyclability.waste_reduction_tips.map((tip, idx) => (
+                                <li key={idx} className="text-xs text-neutral-300 flex items-start gap-2">
+                                  <span className="w-1.5 h-1.5 bg-orange-400 rounded-full mt-1 flex-shrink-0" /> {tip}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -1226,6 +1829,26 @@ export default function RecyclingFacilitatorDashboard() {
                       <p className="text-sm font-medium text-neutral-500">Recovery Pathways in Use</p>
                       <h3 className="text-3xl font-bold text-white mt-1">{recoveryChartData.length}</h3>
                     </div>
+                  </div>
+
+                  {/* Recovery statistics pie charts */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <PieChartWidget
+                      data={pathwayPieData}
+                      title="Recovery Pathway Share"
+                      subtitle="Proportion of total tracked weight allocated per recycling stream"
+                      unit="kg"
+                      centerText={`${totalTrackedKg.toFixed(0)}`}
+                      centerSubtext="Total kg"
+                    />
+                    <PieChartWidget
+                      data={conditionPieData}
+                      title="Waste Condition Breakdown"
+                      subtitle="Distribution of inventory weight by condition quality category"
+                      unit="kg"
+                      centerText={`${conditionPieData.length}`}
+                      centerSubtext="Conditions"
+                    />
                   </div>
 
                   {/* Recovery pathway chart */}
@@ -1460,20 +2083,28 @@ export default function RecyclingFacilitatorDashboard() {
               </div>
               <div className="flex items-center gap-3">
                 <button
-                  onClick={() => handleExport("pdf")}
+                  onClick={() => handleExport("pdf", "waste_classification_report")}
                   disabled={isExporting !== null || historyItems.length === 0}
-                  className="flex items-center gap-1.5 text-sm font-bold text-neutral-200 bg-neutral-900 border border-white/10 hover:bg-neutral-800 px-3.5 py-2 rounded-xl transition-colors disabled:opacity-50"
+                  className="flex items-center gap-1.5 text-xs font-bold text-white bg-orange-600 hover:bg-orange-500 px-3 py-1.5 rounded-xl transition-colors disabled:opacity-50 shadow-sm"
                 >
-                  {isExporting === "pdf" ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4 text-orange-400" />}
-                  Export PDF Report
+                  {isExporting === "pdf" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileDown className="w-3.5 h-3.5" />}
+                  Waste Classification (PDF)
                 </button>
                 <button
-                  onClick={() => handleExport("excel")}
+                  onClick={() => handleExport("pdf", "recycling_report")}
                   disabled={isExporting !== null || historyItems.length === 0}
-                  className="flex items-center gap-1.5 text-sm font-bold text-neutral-200 bg-neutral-900 border border-white/10 hover:bg-neutral-800 px-3.5 py-2 rounded-xl transition-colors disabled:opacity-50"
+                  className="flex items-center gap-1.5 text-xs font-bold text-neutral-200 bg-neutral-900 border border-white/10 hover:bg-neutral-800 px-3 py-1.5 rounded-xl transition-colors disabled:opacity-50 shadow-sm"
                 >
-                  {isExporting === "excel" ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileSpreadsheet className="w-4 h-4 text-emerald-400" />}
-                  Export Excel Report
+                  {isExporting === "pdf" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileDown className="w-3.5 h-3.5 text-orange-400" />}
+                  Recycling Pathway (PDF)
+                </button>
+                <button
+                  onClick={() => handleExport("excel", "waste_classification_report")}
+                  disabled={isExporting !== null || historyItems.length === 0}
+                  className="flex items-center gap-1.5 text-xs font-bold text-emerald-400 bg-neutral-900 border border-white/10 hover:bg-neutral-800 px-3 py-1.5 rounded-xl transition-colors disabled:opacity-50 shadow-sm"
+                >
+                  {isExporting === "excel" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />}
+                  Excel Report
                 </button>
                 <button onClick={() => setShowHistoryModal(false)} className="text-neutral-400 hover:text-white p-1 rounded-lg">
                   <X className="w-6 h-6" />

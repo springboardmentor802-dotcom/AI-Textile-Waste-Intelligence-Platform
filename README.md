@@ -701,6 +701,8 @@ For every completed assessment the platform generates a downloadable PDF report 
 
 ## Dashboard
 
+The main dashboard provides a consolidated overview of live textile analysis activity, sustainability assessments, circular recovery outcomes, AI confidence and platform operations.
+
 ```text
 Project-screenshots/dashboard.png
 ```
@@ -709,17 +711,21 @@ Project-screenshots/dashboard.png
 
 ---
 
-## AI Textile Prediction
+## Upload Waste and Textile Analysis
+
+The Upload Waste module allows users to upload a textile image, enter its measured weight and run the complete AI + computer vision assessment pipeline.
 
 ```text
-Project-screenshots/single_prediction.png
+Project-screenshots/upload_waste.png
 ```
 
-![Single Prediction](Project-screenshots/single_prediction.png)
+![Upload Waste](Project-screenshots/upload_waste.png)
 
 ---
 
 ## Batch Textile Analysis
+
+The Batch Analysis module supports processing multiple textile samples together. Each sample is analysed independently and can produce individual recovery outcomes and reports.
 
 ```text
 Project-screenshots/batch_analysis.png
@@ -731,34 +737,74 @@ Project-screenshots/batch_analysis.png
 
 ## Analytics Dashboard
 
+The analytics workspace combines live textile analyses with the 10,000-record synthetic sustainability dataset.
+
+It displays sustainability outcomes, environmental estimates, assessment status and circular economy intelligence.
+
 ```text
 Project-screenshots/analytics.png
 ```
 
-![Analytics](Project-screenshots/analytics.png)
+![Analytics Dashboard](Project-screenshots/analytics.png)
 
 ---
 
-## Recommendation Engine
+## Sustainability Analytics and Graphs
+
+The analytics visualization layer provides distribution analysis for:
+
+- Materials
+- Circularity levels
+- Recovery recommendations
+- Textile condition
+- Contamination levels
+- Environmental impact categories
+
+```text
+Project-screenshots/analytics_graphs.png
+```
+
+![Analytics Graphs](Project-screenshots/analytics_graphs.png)
+
+---
+
+## Recommendation Intelligence
+
+The recommendation workspace displays circular recovery guidance produced by the explainable rule-based recommendation engine.
+
+The engine evaluates material, condition, contamination and damage information to generate suitable recovery pathways.
 
 ```text
 Project-screenshots/recommendations.png
 ```
 
-![Recommendations](Project-screenshots/recommendations.png)
+![Recommendation Intelligence](Project-screenshots/recommendations.png)
 
 ---
 
-## API Documentation
+## Textile Intelligence PDF Report
+
+The platform generates downloadable assessment reports containing textile prediction, condition analysis, sustainability information and recovery recommendations.
+
+```text
+Project-screenshots/pdf_report.png
+```
+
+![PDF Report](Project-screenshots/pdf_report.png)
+
+---
+
+## FastAPI Documentation
+
+The backend APIs are documented and testable through Swagger UI.
 
 ```text
 Project-screenshots/api_docs.png
 ```
 
-![API Docs](Project-screenshots/api_docs.png)
+![API Documentation](Project-screenshots/api_docs.png)
 
 ---
-
 # Technology Stack
 
 ## Frontend

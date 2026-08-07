@@ -5,7 +5,7 @@ import uuid
 from datetime import date, datetime
 from typing import Optional, List
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, Query
 from fastapi.responses import StreamingResponse
 from fastapi.security import OAuth2PasswordBearer
 import jwt
@@ -17,8 +17,10 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-from ml_engine.serve import analyze_image
+from ml_engine.serve import analyze_image, analyze_defects 
 from ml_engine.recyclability_engine import assess_recyclability
+from sustainability.impact_calculator import calculate_item_impact
+from sustainability.weight_estimation import estimate_item_weight_kg
 
 from database import ai_logs_collection, waste_batches_collection
 from security import decode_access_token
@@ -36,6 +38,11 @@ from report_generator import (
     generate_pdf_report,
     generate_single_scan_pdf_report,
     generate_batch_pdf_report,
+    generate_waste_classification_report,
+    generate_recycling_report,
+    generate_sustainability_report,
+    generate_environmental_impact_report,
+    generate_circular_economy_report,
 )
 
 router = APIRouter(prefix="/api/ml", tags=["Machine Learning"])
@@ -105,6 +112,21 @@ class BatchAnalyzeResponse(BaseModel):
     batch_label: Optional[str] = None
     results: List[AnalyzeResponse]
     summary: BatchSummary
+
+@router.post("/analyze/defects")
+async def analyze_defects_endpoint(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user),
+):
+    if file.content_type not in ALLOWED_CONTENT_TYPES:
+        raise HTTPException(status_code=400, detail=f"Unsupported file type '{file.content_type}'.")
+    image_bytes = await file.read()
+    if not image_bytes:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+    try:
+        return analyze_defects(image_bytes)
+    except Exception as exc:
+        raise HTTPException(status_code=422, detail=f"Could not process image: {exc}")
 
 @router.post("/analyze", response_model=AnalyzeResponse)
 async def analyze(
@@ -192,11 +214,15 @@ async def analyze_batch(
         try:
             analysis = analyze_image(image_bytes)
             recyclability = assess_recyclability(analysis)
+            g_label = (analysis.get("garment_type") or {}).get("label")
+            m_label = (analysis.get("material_type") or {}).get("label")
+            est_weight = estimate_item_weight_kg(garment_label=g_label, material_label=m_label)
             processed.append({
                 "filename": file.filename,
                 "content_type": file.content_type,
                 "analysis": analysis,
                 "recyclability": recyclability,
+                "estimated_weight_kg": est_weight,
             })
         except Exception as exc:
             print(f"[ml_endpoints] error processing {file.filename}: {exc}")
@@ -208,8 +234,10 @@ async def analyze_batch(
     avg_circularity = 0.0
     materials_count: dict = {}
     conditions_count: dict = {}
+    total_batch_est_weight = 0.0
     for item in processed:
         avg_circularity += item["recyclability"]["circularity_score"]
+        total_batch_est_weight += item["estimated_weight_kg"]
 
         mat_label = item["analysis"]["material_type"]["label"] if item["analysis"].get("material_type") else "Unknown"
         materials_count[mat_label] = materials_count.get(mat_label, 0) + 1
@@ -222,6 +250,8 @@ async def analyze_batch(
     dominant_condition = max(conditions_count, key=conditions_count.get) if conditions_count else "Recyclable"
     if dominant_condition not in VALID_CONDITIONS:
         dominant_condition = "Recyclable"
+
+    resolved_quantity_kg = quantity_kg if (quantity_kg and quantity_kg > 0) else round(total_batch_est_weight, 2)
 
     is_multi_image_upload = len(processed) > 1
     should_create_new_batch = (not is_existing_batch) and is_multi_image_upload
@@ -243,7 +273,7 @@ async def analyze_batch(
         inventory_payload = {
             "fabric_type": dominant_material if dominant_material != "Unknown" else "Mixed/Unknown",
             "source": (source or "").strip() or "AI Scan Intake",
-            "quantity_kg": quantity_kg if quantity_kg and quantity_kg > 0 else round(0.5 * len(processed), 2),
+            "quantity_kg": resolved_quantity_kg,
             "color": None,
             "condition": dominant_condition,
             "collection_date": date.today().isoformat(),
@@ -305,6 +335,20 @@ async def analyze_batch(
         results=response_results,
         summary=summary
     )
+
+@router.post("/analyze/detailed")
+async def analyze_detailed(file: UploadFile = File(...), current_user=Depends(get_current_user)):
+    image_bytes = await file.read()
+    analysis = analyze_image(image_bytes)
+    defect_analysis = analyze_defects(image_bytes)
+    recyclability = assess_recyclability(analysis, defect_analysis)
+    impact = calculate_item_impact({"analysis": analysis, "recyclability": recyclability})
+    return {
+        "analysis": analysis,
+        "defect_analysis": defect_analysis,
+        "recyclability": recyclability,
+        "impact": impact,
+    }
 
 @router.get("/history")
 async def get_history(
@@ -377,9 +421,69 @@ async def get_history_grouped_by_batch(
 
     return result
 
+def _generate_typed_pdf_report(
+    docs: list[dict],
+    user_email: str,
+    report_type: Optional[str] = None,
+    batch_id: Optional[str] = None,
+    batch_meta: Optional[dict] = None,
+) -> tuple:
+    rt = (report_type or "").lower().strip()
+
+    if rt in ["sustainability_report", "sustainability_esg_report", "sustainability"]:
+        from sustainability.impact_calculator import aggregate_impact
+        from sustainability.benchmarking import benchmark_periods
+        current_metrics = aggregate_impact(docs)
+        half = len(docs) // 2
+        previous_metrics = aggregate_impact(docs[half:]) if half > 0 else {}
+        benchmark_data = benchmark_periods(current_metrics, previous_metrics)
+        buffer = generate_sustainability_report(docs, user_email, batch_id=batch_id, benchmark_data=benchmark_data)
+        filename = f"sustainability_report_{batch_id or int(time.time())}.pdf"
+        return buffer, filename
+
+    if rt in ["environmental_impact_report", "environmental_impact", "environmental"]:
+        from sustainability.impact_calculator import aggregate_impact
+        impact_data = aggregate_impact(docs)
+        buffer = generate_environmental_impact_report(docs, user_email, batch_id=batch_id, impact_data=impact_data)
+        filename = f"environmental_impact_report_{batch_id or int(time.time())}.pdf"
+        return buffer, filename
+
+    if rt in ["circular_economy_report", "circular_economy", "circular"]:
+        from sustainability.circular_economy import analyze_circular_economy
+        from sustainability.waste_diversion import analyze_waste_diversion
+        circular_data = analyze_circular_economy(docs)
+        diversion_data = analyze_waste_diversion(docs)
+        buffer = generate_circular_economy_report(
+            docs, user_email, batch_id=batch_id, circular_data=circular_data, diversion_data=diversion_data
+        )
+        filename = f"circular_economy_report_{batch_id or int(time.time())}.pdf"
+        return buffer, filename
+
+    if rt in ["waste_classification_report", "waste_classification", "classification"]:
+        buffer = generate_waste_classification_report(docs, user_email, batch_id=batch_id, batch_meta=batch_meta)
+        filename = f"waste_classification_report_{batch_id or int(time.time())}.pdf"
+        return buffer, filename
+
+    if rt in ["recycling_report", "recycling"]:
+        buffer = generate_recycling_report(docs, user_email, batch_id=batch_id, batch_meta=batch_meta)
+        filename = f"recycling_report_{batch_id or int(time.time())}.pdf"
+        return buffer, filename
+
+    # Default fallbacks
+    if batch_id:
+        buffer = generate_batch_pdf_report(docs, batch_id, user_email)
+        filename = f"waste_batch_report_{batch_id}.pdf"
+    else:
+        buffer = generate_pdf_report(docs, user_email)
+        filename = f"waste_classification_report_{int(time.time())}.pdf"
+
+    return buffer, filename
+
+
 @router.get("/export/pdf")
 async def export_pdf(
     limit: int = 200,
+    report_type: Optional[str] = Query(None),
     current_user: dict = Depends(get_current_user),
 ):
     limit = max(1, min(limit, 500))
@@ -393,12 +497,14 @@ async def export_pdf(
     if not docs:
         raise HTTPException(status_code=404, detail="No scans to export yet.")
 
-    buffer = generate_pdf_report(docs, current_user.get("email") or "user")
-    filename = f"waste_classification_report_{int(time.time())}.pdf"
+    buffer, filename = _generate_typed_pdf_report(docs, current_user.get("email") or "user", report_type=report_type)
     return StreamingResponse(
         buffer,
         media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+            "Access-Control-Expose-Headers": "Content-Disposition",
+        },
     )
 
 @router.get("/export/excel")
@@ -422,7 +528,10 @@ async def export_excel(
     return StreamingResponse(
         buffer,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+            "Access-Control-Expose-Headers": "Content-Disposition",
+        },
     )
 
 async def _get_scan_or_404(scan_id: str, current_user: dict) -> dict:
@@ -443,11 +552,12 @@ async def _get_scan_or_404(scan_id: str, current_user: dict) -> dict:
 @router.get("/export/pdf/batch/{batch_id}")
 async def export_batch_pdf(
     batch_id: str,
+    report_type: Optional[str] = Query(None),
     current_user: dict = Depends(get_current_user),
 ):
     """Single combined PDF covering every scan that shares this batch_id."""
     query = {"batch_id": batch_id}
-    if current_user.get("role") != "Admin":
+    if current_user.get("role") not in ["Admin", "Sustainability Manager"]:
         query["user_email"] = current_user["email"]
 
     docs = []
@@ -455,15 +565,67 @@ async def export_batch_pdf(
     async for doc in cursor:
         docs.append(doc)
 
-    if not docs:
-        raise HTTPException(status_code=404, detail="No scans found for this batch.")
+    batch_meta = None
+    from bson import ObjectId
+    from bson.errors import InvalidId
+    try:
+        b_oid = ObjectId(batch_id)
+    except (InvalidId, TypeError):
+        b_oid = batch_id
 
-    buffer = generate_batch_pdf_report(docs, batch_id, current_user.get("email") or "user")
-    filename = f"waste_batch_report_{batch_id}.pdf"
+    batch_doc = await waste_batches_collection.find_one({"_id": b_oid})
+    if not batch_doc:
+        batch_doc = await waste_batches_collection.find_one({"_id": str(batch_id)})
+
+    if batch_doc:
+        batch_meta = {
+            "label": batch_doc.get("fabric_type") or batch_doc.get("label") or "Mixed/Unknown",
+            "source": batch_doc.get("source") or "—",
+            "quantity_kg": batch_doc.get("quantity_kg") or "—",
+            "fabric_type": batch_doc.get("fabric_type") or "Mixed",
+            "condition": batch_doc.get("condition") or "Recyclable",
+        }
+
+    if not docs and batch_doc:
+        fabric = batch_doc.get("fabric_type") or batch_doc.get("label") or "Mixed/Unknown"
+        cond = batch_doc.get("condition") or "Recyclable"
+
+        synth_analysis = {
+            "material_type": {"label": fabric, "confidence": 0.95},
+            "garment_type": {"label": "Scrap/Fabric", "confidence": 0.90},
+            "waste_status": {"label": cond, "confidence": 0.90},
+            "visual_features": {
+                "color_analysis": {"primary_color": batch_doc.get("color") or "Mixed"},
+                "texture": {"label": "Standard"},
+                "pattern": {"label": "Solid"},
+            },
+        }
+        synth_recyclability = assess_recyclability(synth_analysis)
+        docs.append({
+            "batch_id": str(batch_doc["_id"]),
+            "filename": f"Inventory Batch #{str(batch_doc['_id'])[:6]}",
+            "analysis": synth_analysis,
+            "recyclability": synth_recyclability,
+            "created_at": batch_doc.get("created_at") or time.time(),
+        })
+
+    if not docs:
+        raise HTTPException(status_code=404, detail="No scans or batch record found for this batch.")
+
+    buffer, filename = _generate_typed_pdf_report(
+        docs,
+        current_user.get("email") or "user",
+        report_type=report_type,
+        batch_id=batch_id,
+        batch_meta=batch_meta,
+    )
     return StreamingResponse(
         buffer,
         media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+            "Access-Control-Expose-Headers": "Content-Disposition",
+        },
     )
 
 @router.get("/export/pdf/{scan_id}")

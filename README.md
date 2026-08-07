@@ -413,7 +413,244 @@ to generate sustainable waste management decisions.
 | Poor | Heavy Contamination | Specialized Recycling |
 
 ---
+---
 
+# Milestone 3: Explainable Sustainability Intelligence
+
+Milestone 3 extends the AI Textile Waste Intelligence Platform beyond material recognition by introducing an explainable sustainability assessment pipeline. The platform combines AI-based fabric classification, computer vision, rule-based decision making, environmental impact estimation, and interactive analytics to support circular economy decisions.
+
+## End-to-End Analysis Pipeline
+
+The complete analysis workflow consists of the following stages:
+
+```text
+Textile Image Upload
+        ↓
+CNN Fabric Classification
+        ↓
+Material Verification
+        ↓
+Computer Vision Inspection
+        ↓
+Condition Assessment
+        ↓
+Defect Detection
+        ↓
+Contamination Analysis
+        ↓
+Explainable Recommendation Engine
+        ↓
+Sustainability Assessment
+        ↓
+Environmental Impact Estimation
+        ↓
+Analytics Dashboard
+```
+
+---
+
+## Textile Intelligence
+
+The platform performs two-stage textile analysis.
+
+### Stage 1 – AI Material Recognition
+
+The TensorFlow CNN model predicts:
+
+- Visual fabric category
+- Fabric class
+- Confidence score
+- Likely fibre families
+
+### Stage 2 – Computer Vision Inspection
+
+OpenCV is used to detect:
+
+- Fabric condition
+- Visible defects
+- Damage severity
+- Contamination level
+- Quality assessment
+
+---
+
+## Explainable Recommendation Engine
+
+The recommendation engine contains **21 verified decision rules**.
+
+The engine evaluates:
+
+- Material
+- Condition
+- Damage severity
+- Contamination level
+- Reuse potential
+
+and generates one explainable recovery pathway.
+
+### Example Recommendations
+
+- Direct Reuse
+- Donation
+- Repair
+- Upcycling
+- Mechanical Recycling
+- Chemical Recycling
+- Fiber Recovery
+- Material Separation
+- Specialized Recycling
+- Hazardous Textile Waste Treatment
+- Cleaning and Reassessment
+- Manual Review
+
+Every recommendation is fully explainable and linked to a matching decision rule.
+
+---
+
+## Sustainability Assessment Engine
+
+Each textile is assigned three explainable scores.
+
+### Sustainability Score
+
+Represents the overall environmental suitability of the textile.
+
+The score is calculated using:
+
+- Material properties
+- Fabric condition
+- Damage severity
+- Contamination level
+- Recovery feasibility
+
+### Reuse Score
+
+Measures the potential for direct reuse.
+
+### Recovery Score
+
+Measures how suitable the textile is for recycling or recovery.
+
+The platform also classifies every textile into:
+
+- High Circularity
+- Medium Circularity
+- Low Circularity
+
+---
+
+## Environmental Impact Estimation
+
+For every recommendation, the platform estimates:
+
+- CO₂ emissions saved
+- Water saved
+- Energy saved
+- Landfill waste diverted
+
+These values provide an estimate of the environmental benefits of the recommended recovery pathway.
+
+---
+
+## Synthetic Sustainability Dataset
+
+To evaluate sustainability trends at scale, a synthetic dataset containing **10,000 assessment records** was generated.
+
+The dataset contains:
+
+- Material
+- Condition
+- Damage level
+- Contamination level
+- Recommendation
+- Sustainability Score
+- Reuse Score
+- Recovery Score
+- Circularity Level
+- CO₂ Saved
+- Water Saved
+- Energy Saved
+- Landfill Diverted
+
+The synthetic dataset is used exclusively for analytics and visualization.
+
+---
+
+## Analytics Dashboard
+
+Milestone 3 introduces an interactive analytics dashboard displaying:
+
+- Sustainability Score Distribution
+- Material Distribution
+- Condition Distribution
+- Contamination Distribution
+- Circularity Levels
+- Recovery Recommendation Distribution
+- Environmental Benefits
+- Live Textile Portfolio
+- Recent Textile Analyses
+
+The dashboard combines real application records with synthetic sustainability data to visualize circular economy trends.
+
+---
+
+## Batch Textile Analysis
+
+Multiple textile samples can be processed simultaneously.
+
+Features include:
+
+- Batch image upload
+- AI analysis for each textile
+- Individual assessment reports
+- Batch summary report
+- Recommendation generation
+- Sustainability scoring
+- Environmental impact estimation
+
+---
+
+## PDF Report Generation
+
+For every completed assessment the platform generates a downloadable PDF report containing:
+
+- AI prediction
+- Verified material
+- Condition assessment
+- Defect analysis
+- Recommendation
+- Sustainability scores
+- Environmental impact
+- Circular recovery pathway
+
+---
+
+## Milestone 3 Achievements
+
+✔ End-to-end textile intelligence workflow
+
+✔ CNN-based fabric classification
+
+✔ Computer vision condition inspection
+
+✔ 21 explainable recommendation rules
+
+✔ Sustainability scoring engine
+
+✔ Circularity assessment
+
+✔ Environmental impact estimation
+
+✔ 10,000-record synthetic sustainability dataset
+
+✔ Interactive analytics dashboard
+
+✔ Batch textile analysis
+
+✔ PDF report generation
+
+✔ Explainable AI-based decision support
+---
 # Platform Features
 
 ## User Management

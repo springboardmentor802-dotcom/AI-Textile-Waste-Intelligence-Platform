@@ -9,13 +9,14 @@
   --sb-lime: #a5dc45;
 
   position: sticky;
-  top: 0;
+  top: 78px;
   z-index: 40;
   display: flex;
   width: 272px;
   height: calc(100vh - 78px);
   min-height: 620px;
   flex: 0 0 272px;
+  align-self: flex-start;
   flex-direction: column;
   overflow: hidden;
   padding: 26px 18px 20px;
@@ -492,7 +493,6 @@
     display: inline;
   }
 }
-
 
 @media (max-width: 480px) {
   .app-sidebar {

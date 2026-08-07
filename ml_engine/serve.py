@@ -85,10 +85,25 @@ def analyze_image(image_bytes: bytes) -> dict:
 
     return result
 
+def analyze_defects(image_bytes: bytes) -> dict:
+    if "defect" not in _loaded:
+        _loaded["defect"] = _load_task("defect")
+
+    image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+    tensor = INFER_TRANSFORM(image)
+    label, confidence = _predict("defect", tensor)
+    return {"defect_type": {"label": label, "confidence": round(confidence, 4)} if label else None}
+
+def analyze_image_full(image_bytes: bytes) -> dict:
+    result = analyze_image(image_bytes)
+    result.update(analyze_defects(image_bytes))
+    return result
+
 if __name__ == "__main__":
     import sys
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         print("Usage: python serve.py <image_path>")
     else:
         with open(sys.argv[1], "rb") as f:
-            print(json.dumps(analyze_image(f.read()), indent=2))
+            image_bytes = f.read()
+        print(json.dumps(analyze_image_full(image_bytes), indent=2))

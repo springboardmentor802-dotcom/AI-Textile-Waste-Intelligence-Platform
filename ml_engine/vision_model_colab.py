@@ -175,12 +175,13 @@ def evaluate(model: nn.Module, loader: DataLoader) -> float:
 def run_training(fresh=None, task_epochs=None):
 
     fresh = fresh or []
-    task_epochs = task_epochs or {"garment": 3, "material": 10, "waste": 10}
+    task_epochs = task_epochs or {"garment": 3, "material": 10, "waste": 10, "defect": 10}
 
     tasks = [
         ("garment", "garment_dataset.csv", "garment_type"),
         ("material", "material_dataset.csv", "material_type"),
         ("waste", "waste_dataset.csv", "waste_status"),
+        ("defect", "defect_dataset.csv", "defect_type"),
     ]
 
     fresh_tasks = {t[0] for t in tasks} if "all" in fresh else set(fresh)

@@ -294,6 +294,46 @@ def prepare_waste_condition(valid_labels: list[str]) -> list[dict]:
             })
     return rows
 
+DEFECT_LABEL_MAP = {
+    "stain": "Stain",
+    "hole": "Hole",
+    "broken stitch": "Broken Stitch",
+    "needle mark": "Needle Mark",
+    "pinched fabric": "Pinched Fabric",
+    "defect free": "Defect Free",
+    "horizontal": "Weave Defect",
+    "lines": "Weave Defect",
+    "vertical": "Weave Defect",
+}
+
+def prepare_defects(valid_labels: list[str]) -> list[dict]:
+    root = DATASETS_DIR / "defects_detection"
+    rows = []
+    if not root.exists():
+        print(f"[skip] {root} not found -- check the defects_detection folder is under datasets/.")
+        return rows
+
+    for class_dir in root.iterdir():
+        if not class_dir.is_dir():
+            continue
+        key = class_dir.name.strip().lower()
+        mapped_label = DEFECT_LABEL_MAP.get(key)
+        if mapped_label is None:
+            print(f"[skip] {class_dir.name} -- not in DEFECT_LABEL_MAP")
+            continue
+        if mapped_label not in valid_labels:
+            print(f"[warn] {mapped_label} not in taxonomy.json defect_type -- add it or fix DEFECT_LABEL_MAP")
+            continue
+        for img_path in class_dir.rglob("*.*"):
+            if img_path.suffix.lower() not in (".jpg", ".jpeg", ".png", ".bmp", ".webp"):
+                continue
+            rows.append({
+                "image_path": str(img_path.relative_to(DATASETS_DIR)),
+                "label": mapped_label,
+                "split": None,
+            })
+    return rows
+
 def main():
     random.seed(RANDOM_SEED)
     taxonomy = load_taxonomy()
@@ -314,7 +354,11 @@ def main():
     if waste_rows:
         _write_csv(_assign_splits(waste_rows), DATASETS_DIR / "waste_dataset.csv")
 
-    if not (garment_rows or material_rows or waste_rows):
+    defect_rows = prepare_defects(taxonomy["defect_type"])          
+    if defect_rows:                                                 
+        _write_csv(_assign_splits(defect_rows), DATASETS_DIR / "defect_dataset.csv")
+
+    if not (garment_rows or material_rows or waste_rows or defect_rows):
         print(
             "No datasets found under ml_engine/datasets/. "
             "Download and extract each dataset there first."

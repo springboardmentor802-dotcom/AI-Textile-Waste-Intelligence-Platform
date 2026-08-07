@@ -60,4 +60,6 @@ def evaluate_task(task_name: str, csv_filename: str, taxonomy_key: str):
 if __name__ == "__main__":
     evaluate_task("material", "material_dataset.csv", "material_type")
     evaluate_task("waste", "waste_dataset.csv", "waste_status")
+    evaluate_task("defect", "defect_dataset.csv", "defect_type")
     evaluate_task("garment", "garment_dataset.csv", "garment_type")
+    

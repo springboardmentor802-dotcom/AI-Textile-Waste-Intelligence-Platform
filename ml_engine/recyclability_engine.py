@@ -80,6 +80,20 @@ CONDITION_REDUCTION_TIPS = {
     "Degraded": "Degraded items typically can't be reused -- fiber-recycle if the material is still identifiable, otherwise dispose responsibly.",
 }
 
+DEFECT_TYPE_TIPS = {
+    "Stain": "A stain alone often doesn't disqualify an item from resale -- try spot-treating or laundering before routing elsewhere.",
+    "Hole": "Small holes can be patched or mended for the repair pipeline; larger or multiple holes are better routed to recycling instead of resale.",
+    "Broken Stitch": "A broken stitch is usually a quick fix -- strong candidate for the repair/refurbish pipeline rather than recycling.",
+    "Needle Mark": "Typically a minor cosmetic defect that doesn't affect wearability -- fine for resale as-is or with light mending.",
+    "Pinched Fabric": "Check whether the fabric pull can be steamed or brushed out; if it's permanent, treat it as cosmetic-only and still resalable.",
+    "Weave Defect": "An irregularity in the weave itself is structural, not cosmetic -- consider lower-tier resale or recycling depending on severity.",
+    "Defect Free": "No visible defect detected -- this supports routing the item toward the highest-value channel (reuse/resale) available.",
+}
+
+DEFECT_CONFIDENCE_THRESHOLD = 0.55
+
+STATUSES_EXPECTING_NO_DEFECT = {"Reusable"}
+
 def get_waste_reduction_tips(material_label: str, condition_label: str) -> list[str]:
     tips = []
     material_tip = MATERIAL_REDUCTION_TIPS.get(material_label)
@@ -147,7 +161,37 @@ def _reuse_score(condition_score: float, garment_type: Optional[str]) -> float:
         base *= 0.85
     return round(base, 1)
 
-def assess_recyclability(analysis: dict) -> dict:
+def _apply_defect_insight(
+    result: dict,
+    defect_analysis: Optional[dict],
+    condition_label: str,
+) -> None:
+    if not defect_analysis:
+        result["defect_detected"] = None
+        return
+
+    defect_info = defect_analysis.get("defect_type") or {}
+    defect_label = defect_info.get("label")
+    defect_confidence = defect_info.get("confidence")
+
+    if not defect_label or defect_confidence is None or defect_confidence < DEFECT_CONFIDENCE_THRESHOLD:
+        result["defect_detected"] = None
+        return
+
+    result["defect_detected"] = {"label": defect_label, "confidence": defect_confidence}
+
+    defect_tip = DEFECT_TYPE_TIPS.get(defect_label)
+    if defect_tip:
+        result["waste_reduction_tips"].append(defect_tip)
+
+    if defect_label != "Defect Free" and condition_label in STATUSES_EXPECTING_NO_DEFECT:
+        result["inspection_flag"] = (
+            f"Waste status suggests '{condition_label}' but a '{defect_label}' defect was "
+            f"detected (confidence {round(defect_confidence, 2)}) -- consider manual review "
+            f"before routing to a high-value channel."
+        )
+
+def assess_recyclability(analysis: dict, defect_analysis: Optional[dict] = None) -> dict:
     garment = analysis.get("garment_type") or {}
     material = analysis.get("material_type") or {}
     waste = analysis.get("waste_status") or {}
@@ -179,7 +223,7 @@ def assess_recyclability(analysis: dict) -> dict:
     recommended_option = determine_recycling_option(material_label, condition_label)
     waste_reduction_tips = get_waste_reduction_tips(material_label, condition_label)
 
-    return {
+    result = {
         "circularity_score": circularity_score,
         "circularity_category": category,
         "waste_category": waste_category,
@@ -198,15 +242,23 @@ def assess_recyclability(analysis: dict) -> dict:
         },
     }
 
+    _apply_defect_insight(result, defect_analysis, condition_label)
+    if defect_analysis:
+        result["inputs_used"]["defect_type"] = (defect_analysis.get("defect_type") or {}).get("label")
+
+    return result
+
 if __name__ == "__main__":
     import sys
     import json
-    from serve import analyze_image
+    from serve import analyze_image, analyze_defects
 
     if len(sys.argv) != 2:
         print("Usage: python recyclability_engine.py <image_path>")
     else:
         with open(sys.argv[1], "rb") as f:
-            analysis = analyze_image(f.read())
-        result = assess_recyclability(analysis)
-        print(json.dumps({"analysis": analysis, "recyclability": result}, indent=2))
+            image_bytes = f.read()
+        analysis = analyze_image(image_bytes)
+        defect_analysis = analyze_defects(image_bytes)
+        result = assess_recyclability(analysis, defect_analysis)
+        print(json.dumps({"analysis": analysis, "defect_analysis": defect_analysis, "recyclability": result}, indent=2))

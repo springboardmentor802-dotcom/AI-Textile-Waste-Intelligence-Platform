@@ -1,8 +1,9 @@
-
-
 import { jsPDF } from "jspdf";
 
 // --- Palette (kept in the same green/white family used across the app) ---
+// ============================================================================
+// UNCHANGED FROM ORIGINAL FILE (down to the "NEW HELPERS" marker below)
+// ============================================================================
 const COLORS = {
   green: [46, 125, 50], // #2e7d32
   greenDark: [37, 100, 40], // #256428
@@ -165,6 +166,9 @@ function drawKeyValue(doc, label, value, x, y, wrapWidth) {
  * bar, waste/recycling card, fabric info card, top-3 card) onto whatever
  * page in `doc` is currently active. Shared by both the single-result
  * report and each detail page of the batch report.
+ *
+ * NOTE: left fully intact. `downloadBatchPredictionsReport` still depends
+ * on this exact function, so it is not touched by the redesign below.
  */
 async function drawPredictionPage(doc, params) {
   const {
@@ -322,49 +326,6 @@ function finalizeDocument(doc) {
   }
 }
 
-/**
- * @param {Object} params
- * @param {File} params.imageFile - the original uploaded fabric image
- * @param {string} params.material
- * @param {number} params.confidence
- * @param {string} params.wasteCategory
- * @param {string} params.recyclability
- * @param {string} params.recommendation
- * @param {Array<{material: string, confidence: number}>} params.top3Predictions
- * @param {Object} [params.materialTypeInfo] - { type, commonUses, description }
- * @param {number} [params.processingTimeSeconds]
- * @param {string} [params.fileName] - output filename, defaults to a generated one
- */
-export async function downloadPredictionPdf({
-  imageFile,
-  material,
-  confidence,
-  wasteCategory,
-  recyclability,
-  recommendation,
-  top3Predictions = [],
-  materialTypeInfo,
-  processingTimeSeconds,
-  fileName,
-}) {
-  const doc = new jsPDF({ unit: "pt", format: "a4" });
-
-  await drawPredictionPage(doc, {
-    imageFile,
-    material,
-    confidence,
-    wasteCategory,
-    recyclability,
-    recommendation,
-    top3Predictions,
-    materialTypeInfo,
-    processingTimeSeconds,
-  });
-
-  finalizeDocument(doc);
-  doc.save(fileName || `fabric_prediction_${material.toLowerCase()}_${Date.now()}.pdf`);
-}
-
 /** Small stat card used on the batch report's cover page. */
 function drawStatCard(doc, x, y, width, height, label, value) {
   setFill(doc, COLORS.greenLight);
@@ -381,11 +342,429 @@ function drawStatCard(doc, x, y, width, height, label, value) {
   doc.text(String(value), x + 14, y + 42);
 }
 
+// ============================================================================
+// NEW HELPERS — added to support the redesigned 2-page single report.
+// Nothing above this line was modified.
+// ============================================================================
+
 /**
- * Generates ONE combined PDF covering every completed prediction in a batch:
- * a cover page with summary stat cards and an included-items list, followed
- * by one detail page per item (reusing the same layout as the single-item
- * report for visual consistency).
+ * Converts a raw object key like "co2_saved_kg" or "avgConfidence" into a
+ * human label like "CO2 Saved Kg" / "Avg Confidence". Used so the
+ * sustainability sub-objects (material_information, environmental_impact,
+ * waste_scoring, recommendations, overall_sustainability) can be rendered
+ * without hard-coding their exact field names, which weren't available at
+ * the time this file was written — this keeps the report resilient to
+ * backend/data-shape changes instead of silently dropping fields.
+ */
+function formatFieldLabel(key) {
+  const spaced = String(key)
+    .replace(/_/g, " ")
+    .replace(/([a-z])([A-Z])/g, "$1 $2");
+  return spaced.replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+/**
+ * Flattens an arbitrarily-shaped plain object into a flat list of
+ * { label, value } pairs suitable for the key/value grid renderer below.
+ * - Primitives (string/number/boolean) become a single row.
+ * - Arrays of primitives are joined into a comma-separated string.
+ * - Arrays of objects are summarized as "N item(s)" (they're rendered in
+ *   full elsewhere via drawBulletListCard, e.g. for recommendations).
+ * - Nested plain objects are recursed into one level, with the parent key
+ *   prefixed onto the child label (e.g. "Breakdown - Score").
+ * This is what lets the redesigned cards safely display the
+ * `sustainability.*` sub-objects using only the existing data, without
+ * assuming field names that weren't confirmed.
+ */
+function flattenEntries(obj, depth = 0, prefix = "") {
+  if (!obj || typeof obj !== "object") return [];
+  const entries = [];
+
+  Object.entries(obj).forEach(([key, value]) => {
+    if (value === undefined || value === null || typeof value === "function") return;
+    const label = prefix + formatFieldLabel(key);
+
+    if (Array.isArray(value)) {
+      const isObjectArray = value.some((v) => v && typeof v === "object");
+      if (isObjectArray) {
+        entries.push({ label, value: `${value.length} item(s)` });
+      } else if (value.length > 0) {
+        entries.push({ label, value: value.join(", ") });
+      }
+      return;
+    }
+
+    if (typeof value === "object") {
+      if (depth < 1) {
+        entries.push(...flattenEntries(value, depth + 1, `${label} - `));
+      } else {
+        entries.push({ label, value: "-" });
+      }
+      return;
+    }
+
+    entries.push({ label, value });
+  });
+
+  return entries;
+}
+
+/**
+ * Measures + draws a responsive "white card" section containing a green
+ * section heading followed by a 2-column key/value grid (falling back to
+ * a full-width row for long text values). This generalizes the
+ * label/value layout already used for "Waste & Recycling" / "Fabric
+ * Information" in drawPredictionPage, so the new sustainability sections
+ * (Material Information, Sustainability Overview, Environmental Impact,
+ * Circular Economy Score) share the exact same visual language without
+ * duplicating that layout math per-section.
+ *
+ * Returns the new `y` cursor after the card (card bottom + gap).
+ */
+function drawKeyValueCard(doc, x, y, width, title, entries, gap = 20) {
+  const padding = 16;
+  const innerWidth = width - padding * 2;
+  const halfWidth = (innerWidth - 18) / 2;
+  const longValueThreshold = 42;
+
+  if (!entries || entries.length === 0) {
+    const emptyHeight = 60;
+    drawCard(doc, x, y, width, emptyHeight);
+    const headingY = drawSectionHeading(doc, title, x + padding, y + 24);
+    doc.setFontSize(9.5);
+    doc.setFont("helvetica", "italic");
+    setTextColor(doc, COLORS.grayMuted);
+    doc.text("No data available.", x + padding, headingY + 4);
+    return y + emptyHeight + gap;
+  }
+
+  // --- Pass 1: measure (no drawing) so we know the card height up front ---
+  let rows = [];
+  let i = 0;
+  while (i < entries.length) {
+    const entry = entries[i];
+    const valueText = String(entry.value ?? "-");
+    if (valueText.length > longValueThreshold) {
+      const lines = doc.splitTextToSize(valueText, innerWidth);
+      rows.push({ type: "full", height: 13 + lines.length * 13 + 10, entries: [entry] });
+      i += 1;
+    } else {
+      const next = entries[i + 1];
+      const nextIsShort = next && String(next.value ?? "-").length <= longValueThreshold;
+      if (nextIsShort) {
+        rows.push({ type: "pair", height: 34, entries: [entry, next] });
+        i += 2;
+      } else {
+        rows.push({ type: "pair", height: 34, entries: [entry] });
+        i += 1;
+      }
+    }
+  }
+
+  const headingHeight = 32;
+  const contentHeight = rows.reduce((sum, r) => sum + r.height, 0);
+  const cardHeight = headingHeight + contentHeight + padding;
+
+  // --- Pass 2: draw ---
+  drawCard(doc, x, y, width, cardHeight);
+  let rowY = drawSectionHeading(doc, title, x + padding, y + 24);
+
+  rows.forEach((row) => {
+    if (row.type === "full") {
+      drawKeyValue(doc, row.entries[0].label, row.entries[0].value, x + padding, rowY, innerWidth);
+      rowY += row.height;
+    } else {
+      drawKeyValue(doc, row.entries[0].label, row.entries[0].value, x + padding, rowY);
+      if (row.entries[1]) {
+        drawKeyValue(doc, row.entries[1].label, row.entries[1].value, x + padding + halfWidth + 18, rowY);
+      }
+      rowY += row.height;
+    }
+  });
+
+  return y + cardHeight + gap;
+}
+
+/**
+ * Renders a bulleted list card — used for "Recycling Recommendation(s)",
+ * which may come through as an array of strings or an array of objects
+ * (e.g. { title, description } or { text }). Each item is coerced to a
+ * single readable line rather than assuming one exact shape.
+ */
+function drawBulletListCard(doc, x, y, width, title, items, gap = 20) {
+  const padding = 16;
+  const innerWidth = width - padding * 2 - 14; // leave room for the bullet marker
+  const list = Array.isArray(items) ? items : items ? [items] : [];
+
+  const toLine = (item) => {
+    if (typeof item === "string") return item;
+    if (item && typeof item === "object") {
+      const candidate =
+        item.text || item.recommendation || item.description || item.title || item.message;
+      if (candidate) return String(candidate);
+      return Object.values(item).filter((v) => typeof v === "string").join(" — ") || JSON.stringify(item);
+    }
+    return String(item ?? "-");
+  };
+
+  if (list.length === 0) {
+    return drawKeyValueCard(doc, x, y, width, title, [], gap);
+  }
+
+  // --- Pass 1: measure ---
+  const wrappedLines = list.map((item) => doc.splitTextToSize(toLine(item), innerWidth));
+  const rowGap = 10;
+  const contentHeight = wrappedLines.reduce((sum, lines) => sum + lines.length * 13 + rowGap, 0);
+  const headingHeight = 32;
+  const cardHeight = headingHeight + contentHeight + padding - rowGap + 6;
+
+  // --- Pass 2: draw ---
+  drawCard(doc, x, y, width, cardHeight);
+  let rowY = drawSectionHeading(doc, title, x + padding, y + 24);
+
+  doc.setFontSize(10.5);
+  wrappedLines.forEach((lines) => {
+    setFill(doc, COLORS.green);
+    doc.circle(x + padding + 3, rowY - 4, 2.2, "F");
+    doc.setFont("helvetica", "normal");
+    setTextColor(doc, COLORS.dark);
+    doc.text(lines, x + padding + 14, rowY);
+    rowY += lines.length * 13 + rowGap;
+  });
+
+  return y + cardHeight + gap;
+}
+
+/**
+ * Page 1 of the redesigned single-item report: title/date band, uploaded
+ * image + prediction result, defect detection, material information, and
+ * top-3 predictions — matching the first half of the current web UI.
+ */
+async function drawReportPageOne(doc, params) {
+  const {
+    imageFile,
+    material,
+    confidence,
+    defect,
+    defectConfidence,
+    wasteCategory,
+    recyclability,
+    recommendation,
+    top3Predictions = [],
+    materialTypeInfo,
+    processingTimeSeconds,
+    sustainability,
+  } = params;
+
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const contentWidth = pageWidth - PAGE_MARGIN * 2;
+  let y = drawHeader(doc, {
+    title: "AI Fabric Prediction Report",
+    subtitle: new Date().toLocaleString(),
+  });
+
+  // --- Prediction Result card: image + material + confidence + recyclability ---
+  const overviewHeight = 172;
+  drawCard(doc, PAGE_MARGIN, y, contentWidth, overviewHeight);
+  const cardPadding = 18;
+  const imageSize = overviewHeight - cardPadding * 2;
+
+  if (imageFile) {
+    try {
+      const dataUrl = await fileToDataUrl(imageFile);
+      const imageFormat = imageFile.type.includes("png") ? "PNG" : "JPEG";
+      setDraw(doc, COLORS.border);
+      doc.roundedRect(PAGE_MARGIN + cardPadding - 2, y + cardPadding - 2, imageSize + 4, imageSize + 4, 6, 6, "S");
+      doc.addImage(
+        dataUrl,
+        imageFormat,
+        PAGE_MARGIN + cardPadding,
+        y + cardPadding,
+        imageSize,
+        imageSize,
+        undefined,
+        "FAST"
+      );
+    } catch {
+      // Continue without the image rather than failing the whole report.
+    }
+  }
+
+  const textX = PAGE_MARGIN + cardPadding + imageSize + 20;
+  const textWidth = contentWidth - cardPadding * 2 - imageSize - 20;
+  let textY = y + cardPadding + 16;
+
+  doc.setFontSize(20);
+  doc.setFont("helvetica", "bold");
+  setTextColor(doc, COLORS.dark);
+  doc.text(String(material ?? "-"), textX, textY);
+  textY += 26;
+
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "bold");
+  setTextColor(doc, COLORS.grayMuted);
+  doc.text("CONFIDENCE", textX, textY);
+  doc.setFont("helvetica", "bold");
+  setTextColor(doc, COLORS.green);
+  doc.text(`${confidence}%`, textX + textWidth, textY, { align: "right" });
+  textY += 8;
+  drawProgressBar(doc, textX, textY, textWidth, 8, confidence, COLORS.green);
+  textY += 26;
+
+  if (typeof processingTimeSeconds === "number") {
+    doc.setFontSize(9.5);
+    doc.setFont("helvetica", "normal");
+    setTextColor(doc, COLORS.gray);
+    doc.text(`AI Processing Time: ${processingTimeSeconds.toFixed(2)} sec`, textX, textY);
+    textY += 16;
+  }
+
+  const recTone = recyclabilityTone(recyclability);
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "bold");
+  setTextColor(doc, COLORS.grayMuted);
+  doc.text("RECYCLABILITY", textX, textY + 12);
+  drawPill(doc, String(recyclability ?? "Unknown"), textX, textY + 30, recTone);
+
+  y += overviewHeight + 20;
+
+  // --- Defect Detection card ---
+  const halfWidth = (contentWidth - 16 * 2 - 18) / 2;
+  y = drawKeyValueCard(doc, PAGE_MARGIN, y, contentWidth, "Defect Detection", [
+    { label: "Defect", value: defect ?? "None detected" },
+    { label: "Defect Confidence", value: defectConfidence != null ? `${defectConfidence}%` : "-" },
+    { label: "Waste Category", value: wasteCategory },
+    { label: "Recommendation", value: recommendation },
+  ]);
+
+  // --- Material Information card (from sustainability.material_information,
+  //     falling back to materialTypeInfo already computed in the UI) ---
+  const materialInfoEntries = sustainability?.material_information
+    ? flattenEntries(sustainability.material_information)
+    : materialTypeInfo
+    ? flattenEntries(materialTypeInfo)
+    : [];
+  y = drawKeyValueCard(doc, PAGE_MARGIN, y, contentWidth, "Material Information", materialInfoEntries);
+
+  // --- Top 3 Predictions card (unchanged visual logic from the original) ---
+  if (top3Predictions.length > 0) {
+    const top3Height = 32 + top3Predictions.length * 24 + 12;
+    drawCard(doc, PAGE_MARGIN, y, contentWidth, top3Height);
+    let rowY = drawSectionHeading(doc, "Top 3 Predictions", PAGE_MARGIN + 16, y + 24);
+    const barX = PAGE_MARGIN + 150;
+    const barWidth = contentWidth - 32 - 150 - 50;
+    const rankColors = [COLORS.green, [67, 160, 71], [129, 199, 132]];
+
+    top3Predictions.forEach((p, index) => {
+      doc.setFontSize(10.5);
+      doc.setFont("helvetica", "normal");
+      setTextColor(doc, COLORS.dark);
+      doc.text(String(p.material), PAGE_MARGIN + 16, rowY);
+      drawProgressBar(doc, barX, rowY - 8, barWidth, 7, p.confidence, rankColors[index] || COLORS.green);
+      doc.setFont("helvetica", "bold");
+      setTextColor(doc, COLORS.gray);
+      doc.text(`${p.confidence}%`, PAGE_MARGIN + contentWidth - 16, rowY, { align: "right" });
+      rowY += 24;
+    });
+  }
+
+  void halfWidth; // reserved for future two-column defect layout tweaks
+}
+
+/**
+ * Page 2 of the redesigned single-item report: Sustainability Overview,
+ * Environmental Impact, Circular Economy Score, and Recycling
+ * Recommendation — mirroring the corresponding UI cards 1:1, using only
+ * the `sustainability` object already passed into downloadPredictionPdf.
+ */
+function drawReportPageTwo(doc, sustainability) {
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const contentWidth = pageWidth - PAGE_MARGIN * 2;
+  let y = drawHeader(doc, { title: "Sustainability Report", subtitle: "Page 2 of 2" });
+
+  const overall = sustainability?.overall_sustainability;
+  const environmental = sustainability?.environmental_impact;
+  const wasteScoring = sustainability?.waste_scoring;
+  const recommendations = sustainability?.recommendations;
+
+  y = drawKeyValueCard(doc, PAGE_MARGIN, y, contentWidth, "Sustainability Overview", flattenEntries(overall));
+  y = drawKeyValueCard(doc, PAGE_MARGIN, y, contentWidth, "Environmental Impact", flattenEntries(environmental));
+  y = drawKeyValueCard(doc, PAGE_MARGIN, y, contentWidth, "Circular Economy Score", flattenEntries(wasteScoring));
+  drawBulletListCard(doc, PAGE_MARGIN, y, contentWidth, "Recycling Recommendation", recommendations);
+}
+
+// ============================================================================
+// EXPORTED FUNCTIONS
+// ============================================================================
+
+/**
+ * @param {Object} params
+ * @param {File} params.imageFile - the original uploaded fabric image
+ * @param {string} params.material
+ * @param {number} params.confidence
+ * @param {string} [params.defect] - NEW: detected defect label, if any
+ * @param {number} [params.defectConfidence] - NEW: defect detection confidence (%)
+ * @param {string} params.wasteCategory
+ * @param {string} params.recyclability
+ * @param {string} params.recommendation
+ * @param {Array<{material: string, confidence: number}>} params.top3Predictions
+ * @param {Object} [params.materialTypeInfo] - { type, commonUses, description }
+ * @param {number} [params.processingTimeSeconds]
+ * @param {Object} [params.sustainability] - { material_information, overall_sustainability,
+ *   environmental_impact, waste_scoring, recommendations }
+ * @param {string} [params.fileName] - output filename, defaults to a generated one
+ *
+ * MODIFIED: now renders the redesigned 2-page sustainability report
+ * (drawReportPageOne + drawReportPageTwo) instead of the single legacy
+ * page. The function signature, parameter names, and the way it's called
+ * from Predictions.jsx are unchanged — only two new optional params
+ * (`defect`, `defectConfidence`) were added, both of which Predictions.jsx
+ * already passes today. No business logic, calculation, or API/data
+ * mapping was touched.
+ */
+export async function downloadPredictionPdf({
+  imageFile,
+  material,
+  confidence,
+  defect,
+  defectConfidence,
+  wasteCategory,
+  recyclability,
+  recommendation,
+  top3Predictions = [],
+  materialTypeInfo,
+  processingTimeSeconds,
+  sustainability,
+  fileName,
+}) {
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+
+  await drawReportPageOne(doc, {
+    imageFile,
+    material,
+    confidence,
+    defect,
+    defectConfidence,
+    wasteCategory,
+    recyclability,
+    recommendation,
+    top3Predictions,
+    materialTypeInfo,
+    processingTimeSeconds,
+    sustainability,
+  });
+
+  doc.addPage();
+  drawReportPageTwo(doc, sustainability);
+
+  finalizeDocument(doc);
+  doc.save(fileName || `fabric_prediction_${String(material ?? "report").toLowerCase()}_${Date.now()}.pdf`);
+}
+
+/**
+ * Generates ONE combined PDF covering every completed prediction in a batch.
+ * UNCHANGED — still uses the original single-page-per-item layout
+ * (drawPredictionPage) for visual consistency with existing batch reports.
  *
  * @param {Array<Object>} items - each shaped like downloadPredictionPdf's params
  *   (imageFile, material, confidence, wasteCategory, recyclability,

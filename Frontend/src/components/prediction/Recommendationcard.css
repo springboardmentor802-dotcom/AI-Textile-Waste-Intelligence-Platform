@@ -1,0 +1,227 @@
+/* ===========================================================
+   RecommendationCard.css
+   Design language: rounded white card, soft shadow, green
+   sustainability accents - matches EnvironmentalImpactCard.
+   =========================================================== */
+
+.rec-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 20px 24px 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.rec-card:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+/* --- Header --- */
+
+.rec-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.rec-header-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f0fdf4;
+  color: #16a34a;
+  flex-shrink: 0;
+}
+
+.rec-card-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+/* --- Status badge (header) --- */
+
+.rec-status-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  border-radius: 999px;
+  padding: 5px 10px;
+  white-space: nowrap;
+}
+
+.rec-status-ok {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+.rec-status-review {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+/* --- Primary method highlight (color-coded by action category) --- */
+
+.rec-primary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid;
+  margin-bottom: 18px;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.rec-primary-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+  margin: 0 0 2px;
+}
+
+.rec-primary-value {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0;
+  color: inherit;
+}
+
+.rec-primary-recycle { background: #f0fdf4; border-color: #dcfce7; color: #16a34a; }
+.rec-primary-reuse { background: #eff6ff; border-color: #bfdbfe; color: #2563eb; }
+.rec-primary-donation { background: #fdf4ff; border-color: #f5d0fe; color: #a21caf; }
+.rec-primary-upcycle { background: #fefce8; border-color: #fde68a; color: #a16207; }
+.rec-primary-recovery { background: #f5f3ff; border-color: #ddd6fe; color: #6d28d9; }
+.rec-primary-default { background: #f9fafb; border-color: #e5e7eb; color: #374151; }
+.rec-primary-review { background: #fffbeb; border-color: #fde68a; color: #92400e; }
+
+/* --- Info row (waste category / reuse potential) --- */
+
+.rec-info-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.rec-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #f9fafb;
+}
+
+.rec-info-icon {
+  color: #16a34a;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.rec-info-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+  margin: 0 0 4px;
+}
+
+.rec-info-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+/* --- Reuse Potential badge --- */
+
+.rec-potential-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 2px 10px;
+  border: 1px solid;
+}
+
+.rec-badge-high { background: #f0fdf4; color: #16a34a; border-color: #bbf7d0; }
+.rec-badge-medium { background: #fffbeb; color: #a16207; border-color: #fde68a; }
+.rec-badge-low { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+.rec-badge-unknown { background: #f3f4f6; color: #6b7280; border-color: #e5e7eb; }
+
+/* --- Recommended actions --- */
+
+.rec-actions-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 10px;
+}
+
+.rec-actions-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.rec-action-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 999px;
+  padding: 6px 12px;
+  border: 1px solid;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.rec-action-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Per-action color themes */
+.rec-chip-fiber { background: #f0fdf4; border-color: #bbf7d0; color: #16a34a; }
+.rec-chip-mechanical { background: #ecfeff; border-color: #a5f3fc; color: #0891b2; }
+.rec-chip-chemical { background: #eef2ff; border-color: #c7d2fe; color: #4f46e5; }
+.rec-chip-reuse { background: #eff6ff; border-color: #bfdbfe; color: #2563eb; }
+.rec-chip-donation { background: #fdf4ff; border-color: #f5d0fe; color: #a21caf; }
+.rec-chip-upcycle { background: #fefce8; border-color: #fde68a; color: #a16207; }
+.rec-chip-recovery { background: #f5f3ff; border-color: #ddd6fe; color: #6d28d9; }
+.rec-chip-default { background: #f9fafb; border-color: #e5e7eb; color: #374151; }
+
+.rec-actions-empty {
+  font-size: 13px;
+  color: #9ca3af;
+  margin: 0;
+}
+
+/* --- Responsive --- */
+
+@media (max-width: 480px) {
+  .rec-card {
+    padding: 16px;
+  }
+
+  .rec-info-row {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,264 @@
+/* ===========================================================
+   EnvironmentalImpactCard.css
+   Design language: rounded white cards, soft shadow, green
+   sustainability accents, subtle hover lift - matches the
+   shared dashboard look used across the Prediction result cards.
+   =========================================================== */
+
+.impact-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 20px 24px 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.impact-card:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+/* --- Header --- */
+
+.impact-card-header {
+  display: flex;   
+  align-items: center;   
+  justify-content: flex-start;   
+  gap: 12px;   
+  margin-bottom: 18px;
+}
+
+.impact-header-left{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.impact-header-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f0fdf4;
+  color: #16a34a;
+  flex-shrink: 0;
+}
+
+.impact-card-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.impact-header-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.impact-score-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid;
+  border-radius: 999px;
+  padding: 5px 12px 5px 10px;
+  white-space: nowrap;
+  transition: all 0.25s ease;
+}
+
+.impact-status-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  border-radius: 999px;
+  padding: 5px 10px;
+  white-space: nowrap;
+}
+
+.impact-status-ok {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+.impact-status-unavailable {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.impact-score-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.impact-score-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.impact-score-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.impact-score-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+/* Category color tiers */
+.impact-score-excellent { border-color: #bbf7d0; background: #f0fdf4; }
+.impact-score-excellent .impact-score-dot { background: #16a34a; }
+.impact-score-excellent .impact-score-label { color: #16a34a; }
+
+.impact-score-high { border-color: #bbf7d0; background: #f0fdf4; }
+.impact-score-high .impact-score-dot { background: #22c55e; }
+.impact-score-high .impact-score-label { color: #22c55e; }
+
+.impact-score-moderate { border-color: #fde68a; background: #fffbeb; }
+.impact-score-moderate .impact-score-dot { background: #eab308; }
+.impact-score-moderate .impact-score-label { color: #a16207; }
+
+.impact-score-limited { border-color: #fed7aa; background: #fff7ed; }
+.impact-score-limited .impact-score-dot { background: #f97316; }
+.impact-score-limited .impact-score-label { color: #c2410c; }
+
+.impact-score-low { border-color: #fecaca; background: #fef2f2; }
+.impact-score-low .impact-score-dot { background: #ef4444; }
+.impact-score-low .impact-score-label { color: #dc2626; }
+
+/* --- Stat grid --- */
+
+.impact-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.impact-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 16px 8px;
+  border-radius: 12px;
+  background: #f9fafb;
+  border: 1px solid transparent;
+  transition: background 0.25s ease, transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.impact-stat:hover {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(22, 163, 74, 0.12);
+}
+
+.impact-stat:hover .impact-stat-icon {
+  transform: scale(1.12) rotate(-4deg);
+}
+
+.impact-stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  margin-bottom: 10px;
+  transition: transform 0.25s ease;
+}
+
+
+.impact-icon-co2 {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.impact-icon-water {
+  background: #eff6ff;
+  color: #3b82f6;
+}
+
+.impact-icon-energy {
+  background: #fefce8;
+  color: #eab308;
+}
+
+.impact-icon-landfill {
+  background: #faf5ff;
+  color: #a855f7;
+}
+
+.impact-stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 4px;
+}
+
+.impact-stat-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  margin: 0;
+}
+
+.impact-stat-description{
+    font-size: 12px;
+    line-height: 1.45;
+    color: #6b7280;
+    text-align: center;
+    max-width: 170px;
+}
+
+/* --- Unavailable state --- */
+
+.impact-unavailable {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+  font-size: 13px;
+}
+
+/* --- Responsive --- */
+
+@media (max-width: 900px) {
+  .impact-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .impact-card {
+    padding: 16px;
+  }
+
+  .impact-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .impact-stat {
+    padding: 12px 6px;
+  }
+}

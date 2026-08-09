@@ -1,8 +1,9 @@
 # ♻️ AI Textile Waste Intelligence Platform
 
-An AI-powered web application for intelligent textile waste management that combines secure inventory management, deep learning-based material recognition, waste classification, recyclability assessment, and sustainability recommendations.
-
----
+An AI-powered web application for intelligent textile waste management
+that combines deep learning-based fabric recognition, defect detection,
+waste classification, recyclability assessment, sustainability
+intelligence, circular economy scoring, and recycling recommendations.
 
 # 📌 Overview
 
@@ -19,315 +20,356 @@ The platform allows users to:
 - Download professional PDF reports
 - Track inventory through an interactive dashboard
 
----
-
 ## 🛠️ Tech Stack
 
 **Frontend:** React.js, Vite, React Router DOM, CSS
 
-**Backend:** Python, FastAPI, SQLAlchemy, Pydantic, Passlib (bcrypt), python-jose (JWT)
+**Backend:** Python, FastAPI, SQLAlchemy, Pydantic, Passlib (bcrypt),
+python-jose (JWT)
 
 **AI & Machine Learning:** TensorFlow, Keras, NumPy, Pillow
 
 **Database:** PostgreSQL
 
 **Tools:** Git, GitHub, VS Code, pgAdmin 4
----
 
-# 📁 Project Structure
+## ✨ Implemented Features
 
-```
-AI-Textile-Waste-Intelligence-Platform/
+### 🔐 Authentication & Security
 
-├── Frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── services/
-│   │   ├── utils/
-│   │   ├── data/
-│   │   └── App.jsx
-│
-├── Backend/
-│   ├── routes/
-│   │   ├── auth.py
-│   │   ├── inventory.py
-│   │   └── predict.py
-│   │
-│   ├── config.py
-│   ├── database.py
-│   ├── models.py
-│   ├── schemas.py
-│   └── main.py
-│
-├── Dataset/
-├── Models/
-├── Notebook/
-├── Docs/
-└── README.md
-```
+-   User Registration
+-   Secure Login
+-   Password Hashing using bcrypt
+-   JWT Authentication
+-   Protected Routes
+-   Role-Based Access Control (RBAC)
 
----
+### 📦 Inventory Management
 
-# ✨ Features
+-   Add Inventory
+-   View Inventory
+-   Update Inventory
+-   Delete Inventory
+-   Inventory integration with the application workflow
 
-## 🔐 Authentication & Security
+### 🤖 AI Fabric Prediction
 
-- User Registration
-- Secure Login
-- Password Hashing using bcrypt
-- JWT Authentication
-- Protected Routes
-- Role-Based Access Control (RBAC)
+-   Textile image upload
+-   Image validation
+-   Image preprocessing
+-   Image resizing
+-   Image normalization
+-   CNN-based fabric classification
+-   Prediction confidence score
+-   Top-3 predictions
 
----
+**Supported fabric classes:**
 
-## 📦 Inventory Management
+-   Cotton
+-   Denim
+-   Polyester
+-   Silk
+-   Wool
+-   Blended Fabric
 
-- Add Inventory
-- View Inventory
-- Update Inventory
-- Delete Inventory
-- Dashboard Integration
+### 🔎 Defect Detection
 
----
+The prediction workflow provides fabric defect analysis, including:
 
-## 🤖 AI Material Recognition
+-   Defect prediction
+-   Defect confidence score
+-   Detected defect status
 
-- Textile Image Upload
-- CNN-based Material Classification
-- Image Preprocessing
-- Confidence Score
-- Top-3 Predictions
+### 📚 Material Information
 
-Supported Materials
+After classification, the platform displays:
 
-- Cotton
-- Denim
-- Polyester
-- Silk
-- Wool
-- Blended Fabric
+-   Fabric class
+-   Material type
+-   Material description
+-   Common applications / common uses
 
----
+### 📊 Top-3 Predictions
 
-## ♻️ Waste Classification
+The platform displays the top three model predictions with confidence
+scores. This improves transparency because visually similar fabrics can
+produce competing predictions.
 
-Based on the predicted material, the system automatically provides:
+### ♻️ Waste Classification & Recyclability
 
-- Waste Category
-- Recyclability Status
-- Recycling Recommendation
+Based on the predicted fabric, the platform provides:
 
----
+-   Waste category
+-   Recyclability information
+-   Reuse potential
+-   Recommended recovery/recycling actions
 
-## 📄 Reports
+## 🌱 Sustainability Intelligence
 
-- Single Prediction PDF Report
-- Batch Prediction PDF Report
-- Professional Report Layout
-- Downloadable Reports
+### Sustainability Overview
 
----
+The Sustainability Overview summarizes:
 
-# ✅ Milestone 1 (Week 1 & Week 2)
-## Authentication & Access Control
+-   Circularity Score
+-   Recovery Category
+-   Environmental Score
+-   Material Type
+-   Overall sustainability summary
 
-### Tasks Completed
+### 🌍 Environmental Impact
 
-- Designed project architecture
-- Connected React frontend with FastAPI backend
-- Configured PostgreSQL database
-- Implemented user registration
-- Implemented secure login
-- Password hashing using bcrypt
-- JWT Authentication
-- Protected Routes
-- Role-Based Access Control (RBAC)
-- Built Inventory CRUD APIs
-- Connected frontend with backend APIs
-- Tested authentication workflow
+The platform estimates:
 
-### Outcomes
+-   CO₂ emissions avoided
+-   Water saved
+-   Energy saved
+-   Landfill waste diverted
 
-- Secure authentication system operational
-- JWT-based authorization functional
-- PostgreSQL integration completed
-- Protected dashboard implemented
-- User management successfully completed
+### ♻️ Circular Economy Score
 
----
+The Circular Economy Score uses five weighted factors:
 
-# ✅ Milestone 2 (Week 3 & Week 4)
-## Material Recognition & Waste Classification
+  Factor                     Weight
+  ------------------------ --------
+  Material Recyclability        35%
+  Reuse Potential               20%
+  Material Condition            20%
+  Environmental Benefit         15%
+  Processing Feasibility        10%
 
-### Tasks Completed
+The application displays the overall score, recovery category,
+individual factor scores, and weighted breakdown.
 
-### ✔ Textile Image Analysis Engine
+### 🔄 Recycling Recommendation
 
-- Implemented textile image upload
-- Added image validation
-- Image preprocessing
-- Image resizing
-- Image normalization
+The platform generates:
 
-### ✔ Material Classification Workflow
+-   Primary recovery method
+-   Waste category
+-   Reuse potential
+-   Recommended actions
 
-- Built CNN model using TensorFlow
-- Trained fabric classification model
-- Integrated trained model with FastAPI
-- Developed real-time prediction API
-- Displayed prediction confidence
-- Generated Top-3 predictions
+Possible actions include Fiber Recycling, Mechanical Recycling, Fabric
+Reuse, Donation, and other suitable recovery actions based on the
+analysis.
 
-### ✔ Waste Categorization
+## 📄 Prediction & Sustainability Report
 
-- Classified textile waste
-- Generated waste category
-- Created material information mapping
+The downloadable PDF report can include:
 
-### ✔ Recyclability Assessment
+-   Prediction result
+-   Confidence score
+-   Defect information
+-   Material information
+-   Top predictions
+-   Sustainability overview
+-   Environmental impact
+-   Circular Economy Score
+-   Recycling recommendation
 
-- Implemented recyclability assessment
-- Generated recycling recommendations
-- Displayed sustainability information
+## ✅ Milestone 1 (Week 1 & Week 2)
 
-### ✔ Prediction Reports
+### Authentication & Access Control
 
-- Professional Single Prediction PDF
-- Batch Prediction PDF
-- Material Summary
-- Confidence Score
-- Waste Category
-- Recycling Recommendation
-- Top Predictions
+Completed:
 
-### Outcomes
+-   Project architecture
+-   React and FastAPI integration
+-   PostgreSQL database configuration
+-   User registration and login
+-   bcrypt password hashing
+-   JWT authentication
+-   Protected routes
+-   RBAC
+-   Inventory CRUD APIs
+-   Frontend/backend API integration
+-   Authentication workflow testing
 
-- Textile Image Analysis Engine operational
-- Material Classification Workflow functional
-- CNN model integrated successfully
-- Waste Categorization completed
-- Recyclability Assessment operational
-- AI Prediction API functional
-- PDF Report Generation completed
-- End-to-End AI workflow tested successfully
+## ✅ Milestone 2 (Week 3 & Week 4)
 
----
+### Material Recognition & Waste Classification
 
-# 🔐 API Endpoints
+Completed:
 
-| Method | Endpoint | Description | Authentication |
-|---------|----------|-------------|---------------|
-| GET | / | Health Check | No |
-| POST | /register | Register User | No |
-| POST | /login | User Login | No |
-| GET | /inventory | Get Inventory | Yes |
-| POST | /inventory | Add Inventory | Yes |
-| PUT | /inventory/{id} | Update Inventory | Yes |
-| DELETE | /inventory/{id} | Delete Inventory | Yes |
-| POST | /predict | Predict Textile Material | Yes |
+-   Textile image upload and validation
+-   Image preprocessing, resizing, and normalization
+-   CNN model using TensorFlow/Keras
+-   FastAPI model integration
+-   Real-time prediction API
+-   Confidence scores
+-   Top-3 predictions
+-   Waste categorization
+-   Material information mapping
+-   Recyclability assessment
+-   Recycling recommendations
+-   Prediction PDF reporting
 
----
+## ✅ Milestone 3 (Week 5 & Week 6)
 
-# 🚀 System Workflow
+### Sustainability Intelligence & Recommendations
 
-```
+#### ✔ Sustainability Intelligence
+
+-   Sustainability Overview
+-   Circularity Score
+-   Recovery Category
+-   Environmental Score
+-   Material Type
+-   Overall sustainability summary
+
+#### ✔ Environmental Impact Assessment
+
+-   CO₂ emissions avoided
+-   Water saved
+-   Energy saved
+-   Landfill diversion
+
+#### ✔ Circular Economy Analytics
+
+Implemented a Circular Economy Score using:
+
+-   Material Recyclability --- 35%
+-   Reuse Potential --- 20%
+-   Material Condition --- 20%
+-   Environmental Benefit --- 15%
+-   Processing Feasibility --- 10%
+
+The application displays the overall score, recovery category, and
+individual factor scores.
+
+#### ✔ Recycling Recommendation Engine
+
+Provides:
+
+-   Primary recovery method
+-   Waste category
+-   Reuse potential
+-   Recommended actions
+
+#### ✔ Enhanced Prediction Experience
+
+**Image Upload → Preprocessing → CNN Prediction → Defect Detection →
+Material Information → Top-3 Predictions → Sustainability Analysis →
+Recycling Recommendation → PDF Report**
+
+#### ✔ PDF Sustainability Reporting
+
+The downloadable report is extended to include prediction and
+sustainability information.
+
+### Milestone 3 Outcomes
+
+-   Sustainability analysis integrated with AI prediction
+-   Environmental impact assessment implemented
+-   Circular Economy Score implemented
+-   Weighted sustainability factors displayed
+-   Recycling recommendation workflow implemented
+-   Sustainability information integrated into prediction results
+-   PDF reporting extended with sustainability information
+
+## 🔐 API Endpoints
+
+  -------------------------------------------------------------------------
+  Method            Endpoint            Description       Authentication
+  ----------------- ------------------- ----------------- -----------------
+  GET               `/`                 Health Check      No
+
+  POST              `/register`         Register User     No
+
+  POST              `/login`            User Login        No
+
+  GET               `/inventory`        Get Inventory     Yes
+
+  POST              `/inventory`        Add Inventory     Yes
+
+  PUT               `/inventory/{id}`   Update Inventory  Yes
+
+  DELETE            `/inventory/{id}`   Delete Inventory  Yes
+
+  POST              `/predict`          Predict Textile   Yes
+                                        Material and      
+                                        generate analysis 
+  -------------------------------------------------------------------------
+
+## 🚀 System Workflow
+
+``` text
 User Login
-      │
-      ▼
+     │
+     ▼
 Upload Textile Image
-      │
-      ▼
-Image Preprocessing
-      │
-      ▼
+     │
+     ▼
+Image Validation & Preprocessing
+     │
+     ▼
 CNN Material Classification
-      │
-      ▼
-Material Prediction
-      │
-      ▼
+     │
+     ├──────────────► Top-3 Predictions
+     │
+     ▼
+Defect Detection
+     │
+     ▼
+Material Information
+     │
+     ▼
 Waste Classification
-      │
-      ▼
+     │
+     ▼
 Recyclability Assessment
-      │
-      ▼
+     │
+     ▼
+Sustainability Intelligence
+     │
+     ├──────────────► Sustainability Overview
+     ├──────────────► Environmental Impact
+     └──────────────► Circular Economy Score
+     │
+     ▼
 Recycling Recommendation
-      │
-      ▼
+     │
+     ▼
 Generate PDF Report
 ```
 
----
+## 🚀 Getting Started
 
-# 🚀 Getting Started
+### Backend
 
-## Backend
-
-```bash
+``` bash
 cd Backend
-
 python -m venv venv
-
 venv\Scripts\activate
-
 pip install -r requirements.txt
-
 uvicorn main:app --reload
 ```
 
-Backend URL
+Backend: `http://localhost:8000`
 
-```
-http://localhost:8000
-```
+Swagger: `http://localhost:8000/docs`
 
-Swagger API
+### Frontend
 
-```
-http://localhost:8000/docs
-```
-
----
-
-## Frontend
-
-```bash
+``` bash
 cd Frontend
-
 npm install
-
 npm run dev
 ```
 
-Frontend URL
+Frontend: `http://localhost:5173`
 
-```
-http://localhost:5173
-```
+## 🔜 Future Enhancements
 
----
+-   History page improvements and integration with the latest prediction
+    workflow
+-   Dashboard improvements and integration with the latest analytics
+-   Additional reporting and analytics
+-   Batch analysis enhancements
+-   Further model improvements and validation
+-   Production/cloud deployment
 
-# 🔜 Upcoming Features (Milestone 3)
-
-- Sustainability Intelligence Engine
-- Recycling Recommendation Engine
-- Environmental Impact Assessment
-- Circular Economy Analytics
-- Sustainability Dashboard
-
----
-
-# 👩‍💻 Contributors
-
-- Rajashree Tharmalingam
-- Infosys Internship Project Team
-
----
-
-# 📄 License
+## 📄 License
 
 Developed as part of the Infosys Internship Program.
 

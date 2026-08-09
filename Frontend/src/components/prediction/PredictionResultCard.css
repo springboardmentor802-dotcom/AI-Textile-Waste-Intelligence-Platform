@@ -1,0 +1,247 @@
+/* ===== Prediction Result Card v2 ===== */
+
+.pred-result-card-v2 {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.pred-result-card-v2:hover {
+  box-shadow: 0 4px 12px rgba(16, 24, 40, 0.08);
+}
+
+.pred-result-eyebrow {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #101828;
+}
+
+.pred-result-top-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.pred-result-material-block {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  min-width: 0; /* allow long material names to wrap instead of overflowing the grid */
+}
+
+.pred-result-icon-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #eafaf0;
+  color: #1f9d55;
+}
+
+.pred-result-label {
+  margin: 0 0 4px 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #667085;
+}
+
+.pred-result-label-right {
+  text-align: right;
+}
+
+.pred-result-material-name {
+  margin: 0 0 8px 0;
+  font-size: 26px;
+  font-weight: 700;
+  color: #101828;
+  line-height: 1.1;
+  overflow-wrap: break-word;
+}
+
+.pred-result-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.pred-result-badge-fiber {
+  background: #eafaf0;
+  color: #1f9d55;
+}
+
+.pred-result-badge-tone-high {
+  background: #eafaf0;
+  color: #1f9d55;
+}
+
+.pred-result-badge-tone-medium {
+  background: #fff6e5;
+  color: #b7791f;
+}
+
+.pred-result-badge-tone-low {
+  background: #fdeceb;
+  color: #d92d20;
+}
+
+.pred-result-confidence-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 160px;
+}
+
+.pred-gauge {
+  position: relative;
+  width: 100%;
+  max-width: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pred-gauge-svg {
+  width: 100%;
+  height: auto;
+}
+
+.pred-gauge-marker {
+  fill: #101828;
+  stroke: #ffffff;
+  stroke-width: 2;
+}
+
+.pred-gauge-value {
+  margin-top: -6px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #101828;
+}
+
+.pred-result-defect-panel {
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: #f4f8ff;
+  border: 1px solid #e6edfb;
+}
+
+.pred-result-defect-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #344054;
+  margin-bottom: 8px;
+}
+
+.pred-result-defect-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.pred-result-defect-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pred-result-defect-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.pred-result-defect-key {
+  color: #667085;
+}
+
+.pred-result-defect-value {
+  color: #101828;
+  font-weight: 600;
+  text-align: right;
+}
+
+/* ===== Responsive ===== */
+
+/* Tablet: keep the two-column layout but tighten spacing */
+@media (max-width: 768px) {
+  .pred-result-card-v2 {
+    padding: 20px;
+    gap: 16px;
+  }
+
+  .pred-result-material-name {
+    font-size: 22px;
+  }
+}
+
+/* Mobile: stack material + confidence vertically */
+@media (max-width: 640px) {
+  .pred-result-top-row {
+    grid-template-columns: 1fr;
+  }
+
+  .pred-result-confidence-block {
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .pred-gauge {
+    max-width: 180px;
+  }
+}
+
+/* Small phones: prevent gauge/badges from overflowing narrow viewports */
+@media (max-width: 360px) {
+  .pred-result-card-v2 {
+    padding: 16px;
+  }
+
+  .pred-result-material-name {
+    font-size: 20px;
+  }
+
+  .pred-gauge {
+    max-width: 150px;
+  }
+
+  .pred-result-defect-row {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .pred-result-defect-value {
+    text-align: left;
+  }
+}
+
+/* Defect Status Colors */
+.pred-result-defect-value-alert {
+  color: #d92d20;
+  font-weight: 600;
+}
+
+.pred-result-defect-value-ok {
+  color: #1f9d55;
+  font-weight: 600;
+}

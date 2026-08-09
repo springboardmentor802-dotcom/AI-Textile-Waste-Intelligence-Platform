@@ -1,13 +1,9 @@
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   Upload,
   ImageIcon,
   Loader2,
   AlertCircle,
-  CheckCircle2,
-  Recycle,
-  Leaf,
-  Info,
   RotateCcw,
   Clock,
   FileDown,
@@ -16,21 +12,27 @@ import { predictFabric } from "../services/api";
 import { getMaterialTypeInfo } from "../data/materialInfo";
 import { downloadPredictionPdf } from "../utils/pdfReport";
 import BatchPrediction from "./BatchPrediction";
+import PredictionResultCard from "../components/prediction/PredictionResultCard";
+import TopPredictionCard from "../components/prediction/TopPredictionCard";
+import OverallSummaryCard from "../components/prediction/OverallSummaryCard";
+import EnvironmentalImpactCard from "../components/prediction/EnvironmentalImpactCard";
+import CircularityScoreCard from "../components/prediction/CircularityScoreCard";
+import MaterialInformationCard from "../components/prediction/MaterialInformationCard";
+import RecommendationCard from "../components/prediction/RecommendationCard";
 import "./Predictions.css";
 
 function Predictions() {
   const fileInputRef = useRef(null);
 
-  const [activeTab, setActiveTab] = useState("single"); // "single" | "batch"
-
+  const [activeTab, setActiveTab] = useState("single");
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
-  const [processingTime, setProcessingTime] = useState(null); // seconds
+  const [processingTime, setProcessingTime] = useState(null);
 
-  const handleFileChange = (event) => {
+  const handleFileChange = useCallback((event) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -44,13 +46,13 @@ function Predictions() {
     setResult(null);
     setProcessingTime(null);
     setError(null);
-  };
+  }, []);
 
-  const handleBrowseClick = () => {
+  const handleBrowseClick = useCallback(() => {
     fileInputRef.current?.click();
-  };
+  }, []);
 
-  const handlePredict = async () => {
+  const handlePredict = useCallback(async () => {
     if (!selectedFile) return;
 
     setIsLoading(true);
@@ -68,9 +70,9 @@ function Predictions() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [selectedFile]);
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     setSelectedFile(null);
     setPreviewUrl(null);
     setResult(null);
@@ -79,31 +81,32 @@ function Predictions() {
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
-  };
+  }, []);
 
-  const handleDownloadPdf = async () => {
+  const handleDownloadPdf = useCallback(async () => {
     if (!result || !selectedFile) return;
 
     await downloadPredictionPdf({
       imageFile: selectedFile,
       material: result.material,
       confidence: result.confidence,
+      defect: result.defect,
+      defectConfidence: result.defect_confidence,
       wasteCategory: result.waste_category,
       recyclability: result.recyclability,
       recommendation: result.recommendation,
       top3Predictions: result.top_3_predictions,
       materialTypeInfo: getMaterialTypeInfo(result.material),
       processingTimeSeconds: processingTime,
+      sustainability: result.sustainability,
     });
-  };
-
-  const fabricInfo = result ? getMaterialTypeInfo(result.material) : null;
+  }, [result, selectedFile, processingTime]);
 
   return (
-    <div className="predictions-page">
+    <main className="predictions-page">
       <div className="predictions-header">
         <h1>AI Fabric Prediction</h1>
-        <p>Upload a fabric image to identify the material type and get recycling guidance.</p>
+        <p>Upload a fabric image to identify material type, detect defects, and receive sustainability recommendations.</p>
       </div>
 
       <div className="pred-tabs">
@@ -119,185 +122,161 @@ function Predictions() {
           className={`pred-tab ${activeTab === "batch" ? "pred-tab-active" : ""}`}
           onClick={() => setActiveTab("batch")}
         >
-          Batch Prediction
+          Batch Analysis
         </button>
       </div>
 
       {activeTab === "single" && (
-        <div className="predictions-grid">
-          {/* --- Upload card --- */}
-          <div className="pred-card upload-card">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="pred-file-input"
-            />
+        <div className="pred-report-flow">
+          {/* ROW 1: Upload Image + Prediction Result */}
+          <section className="pred-section">
+            <div className="pred-result-row pred-result-row--split">
+              <div className="pred-card pred-upload-card">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="pred-file-input"
+                />
 
-            {!previewUrl ? (
-              <button type="button" className="pred-dropzone" onClick={handleBrowseClick}>
-                <div className="pred-icon-circle">
-                  <Upload size={22} />
-                </div>
-                <p className="pred-dropzone-title">Click to upload a fabric image</p>
-                <p className="pred-dropzone-subtitle">JPG, PNG, up to 10MB</p>
-              </button>
-            ) : (
-              <div className="pred-preview">
-                <img src={previewUrl} alt="Selected fabric" className="pred-preview-image" />
-                <button type="button" className="pred-change-btn" onClick={handleBrowseClick}>
-                  <ImageIcon size={16} />
-                  Change image
-                </button>
-              </div>
-            )}
-
-            {error && (
-              <div className="pred-error">
-                <AlertCircle size={16} />
-                <span>{error}</span>
-              </div>
-            )}
-
-            <div className="pred-actions">
-              <button
-                type="button"
-                className="pred-btn-primary"
-                onClick={handlePredict}
-                disabled={!selectedFile || isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 size={16} className="pred-spin" />
-                    Analyzing...
-                  </>
-                ) : (
-                  "Predict Fabric Type"
-                )}
-              </button>
-
-              {(selectedFile || result) && (
-                <button type="button" className="pred-btn-secondary" onClick={handleReset}>
-                  <RotateCcw size={16} />
-                  Reset
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* --- Result card --- */}
-          {result ? (
-            <div className="pred-card result-card">
-              <div className="pred-result-header">
-                <div className="pred-icon-circle pred-icon-circle-success">
-                  <CheckCircle2 size={22} />
-                </div>
-                <div>
-                  <p className="pred-result-label">Predicted Material</p>
-                  <h2 className="pred-result-material">{result.material}</h2>
-                </div>
-                <div className="pred-confidence-badge">{result.confidence}%</div>
-              </div>
-
-              {processingTime !== null && (
-                <div className="pred-processing-time">
-                  <Clock size={14} />
-                  <span>AI Processing Time: {processingTime.toFixed(2)} sec</span>
-                </div>
-              )}
-
-              <div className="pred-info-grid">
-                <div className="pred-info-item">
-                  <div className="pred-icon-circle pred-icon-circle-small">
-                    <Recycle size={16} />
-                  </div>
-                  <div>
-                    <p className="pred-info-label">Waste Category</p>
-                    <p className="pred-info-value">{result.waste_category}</p>
-                  </div>
-                </div>
-
-                <div className="pred-info-item">
-                  <div className="pred-icon-circle pred-icon-circle-small">
-                    <Leaf size={16} />
-                  </div>
-                  <div>
-                    <p className="pred-info-label">Recyclability</p>
-                    <p className="pred-info-value">{result.recyclability}</p>
-                  </div>
-                </div>
-
-                <div className="pred-info-item pred-info-item-full">
-                  <div className="pred-icon-circle pred-icon-circle-small">
-                    <Info size={16} />
-                  </div>
-                  <div>
-                    <p className="pred-info-label">Recommendation</p>
-                    <p className="pred-info-value">{result.recommendation}</p>
-                  </div>
-                </div>
-              </div>
-
-              {result.top_3_predictions && (
-                <div className="pred-top3">
-                  <p className="pred-top3-title">Top 3 Predictions</p>
-                  {result.top_3_predictions.map((item) => (
-                    <div key={item.material} className="pred-top3-row">
-                      <span className="pred-top3-name">{item.material}</span>
-                      <div className="pred-top3-bar-track">
-                        <div
-                          className="pred-top3-bar-fill"
-                          style={{ width: `${item.confidence}%` }}
-                        />
-                      </div>
-                      <span className="pred-top3-value">{item.confidence}%</span>
+                {!previewUrl ? (
+                  <button type="button" className="pred-dropzone" onClick={handleBrowseClick}>
+                    <div className="pred-icon-circle">
+                      <Upload size={20} />
                     </div>
-                  ))}
-                </div>
-              )}
-
-              {/* --- Fabric Information card --- */}
-              {fabricInfo && (
-                <div className="pred-fabric-info">
-                  <p className="pred-fabric-info-title">Fabric Information</p>
-                  <div className="pred-fabric-info-row">
-                    <span className="pred-fabric-info-label">Material Type</span>
-                    <span className="pred-fabric-info-value">{fabricInfo.type}</span>
+                    <p className="pred-dropzone-title">Upload Fabric Image</p>
+                    <p className="pred-dropzone-subtitle">JPG, PNG — up to 10MB</p>
+                  </button>
+                ) : (
+                  <div className="pred-preview">
+                    <img src={previewUrl} alt="Selected fabric" className="pred-preview-image" />
+                    <button type="button" className="pred-change-btn" onClick={handleBrowseClick}>
+                      <ImageIcon size={14} />
+                      Change image
+                    </button>
                   </div>
-                  <div className="pred-fabric-info-row">
-                    <span className="pred-fabric-info-label">Common Uses</span>
-                    <span className="pred-fabric-info-value">{fabricInfo.commonUses}</span>
-                  </div>
-                  <p className="pred-fabric-info-description">{fabricInfo.description}</p>
-                </div>
-              )}
+                )}
 
-              <button
-                type="button"
-                className="pred-btn-secondary pred-download-btn"
-                onClick={handleDownloadPdf}
-              >
-                <FileDown size={16} />
-                Download PDF Report
-              </button>
-            </div>
-          ) : (
-            <div className="pred-card result-card pred-empty-state">
-              <div className="pred-icon-circle pred-icon-circle-muted">
-                <ImageIcon size={22} />
+                {error && (
+                  <div className="pred-error">
+                    <AlertCircle size={14} />
+                    <span>{error}</span>
+                  </div>
+                )}
+
+                <div className="pred-actions">
+                  <button
+                    type="button"
+                    className="pred-btn-primary"
+                    onClick={handlePredict}
+                    disabled={!selectedFile || isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 size={16} className="pred-spin" />
+                        Analyzing...
+                      </>
+                    ) : (
+                      "Analyze Fabric"
+                    )}
+                  </button>
+
+                  {(selectedFile || result) && (
+                    <button type="button" className="pred-btn-secondary" onClick={handleReset}>
+                      <RotateCcw size={14} />
+                      Reset
+                    </button>
+                  )}
+                </div>
               </div>
-              <p className="pred-empty-title">No prediction yet</p>
-              <p className="pred-empty-subtitle">
-                Upload a fabric image and click "Predict Fabric Type" to see results here.
-              </p>
+
+              {result ? (
+                <div className="pred-result-col">
+                  <PredictionResultCard result={result} />
+
+                  {processingTime !== null && (
+                    <div className="pred-processing-badge">
+                      <Clock size={12} />
+                      <span>AI Processing Time <strong>{processingTime.toFixed(2)} sec</strong></span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="pred-card pred-empty-state">
+                  <div className="pred-icon-circle pred-icon-circle-muted">
+                    <ImageIcon size={20} />
+                  </div>
+                  <p className="pred-empty-title">Upload an image to begin AI analysis.</p>
+                </div>
+              )}
             </div>
+          </section>
+
+          {result && (
+            <>
+              {/* ROW 2: Material Information */}
+              <section className="pred-section">
+                <MaterialInformationCard
+                  materialInformation={result?.sustainability?.material_information}
+                />
+              </section>
+
+              {/* ROW 3: Top 3 Predictions */}
+              <section className="pred-section">
+                <TopPredictionCard predictions={result?.top_3_predictions} />
+              </section>
+
+              {/* ROW 4: Sustainability Overview */}
+              <section className="pred-section">
+                <OverallSummaryCard sustainability={result?.sustainability} />
+              </section>
+
+              {/* ROW 5: Environmental Impact */}
+              <section className="pred-section">
+                <EnvironmentalImpactCard
+                  environmentalImpact={result?.sustainability?.environmental_impact}
+                />
+              </section>
+
+              {/* ROW 6: Circular Economy Score */}
+              <section className="pred-section">
+                <CircularityScoreCard wasteScoring={result?.sustainability?.waste_scoring} />
+              </section>
+
+              {/* ROW 7: Recycling Recommendation */}
+              <section className="pred-section">
+                <RecommendationCard recommendations={result?.sustainability?.recommendations} />
+              </section>
+
+              {/* ROW 8: Download PDF Report */}
+              <section className="pred-section">
+                <div className="pred-card pred-report-cta-card">
+                  <div className="pred-report-cta-copy">
+                    <p className="pred-report-cta-title">Report & Download</p>
+                    <p className="pred-report-cta-subtitle">
+                      Export a detailed report including prediction result, material information,
+                      sustainability overview, environmental impact, circular economy score,
+                      and recycling recommendations.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="pred-btn-primary pred-download-btn"
+                    onClick={handleDownloadPdf}
+                  >
+                    <FileDown size={16} />
+                    Download PDF Report
+                  </button>
+                </div>
+              </section>
+            </>
           )}
         </div>
       )}
 
       {activeTab === "batch" && <BatchPrediction />}
-    </div>
+    </main>
   );
 }
 

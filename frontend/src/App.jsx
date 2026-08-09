@@ -6,6 +6,7 @@ import Contact from "./pages/Contact";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import SustainabilityDashboard from "./pages/SustainabilityDashboard";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/sustainability" element={<SustainabilityDashboard />} />
     </Routes>
   );
 }

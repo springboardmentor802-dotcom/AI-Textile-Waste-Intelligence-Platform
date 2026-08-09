@@ -415,3 +415,53 @@ class BatchWasteReportPDFView(APIView):
         response = HttpResponse(pdf_buffer, content_type='application/pdf')
         response['Content-Disposition'] = 'attachment; filename="batch_waste_report.pdf"'
         return response
+
+
+class AnalyzeAndLinkToBatchView(APIView):
+    """
+    Runs the full Milestone 2 pipeline on an uploaded image and saves
+    the resulting material type, circularity score, and waste category
+    directly onto an existing TextileWaste batch (identified by batch_id).
+    This is what allows Milestone 3's sustainability engine to use real
+    AI-generated scores instead of placeholder values.
+    """
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self, request, batch_id):
+        uploaded_file = request.FILES.get('image')
+
+        if not uploaded_file:
+            return Response(
+                {"error": "No image file provided. Send it as 'image' in form-data."},
+                status=400
+            )
+
+        try:
+            batch = TextileWaste.objects.get(batch_id=batch_id)
+        except TextileWaste.DoesNotExist:
+            return Response({"error": "Batch not found."}, status=404)
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as temp_file:
+            for chunk in uploaded_file.chunks():
+                temp_file.write(chunk)
+            temp_file_path = temp_file.name
+
+        try:
+            report_data = _run_full_pipeline(temp_file_path, batch.condition)
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+        finally:
+            os.remove(temp_file_path)
+
+        batch.detected_material = report_data["material_classification"]["predicted_fiber_type"]
+        batch.circularity_score = report_data["recyclability_assessment"]["circularity_score"]
+        batch.waste_category = report_data["waste_categorization"]["waste_category"]
+        batch.save()
+
+        return Response({
+            "message": f"Batch {batch_id} updated with AI analysis.",
+            "detected_material": batch.detected_material,
+            "circularity_score": batch.circularity_score,
+            "waste_category": batch.waste_category,
+        })

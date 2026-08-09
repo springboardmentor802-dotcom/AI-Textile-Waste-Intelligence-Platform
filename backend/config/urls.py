@@ -7,8 +7,8 @@ from rest_framework_simplejwt.views import (
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-
     path('api/', include('inventory.urls')),
+    path('api/sustainability/', include('sustainability.urls')),
 
     # JWT Authentication
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

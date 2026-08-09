@@ -12,6 +12,7 @@ from .views import (
     WasteReportView,
     WasteReportPDFView,
     BatchWasteReportPDFView,
+    AnalyzeAndLinkToBatchView,
 )
 
 router = DefaultRouter()
@@ -57,4 +58,8 @@ urlpatterns = [
     # Batch analysis: multiple images -> one combined PDF
     path('batch-waste-report-pdf/', BatchWasteReportPDFView.as_view(),
          name='batch-waste-report-pdf'),
+
+    # Milestone 3 link: analyze an image and save results onto a specific batch
+    path('analyze-and-link/<str:batch_id>/', AnalyzeAndLinkToBatchView.as_view(),
+         name='analyze-and-link'),
 ]

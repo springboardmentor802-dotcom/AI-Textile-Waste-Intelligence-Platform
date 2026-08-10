@@ -9,7 +9,8 @@ from app.config import settings
 from app.database import engine, Base
 from app.models.user import User
 from app.models.textile_batch import TextileBatch
-from app.routers import auth, users, textile, analysis
+from app.models.analysis_result import AnalysisResult
+from app.routers import auth, users, textile, analysis, sustainability, recommendations
 
 logging.basicConfig(
     level=logging.INFO,
@@ -34,11 +35,11 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup():
-    # Database tables
+    # Create all tables — analysis_results will be created here on first start
     Base.metadata.create_all(bind=engine)
     logger.info("Database tables verified/created")
 
-    # Material Recognition CNN
+    # Load CNN material recognition model
     try:
         from app.services.ml_service import load_model
         load_model()
@@ -47,7 +48,7 @@ async def startup():
     except Exception as e:
         logger.error(f"CNN model load failed: {e}")
 
-    # YOLOv8 Defect Detection
+    # Load YOLOv8 defect detection model
     try:
         from app.services.yolo_service import load_yolo_model
         load_yolo_model()
@@ -61,6 +62,8 @@ app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(textile.router)
 app.include_router(analysis.router)
+app.include_router(sustainability.router)
+app.include_router(recommendations.router)
 
 
 @app.get("/")

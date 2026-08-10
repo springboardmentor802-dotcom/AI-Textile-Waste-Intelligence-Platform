@@ -1,5 +1,7 @@
 import api from "./api";
 
+// ── Existing analysis endpoints ────────────────────────────────────
+
 export const uploadForMaterialRecognition = async (file) => {
   const formData = new FormData();
   formData.append("file", file);
@@ -9,7 +11,7 @@ export const uploadForMaterialRecognition = async (file) => {
   return res.data;
 };
 
-// Alias used by MaterialRecognition.jsx
+// Alias used by any page that imports recognizeMaterial
 export const recognizeMaterial = uploadForMaterialRecognition;
 
 export const uploadForFullAnalysis = async (file) => {
@@ -44,5 +46,49 @@ export const getAnalysisStatus = async () => {
 
 export const getDashboardStats = async () => {
   const res = await api.get("/analysis/dashboard-stats");
+  return res.data;
+};
+
+// ── Milestone 3: Sustainability endpoints ─────────────────────────
+
+export const getSustainabilityOverview = async () => {
+  const res = await api.get("/sustainability/overview");
+  return res.data;
+};
+
+export const getSustainabilityByMaterial = async () => {
+  const res = await api.get("/sustainability/by-material");
+  return res.data;
+};
+
+export const getSustainabilityByCategory = async () => {
+  const res = await api.get("/sustainability/by-category");
+  return res.data;
+};
+
+export const getSustainabilityRecent = async (limit = 10) => {
+  const res = await api.get(`/sustainability/recent?limit=${limit}`);
+  return res.data;
+};
+
+export const getEnvironmentalImpact = async () => {
+  const res = await api.get("/sustainability/environmental-impact");
+  return res.data;
+};
+
+export const getCircularEconomy = async () => {
+  const res = await api.get("/sustainability/circular-economy");
+  return res.data;
+};
+
+export const getRecommendationsSummary = async () => {
+  const res = await api.get("/recommendations/summary");
+  return res.data;
+};
+
+// ── Milestone 3: Inventory analytics ─────────────────────────────
+
+export const getInventoryAnalytics = async () => {
+  const res = await api.get("/inventory/analytics");
   return res.data;
 };

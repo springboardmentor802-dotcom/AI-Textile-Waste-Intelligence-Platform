@@ -1,1 +1,1 @@
-from app.routers import auth, users, textile, analysis
+from app.routers import auth, users, textile, analysis, sustainability, recommendations

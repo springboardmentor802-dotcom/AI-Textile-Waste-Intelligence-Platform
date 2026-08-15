@@ -327,7 +327,7 @@ export default function Sustainability() {
 
       <div>
         <div className="flex items-center justify-between mb-3 mt-2">
-          <EngineHeading icon={Globe2} label="Environmental Impact Assessment Engine" color="bg-sky-500/10 border-sky-400/40 text-sky-300" />
+          <EngineHeading icon={Globe2} label="Environmental Impact Assessment Engine" color="bg-amber-500/10 border-amber-400/40 text-amber-300" />
           <button onClick={downloadSustainabilityReport}
             className="flex items-center gap-2 bg-mint-600 hover:bg-mint-500 transition rounded-lg px-3 py-1.5 text-xs font-semibold h-fit">
             <Download size={13} /> Sustainability Report (PDF)

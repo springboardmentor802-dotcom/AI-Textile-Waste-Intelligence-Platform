@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Save, Lock, Bell, UserCog } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Save, Lock, Bell, UserCog, Info, AlertTriangle } from 'lucide-react'
 import api from '../api'
 import { Section } from '../components/ui.jsx'
 
@@ -12,6 +13,9 @@ const PREF_LABELS = {
 }
 
 export default function Settings() {
+  const navigate = useNavigate()
+  const [deleteConfirm, setDeleteConfirm] = useState('')
+  const [deleteErr, setDeleteErr] = useState('')
   const [profileForm, setProfileForm] = useState({ full_name: '', email: '' })
   const [profileMsg, setProfileMsg] = useState('')
   const [profileErr, setProfileErr] = useState('')
@@ -58,6 +62,20 @@ export default function Settings() {
     setPrefsMsg('')
     await api.put('/settings', prefs)
     setPrefsMsg('Preferences saved.')
+  }
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirm !== 'DELETE') {
+      setDeleteErr('Type DELETE to confirm')
+      return
+    }
+    try {
+      await api.delete('/auth/account')
+      localStorage.clear()
+      navigate('/login')
+    } catch (err) {
+      setDeleteErr(err.response?.data?.detail || 'Failed to delete account')
+    }
   }
 
   return (
@@ -126,6 +144,27 @@ export default function Settings() {
           </div>
         )}
       </Section>
-    </div>
-  )
-}
+
+        <Section title="About" icon={Info}>
+          <div className="text-sm text-white/70 space-y-2">
+            <div className="flex justify-between"><span className="text-white/40">Application</span><span>Textile Waste Intelligence Platform</span></div>
+            <div className="flex justify-between"><span className="text-white/40">Version</span><span>1.0.0</span></div>
+            <div className="flex justify-between"><span className="text-white/40">Database</span><span>PostgreSQL (SQLite fallback)</span></div>
+            <div className="flex justify-between"><span className="text-white/40">Built for</span><span>Infosys Springboard Internship</span></div>
+          </div>
+        </Section>
+
+        <Section title="Danger Zone" icon={AlertTriangle}>
+          <p className="text-xs text-white/50 mb-4">Deleting your account permanently removes your profile. This cannot be undone.</p>
+          <input value={deleteConfirm} onChange={(e) => setDeleteConfirm(e.target.value)}
+            placeholder='Type "DELETE" to confirm'
+            className="w-full mb-3 bg-white/5 border border-red-500/20 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-red-500/50" />
+          {deleteErr && <div className="text-xs text-red-400 mb-3">{deleteErr}</div>}
+          <button onClick={handleDeleteAccount}
+            className="flex items-center gap-2 bg-red-600/80 hover:bg-red-600 transition rounded-xl px-4 py-2 text-sm font-semibold">
+            <AlertTriangle size={15} /> Delete My Account
+          </button>
+        </Section>
+      </div>
+    )
+  }

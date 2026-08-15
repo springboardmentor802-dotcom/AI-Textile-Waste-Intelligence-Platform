@@ -135,6 +135,12 @@ def update_profile(payload: UpdateProfileRequest, user=Depends(get_current_user)
         conn.execute(text(f"UPDATE users SET {set_clause} WHERE id=:id"), {**fields, "id": user["id"]})
     return {"message": "Profile updated"}
 
+@app.delete("/api/auth/account")
+def delete_own_account(user=Depends(get_current_user)):
+    with db_session() as conn:
+        conn.execute(text("DELETE FROM users WHERE id=:id"), {"id": user["id"]})
+    return {"message": "Account deleted"}
+
 
 @app.post("/api/auth/change-password")
 def change_password(payload: ChangePasswordRequest, user=Depends(get_current_user)):

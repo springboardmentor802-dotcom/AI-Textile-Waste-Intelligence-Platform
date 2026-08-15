@@ -143,6 +143,150 @@ def change_password(payload: ChangePasswordRequest, user=Depends(get_current_use
     return {"message": "Password changed successfully"}
 
 
+# ================================================================ ADMIN ====
+@app.get("/api/admin/users")
+def list_users(user=Depends(require_roles("admin"))):
+    with db_session() as conn:
+        rows = conn.execute(text("SELECT id, full_name, email, role, created_at FROM users ORDER BY id DESC")).mappings().all()
+    return [dict(r) for r in rows]
+
+
+@app.put("/api/admin/users/{user_id}/role")
+def update_user_role(user_id: int, payload: dict, user=Depends(require_roles("admin"))):
+    new_role = payload.get("role")
+    if new_role not in ROLES:
+        raise HTTPException(400, f"Role must be one of {ROLES}")
+    with db_session() as conn:
+        conn.execute(text("UPDATE users SET role=:r WHERE id=:id"), {"r": new_role, "id": user_id})
+    return {"message": "Role updated"}
+
+
+@app.delete("/api/admin/users/{user_id}")
+def delete_user(user_id: int, user=Depends(require_roles("admin"))):
+    if user_id == user["id"]:
+        raise HTTPException(400, "Cannot delete your own account")
+    with db_session() as conn:
+        conn.execute(text("DELETE FROM users WHERE id=:id"), {"id": user_id})
+    return {"message": "User deleted"}
+
+
+@app.get("/api/dashboard/admin")
+def admin_dashboard(user=Depends(require_roles("admin"))):
+    with db_session() as conn:
+        total_users = conn.execute(text("SELECT COUNT(*) c FROM users")).mappings().first()["c"]
+        users_by_role = conn.execute(text("SELECT role, COUNT(*) c FROM users GROUP BY role")).mappings().all()
+        total_analyses = conn.execute(text("SELECT COUNT(*) c FROM analyses")).mappings().first()["c"]
+        total_inventory = conn.execute(text("SELECT COUNT(*) c FROM inventory")).mappings().first()["c"]
+        total_notifications = conn.execute(text("SELECT COUNT(*) c FROM notifications")).mappings().first()["c"]
+        recent_users = conn.execute(text("SELECT id, full_name, email, role, created_at FROM users ORDER BY id DESC LIMIT 5")).mappings().all()
+        recent_analyses = conn.execute(text("SELECT id, filename, material, circularity_score, created_at FROM analyses ORDER BY id DESC LIMIT 5")).mappings().all()
+
+    return {
+        "total_users": total_users,
+        "users_by_role": [dict(r) for r in users_by_role],
+        "total_analyses": total_analyses,
+        "total_inventory_records": total_inventory,
+        "total_notifications": total_notifications,
+        "recent_users": [dict(r) for r in recent_users],
+        "recent_analyses": [dict(r) for r in recent_analyses],
+        "system_status": "operational",
+        "database_mode": "postgresql" if USING_POSTGRES else "sqlite (fallback)",
+    }
+@app.get("/api/dashboard/recycling-facility")
+def recycling_facility_dashboard(user=Depends(require_roles("admin", "recycling_operator"))):
+    with db_session() as conn:
+        total_inventory = conn.execute(text("SELECT COUNT(*) c, SUM(quantity) q FROM inventory")).mappings().first()
+        by_fabric = conn.execute(text("SELECT fabric_type, SUM(quantity) q, COUNT(*) c FROM inventory GROUP BY fabric_type")).mappings().all()
+        recycling_opportunities = conn.execute(
+            text("SELECT filename, material, circularity_score, recommendation FROM analyses WHERE circularity_score >= 65 ORDER BY circularity_score DESC LIMIT 10")
+        ).mappings().all()
+        by_recommendation = conn.execute(text("SELECT recommendation, COUNT(*) c FROM analyses GROUP BY recommendation")).mappings().all()
+        avg_score = conn.execute(text("SELECT AVG(circularity_score) a FROM analyses")).mappings().first()["a"] or 0
+        recovery_rate = conn.execute(
+            text("SELECT COUNT(*) c FROM analyses WHERE waste_category IN ('Recyclable','Reusable','Upcyclable')")
+        ).mappings().first()["c"]
+        total_processed = conn.execute(text("SELECT COUNT(*) c FROM analyses")).mappings().first()["c"]
+
+    return {
+        "waste_inventory": {
+            "total_batches": total_inventory["c"] or 0,
+            "total_quantity_kg": total_inventory["q"] or 0,
+            "by_fabric_type": [dict(r) for r in by_fabric],
+        },
+        "recycling_opportunities": [dict(r) for r in recycling_opportunities],
+        "processing_analytics": {
+            "by_recommendation": [dict(r) for r in by_recommendation],
+            "average_circularity_score": round(avg_score, 1),
+        },
+        "recovery_statistics": {
+            "recoverable_items": recovery_rate,
+            "total_processed": total_processed,
+            "recovery_rate_pct": round((recovery_rate / total_processed * 100), 1) if total_processed else 0,
+        },
+    }
+
+
+@app.get("/api/dashboard/sustainability-manager")
+def sustainability_manager_dashboard(user=Depends(require_roles("admin", "sustainability_manager"))):
+    with db_session() as conn:
+        rows = conn.execute(text("SELECT circularity_score, waste_category, created_at FROM analyses")).mappings().all()
+        avg_score = conn.execute(text("SELECT AVG(circularity_score) a FROM analyses")).mappings().first()["a"] or 0
+
+    if not rows:
+        return {
+            "sustainability_metrics": {"average_circularity_score": 0, "total_items_tracked": 0},
+            "carbon_reduction_report": {"total_co2_saved_kg": 0},
+            "waste_diversion_analytics": {"diversion_rate_pct": 0, "by_category": []},
+            "esg_reporting": {"environmental_score": 0, "social_score": "N/A", "governance_score": "N/A"},
+        }
+
+    total_carbon = sum((r["circularity_score"] or 0) / 100 * 4.2 for r in rows)
+    diverted = sum(1 for r in rows if r["waste_category"] != "Hazardous")
+    category_counts = {}
+    for r in rows:
+        wc = r["waste_category"] or "Unspecified"
+        category_counts[wc] = category_counts.get(wc, 0) + 1
+
+    return {
+        "sustainability_metrics": {
+            "average_circularity_score": round(avg_score, 1),
+            "total_items_tracked": len(rows),
+        },
+        "carbon_reduction_report": {
+            "total_co2_saved_kg": round(total_carbon, 1),
+        },
+        "waste_diversion_analytics": {
+            "diversion_rate_pct": round(diverted / len(rows) * 100, 1),
+            "by_category": [{"waste_category": k, "count": v} for k, v in category_counts.items()],
+        },
+        "esg_reporting": {
+            "environmental_score": round(avg_score, 1),
+            "social_score": "N/A -- requires HR/labor data integration",
+            "governance_score": "N/A -- requires compliance data integration",
+        },
+    }
+
+
+@app.get("/api/dashboard/manufacturer")
+def manufacturer_dashboard(user=Depends(require_roles("admin", "manufacturer"))):
+    with db_session() as conn:
+        production_waste = conn.execute(text("SELECT material, COUNT(*) c, AVG(circularity_score) a FROM analyses GROUP BY material")).mappings().all()
+        by_recyclability = conn.execute(text("SELECT recyclability, COUNT(*) c FROM analyses GROUP BY recyclability")).mappings().all()
+        avg_score = conn.execute(text("SELECT AVG(circularity_score) a FROM analyses")).mappings().first()["a"] or 0
+        total = conn.execute(text("SELECT COUNT(*) c FROM analyses")).mappings().first()["c"]
+
+    return {
+        "production_waste_analysis": [dict(r) for r in production_waste],
+        "circular_economy_insights": {
+            "by_recyclability": [dict(r) for r in by_recyclability],
+            "total_items_analyzed": total,
+        },
+        "material_recovery_reports": [dict(r) for r in production_waste],
+        "sustainability_performance": {
+            "average_circularity_score": round(avg_score, 1),
+        },
+    }
+
 DEFAULT_SETTINGS = {
     "waste_collection_alerts": True,
     "recycling_opportunity_notifications": True,
@@ -470,6 +614,42 @@ def reports_summary(user=Depends(get_current_user)):
         "by_material": [dict(r) for r in by_material],
     }
 
+@app.get("/api/reports/export/excel")
+def export_reports_excel(user=Depends(get_current_user)):
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill
+
+    with db_session() as conn:
+        rows = conn.execute(text("SELECT * FROM analyses ORDER BY id DESC")).mappings().all()
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Waste Analysis Report"
+
+    if rows:
+        headers = list(rows[0].keys())
+        ws.append(headers)
+        header_fill = PatternFill(start_color="16A34A", end_color="16A34A", fill_type="solid")
+        header_font = Font(color="FFFFFF", bold=True)
+        for cell in ws[1]:
+            cell.fill = header_fill
+            cell.font = header_font
+        for r in rows:
+            ws.append([str(v) if v is not None else "" for v in dict(r).values()])
+        for col in ws.columns:
+            max_len = max(len(str(c.value)) for c in col)
+            ws.column_dimensions[col[0].column_letter].width = min(30, max_len + 2)
+    else:
+        ws.append(["No analysis records yet."])
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return StreamingResponse(
+        buf,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=textile_waste_report.xlsx"},
+    )
 
 @app.get("/api/reports/export/csv")
 def export_reports_csv(user=Depends(get_current_user)):
@@ -609,13 +789,58 @@ def download_report(analysis_id: int, user=Depends(get_current_user)):
                               headers={"Content-Disposition": f"attachment; filename=analysis_{analysis_id}.pdf"})
 
 
-@app.get("/api/sustainability/benchmark")
-def sustainability_benchmark(user=Depends(get_current_user)):
-    with db_session() as conn:
-        avg = conn.execute(text("SELECT AVG(circularity_score) a FROM analyses")).mappings().first()["a"] or 0
-    from . import scoring
-    return scoring.benchmark_against_industry(avg)
+@app.get("/api/sustainability/report/pdf")
+def sustainability_report_pdf(user=Depends(get_current_user)):
+    from reportlab.lib.pagesizes import A4
+    from reportlab.pdfgen import canvas
 
+    with db_session() as conn:
+        rows = conn.execute(text(
+            "SELECT circularity_score, recyclability, waste_category, recommendation FROM analyses"
+        )).mappings().all()
+        avg = conn.execute(text("SELECT AVG(circularity_score) a FROM analyses")).mappings().first()["a"] or 0
+
+    total = len(rows)
+    recyclability_score_map = {"High": 90, "Medium": 60, "Low": 30}
+    total_carbon = total_water = total_recovery = 0.0
+    for r in rows:
+        base = (r["circularity_score"] or 0) / 100
+        total_carbon += base * 4.2
+        total_water += base * 2650
+        total_recovery += recyclability_score_map.get(r["recyclability"], 50)
+    avg_recovery = (total_recovery / total) if total else 0
+    benchmark = scoring.benchmark_against_industry(avg)
+
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=A4)
+    width, height = A4
+    y = height - 60
+
+    c.setFont("Helvetica-Bold", 16)
+    c.drawString(50, y, "Textile Waste Intelligence Platform")
+    y -= 22
+    c.setFont("Helvetica-Bold", 13)
+    c.drawString(50, y, "Sustainability Report")
+    y -= 30
+    c.setFont("Helvetica", 11)
+    for label, value in [
+        ("Total Items Analyzed", total),
+        ("Total Carbon Saved (kg CO2)", round(total_carbon, 1)),
+        ("Total Water Saved (Liters)", round(total_water, 0)),
+        ("Average Resource Recovery (%)", round(avg_recovery, 1)),
+        ("Average Circularity Score", round(avg, 1)),
+        ("Industry Benchmark Score", benchmark["industry_benchmark_score"]),
+        ("Best-in-Class Reference Score", benchmark["top_performer_score"]),
+        ("Standing", benchmark["standing"]),
+    ]:
+        c.drawString(50, y, f"{label}: {value}")
+        y -= 22
+
+    c.showPage()
+    c.save()
+    buf.seek(0)
+    return StreamingResponse(buf, media_type="application/pdf",
+                              headers={"Content-Disposition": "attachment; filename=sustainability_report.pdf"})
 
 # ========================================================= SUSTAINABILITY ====
 @app.get("/api/sustainability/summary")

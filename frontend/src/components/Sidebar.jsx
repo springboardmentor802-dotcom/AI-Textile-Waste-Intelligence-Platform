@@ -8,7 +8,7 @@ const links = [
   { to: '/upload', label: 'Upload Waste', icon: UploadCloud },
   { to: '/history', label: 'History', icon: History },
   { to: '/reports', label: 'Reports', icon: BarChart3 },
-  { to: '/sustainability', label: 'Sustainability', icon: Sprout },
+  { to: '/sustainability', label: 'AI Analytics', icon: Sprout },
   { to: '/profile', label: 'Profile', icon: User },
   { to: '/settings', label: 'Settings', icon: SettingsIcon },
 ]

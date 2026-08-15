@@ -1,6 +1,28 @@
 version: "3.9"
 
 services:
+  backend:
+    build: ./backend
+    container_name: textile_waste_backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+psycopg://textile_admin:textile_pass@postgres:5432/textile_waste
+      MONGO_URL: mongodb://mongo:27017
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - mongo
+
+  frontend:
+    build: ./frontend
+    container_name: textile_waste_frontend
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
   postgres:
     image: postgres:16-alpine
     container_name: textile_waste_postgres

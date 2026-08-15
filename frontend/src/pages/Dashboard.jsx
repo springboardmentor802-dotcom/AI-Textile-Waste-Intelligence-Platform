@@ -4,18 +4,20 @@ import { Chart as ChartJS, ArcElement, BarElement, CategoryScale, LinearScale, T
 import { UploadCloud, ScanEye, Boxes, Recycle, Leaf, TrendingUp, CircleGauge, RefreshCcw } from 'lucide-react'
 import api from '../api'
 import { StatCard } from '../components/ui.jsx'
+import AdminDashboard from '../components/AdminDashboard.jsx'
+import { RecyclingFacilityDashboard, SustainabilityManagerDashboard, ManufacturerDashboard } from '../components/RoleDashboards.jsx'
 
 ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend)
 
 export default function Dashboard() {
   const [summary, setSummary] = useState(null)
+  const role = localStorage.getItem('role')
 
   useEffect(() => {
     api.get('/dashboard/summary').then(({ data }) => setSummary(data)).catch(() => {})
   }, [])
 
   if (!summary) return <div className="text-white/50 text-sm">Loading dashboard...</div>
-
   const materialLabels = summary.material_distribution.map((m) => m.material)
   const materialCounts = summary.material_distribution.map((m) => m.c)
 
@@ -66,6 +68,27 @@ export default function Dashboard() {
           ) : <div className="text-white/40 text-xs">Add inventory records to populate this chart.</div>}
         </div>
       </div>
+
+      {role === 'admin' && (
+        <div className="pt-4 border-t border-white/10">
+          <AdminDashboard />
+        </div>
+      )}
+      {role === 'recycling_operator' && (
+        <div className="pt-4 border-t border-white/10">
+          <RecyclingFacilityDashboard />
+        </div>
+      )}
+      {role === 'sustainability_manager' && (
+        <div className="pt-4 border-t border-white/10">
+          <SustainabilityManagerDashboard />
+        </div>
+      )}
+      {role === 'manufacturer' && (
+        <div className="pt-4 border-t border-white/10">
+          <ManufacturerDashboard />
+        </div>
+      )}
     </div>
   )
 }

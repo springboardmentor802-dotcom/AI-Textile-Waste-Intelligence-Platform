@@ -28,6 +28,7 @@ export default function Reports() {
   const [summary, setSummary] = useState(null)
   const [material, setMaterial] = useState('')
   const [wasteCategory, setWasteCategory] = useState('')
+  const [reportType, setReportType] = useState('waste_classification')
 
   const load = () => {
     api.get('/reports', { params: { material, waste_category: wasteCategory } })
@@ -57,6 +58,22 @@ export default function Reports() {
     }
   }
 
+  const exportExcel = async () => {
+    try {
+      const response = await api.get('/reports/export/excel', { responseType: 'blob' })
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }))
+      const link = document.createElement('a')
+      link.href = url
+      link.download = 'textile_waste_report.xlsx'
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+    } catch (err) {
+      alert('Failed to export Excel')
+    }
+  }
+  
   const materialOptions = summary?.by_material.map((m) => m.material) || []
   const wasteOptions = summary?.by_waste_category.map((w) => w.waste_category) || []
 
@@ -64,10 +81,57 @@ export default function Reports() {
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h1 className="text-xl font-bold">📊 Reports</h1>
-        <button onClick={exportCsv}
-          className="flex items-center gap-2 bg-mint-600 hover:bg-mint-500 transition rounded-xl px-4 py-2 text-sm font-semibold">
-          <Download size={16} /> Export All (CSV)
-        </button>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {[
+          { key: 'waste_classification', label: 'Waste Classification' },
+          { key: 'recycling', label: 'Recycling' },
+          { key: 'sustainability', label: 'Sustainability' },
+          { key: 'environmental_impact', label: 'Environmental Impact' },
+          { key: 'circular_economy', label: 'Circular Economy' },
+        ].map((t) => (
+          <button key={t.key} onClick={() => setReportType(t.key)}
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition ${
+              reportType === t.key ? 'bg-mint-600 text-white' : 'bg-white/5 text-white/60 hover:bg-white/10'
+            }`}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="glass-card p-4 border-l-4 border-mint-500">
+        <h3 className="font-bold text-sm text-mint-400">
+          {{
+            waste_classification: 'Waste Classification Report',
+            recycling: 'Recycling Report',
+            sustainability: 'Sustainability Report',
+            environmental_impact: 'Environmental Impact Report',
+            circular_economy: 'Circular Economy Report',
+          }[reportType]}
+        </h3>
+        <p className="text-xs text-white/50 mt-1">
+          {{
+            waste_classification: 'Waste category, recyclability, and disposal classification for each analyzed item.',
+            recycling: 'Recommended recycling strategy and processing method for each item.',
+            sustainability: 'Circularity score and sustainability outcome for each item.',
+            environmental_impact: 'Recyclability and environmental recovery potential for each item.',
+            circular_economy: 'Material recovery and circular economy pathway for each item.',
+          }[reportType]}
+        </p>
+      </div>
+
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div className="flex gap-2">
+          <button onClick={exportCsv}
+            className="flex items-center gap-2 bg-mint-600 hover:bg-mint-500 transition rounded-xl px-4 py-2 text-sm font-semibold">
+            <Download size={16} /> Export CSV
+          </button>
+          <button onClick={exportExcel}
+            className="flex items-center gap-2 bg-mint-600 hover:bg-mint-500 transition rounded-xl px-4 py-2 text-sm font-semibold">
+            <Download size={16} /> Export Excel
+          </button>
+        </div>
       </div>
 
       {summary && (

@@ -1,5 +1,6 @@
 import io
 import json
+import logging
 from datetime import datetime
 
 from fastapi import FastAPI, Depends, HTTPException, UploadFile, File
@@ -24,6 +25,12 @@ from .material_classifier import classify_material
 from . import scoring
 from . import mongo
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
+logger = logging.getLogger("textile_waste_platform")
+
 app = FastAPI(title="Textile Waste Intelligence Platform API", version="1.0.0")
 
 app.add_middleware(
@@ -37,8 +44,9 @@ app.add_middleware(
 
 @app.on_event("startup")
 def on_startup():
+    logger.info("Starting Textile Waste Intelligence Platform API")
     init_db()
-
+    logger.info("Database initialized -- %s", "PostgreSQL" if USING_POSTGRES else "SQLite fallback")
 
 @app.get("/api/health")
 def health():

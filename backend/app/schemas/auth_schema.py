@@ -19,3 +19,8 @@ class LoginRequest(BaseModel):
     email: EmailStr
 
     password: str
+
+
+class ResetPasswordRequest(BaseModel):
+    email: EmailStr
+    new_password: str = Field(..., min_length=8)

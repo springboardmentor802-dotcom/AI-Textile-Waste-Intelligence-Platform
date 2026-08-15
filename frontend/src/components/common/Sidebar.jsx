@@ -1,7 +1,8 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 function Sidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const menuItems = [
     {
@@ -36,6 +37,13 @@ function Sidebar() {
     },
   ];
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    navigate("/login");
+  };
+
   return (
     <div className="w-72 bg-green-700 text-white min-h-screen shadow-2xl">
 
@@ -53,6 +61,7 @@ function Sidebar() {
 
       </div>
 
+
       {/* Navigation */}
 
       <nav className="p-4 space-y-2">
@@ -69,6 +78,7 @@ function Sidebar() {
                   : "hover:bg-green-600"
               }`}
           >
+
             <span className="text-xl">
               {item.icon}
             </span>
@@ -81,7 +91,26 @@ function Sidebar() {
 
         ))}
 
+
+        {/* Logout */}
+
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium hover:bg-red-600 mt-4 text-left"
+        >
+
+          <span className="text-xl">
+            🚪
+          </span>
+
+          <span>
+            Logout
+          </span>
+
+        </button>
+
       </nav>
+
 
       {/* Footer */}
 

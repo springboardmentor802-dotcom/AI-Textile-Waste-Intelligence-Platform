@@ -12,19 +12,29 @@ import Analytics from "../pages/Analytics";
 
 import ProtectedRoute from "./ProtectedRoute";
 import WasteClassification from "../pages/WasteClassification";
-import Sustainability from "../pages/Sustainability";
 import TextileIntelligence from "../pages/TextileIntelligence";
+import ForgotPassword from "../pages/ForgotPassword";
 
 function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
 
+        {/* Authentication */}
+
         <Route path="/" element={<Login />} />
 
         <Route path="/login" element={<Login />} />
 
         <Route path="/register" element={<Register />} />
+
+        <Route
+          path="/forgot-password"
+          element={<ForgotPassword />}
+        />
+
+
+        {/* Dashboard */}
 
         <Route
           path="/dashboard"
@@ -35,6 +45,9 @@ function AppRoutes() {
           }
         />
 
+
+        {/* Inventory */}
+
         <Route
           path="/inventory"
           element={
@@ -43,16 +56,21 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
-<Route
-  path="/analytics"
-  element={
-    <ProtectedRoute>
-      <Analytics />
-    </ProtectedRoute>
-  }
-/>
 
-        {/* ADD THESE 3 ROUTES HERE */}
+
+        {/* Analytics */}
+
+        <Route
+          path="/analytics"
+          element={
+            <ProtectedRoute>
+              <Analytics />
+            </ProtectedRoute>
+          }
+        />
+
+
+        {/* Profile */}
 
         <Route
           path="/profile"
@@ -63,6 +81,9 @@ function AppRoutes() {
           }
         />
 
+
+        {/* Reports */}
+
         <Route
           path="/reports"
           element={
@@ -72,14 +93,8 @@ function AppRoutes() {
           }
         />
 
-        <Route
-          path="/upload"
-          element={
-            <ProtectedRoute>
-              <Upload />
-            </ProtectedRoute>
-          }
-        />
+
+        {/* Upload */}
 
         <Route
           path="/upload"
@@ -89,6 +104,9 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
+
+        {/* Defect Analysis */}
 
         <Route
           path="/defect-analysis"
@@ -99,6 +117,9 @@ function AppRoutes() {
           }
         />
 
+
+        {/* Waste Classification */}
+
         <Route
           path="/waste-classification"
           element={
@@ -108,14 +129,8 @@ function AppRoutes() {
           }
         />
 
-        {/* <Route
-          path="/sustainability"
-          element={
-            <ProtectedRoute>
-              <Sustainability />
-            </ProtectedRoute>
-          }
-        /> */}
+
+        {/* AI Textile Intelligence */}
 
         <Route
           path="/textile-intelligence"

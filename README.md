@@ -165,3 +165,22 @@ python -c "import ast; ast.parse(open('app/main.py').read())"
   - Waste collection alerts (triggered when a new inventory batch is registered)
   - All alerts respect per-user notification preferences set in Settings
   - Notification bell icon in the sidebar with live unread count, mark-as-read, mark-all-read, and delete
+
+## Milestone 4 (Week 7 & 8) — Analytics, Testing & Deployment
+
+### Dashboard & Analytics
+- **AI Analytics Dashboard**: combined Sustainability Intelligence, Recycling Recommendation, and Environmental Impact engines in one view, with quick multi-image upload (up to 5 images) and per-image breakdown across all three engines
+- **Role-based dashboards**: Admin (user management, platform stats), Recycling Facility Operator (waste inventory, recycling opportunities, recovery statistics), Sustainability Manager (ESG reporting, carbon reduction), Manufacturer (production waste analysis, circular economy insights) — each rendered based on the logged-in user's role
+
+### Reports & Export System
+- 5 categorized report views: Waste Classification, Recycling, Sustainability, Environmental Impact, Circular Economy
+- PDF export (single-item, batch, and dedicated Sustainability Report)
+- Excel export (.xlsx) alongside existing CSV export
+
+### Testing
+- Automated API test suite (pytest) covering health check, registration/login flow, and unauthorized access rejection — 4/4 tests passing
+
+### Deployment
+- Dockerfiles created for both backend (Python/FastAPI) and frontend (React, multi-stage build with Nginx)
+- docker-compose.yml updated to orchestrate all 4 services (backend, frontend, PostgreSQL, MongoDB) together
+- Note: containers are written and ready but not yet build-tested in this environment (Docker Desktop not installed on development machine) — running locally via venv + npm remains fully functional and verified

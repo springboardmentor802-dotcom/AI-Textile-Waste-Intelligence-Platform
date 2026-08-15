@@ -184,3 +184,75 @@ python -c "import ast; ast.parse(open('app/main.py').read())"
 - Dockerfiles created for both backend (Python/FastAPI) and frontend (React, multi-stage build with Nginx)
 - docker-compose.yml updated to orchestrate all 4 services (backend, frontend, PostgreSQL, MongoDB) together
 - Note: containers are written and ready but not yet build-tested in this environment (Docker Desktop not installed on development machine) — running locally via venv + npm remains fully functional and verified
+
+## User Guide
+
+### Getting Started
+1. Register an account, selecting your role: Admin, Manufacturer, Sustainability Manager, or Recycling Operator
+2. Log in — your Dashboard will show role-specific data below the shared platform stats
+
+### Analyzing Textile Waste
+1. Go to **Upload Waste** or **AI Analytics**
+2. Select 1–5 images of textile items
+3. Click Predict/Analyze — each image runs through the full 12-stage AI pipeline (material classification, texture/color/damage/contamination analysis, waste classification, recycling recommendation, sustainability assessment, environmental impact, circularity scoring)
+4. Switch between tabs to view each image's individual results
+5. Download a single PDF report or a combined multi-image PDF
+
+### Tracking Inventory
+1. Go to **Inventory** → **Add Waste** to log a physical batch (Batch ID, fabric type, quantity, source, condition, collection date)
+2. Edit or delete existing records as batches are processed
+
+### Viewing Reports
+1. Go to **Reports** to browse 5 categorized report types (Waste Classification, Recycling, Sustainability, Environmental Impact, Circular Economy)
+2. Filter by material or waste category
+3. Export as CSV, Excel, or PDF
+
+### Notifications
+- The bell icon in the sidebar shows unread alerts for recycling opportunities, inventory warnings, sustainability milestones, and waste collection events
+- Manage which alert types you receive in **Settings**
+
+### Running Locally
+See the Quick Setup & Run Instructions section above for backend/frontend startup steps. Default fallback database (SQLite) requires no external setup.
+
+### Running Tests
+cd backend
+
+source venv/bin/activate
+
+python -m pytest tests/test_api.py -v
+
+## User Guide
+
+### Getting Started
+1. Register an account, selecting your role: Admin, Manufacturer, Sustainability Manager, or Recycling Operator
+2. Log in — your Dashboard will show role-specific data below the shared platform stats
+
+### Analyzing Textile Waste
+1. Go to **Upload Waste** or **AI Analytics**
+2. Select 1–5 images of textile items
+3. Click Predict/Analyze — each image runs through the full 12-stage AI pipeline (material classification, texture/color/damage/contamination analysis, waste classification, recycling recommendation, sustainability assessment, environmental impact, circularity scoring)
+4. Switch between tabs to view each image's individual results
+5. Download a single PDF report or a combined multi-image PDF
+
+### Tracking Inventory
+1. Go to **Inventory** → **Add Waste** to log a physical batch (Batch ID, fabric type, quantity, source, condition, collection date)
+2. Edit or delete existing records as batches are processed
+
+### Viewing Reports
+1. Go to **Reports** to browse 5 categorized report types (Waste Classification, Recycling, Sustainability, Environmental Impact, Circular Economy)
+2. Filter by material or waste category
+3. Export as CSV, Excel, or PDF
+
+### Notifications
+- The bell icon in the sidebar shows unread alerts for recycling opportunities, inventory warnings, sustainability milestones, and waste collection events
+- Manage which alert types you receive in **Settings**
+
+### Running Locally
+See the Quick Setup & Run Instructions section above for backend/frontend startup steps. Default fallback database (SQLite) requires no external setup.
+
+### Running Tests
+cd backend
+
+source venv/bin/activate
+
+python -m pytest tests/test_api.py -v

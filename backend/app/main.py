@@ -803,6 +803,13 @@ def download_report(analysis_id: int, user=Depends(get_current_user)):
                               headers={"Content-Disposition": f"attachment; filename=analysis_{analysis_id}.pdf"})
 
 
+@app.get("/api/sustainability/benchmark")
+def sustainability_benchmark(user=Depends(get_current_user)):
+    with db_session() as conn:
+        avg = conn.execute(text("SELECT AVG(circularity_score) a FROM analyses")).mappings().first()["a"] or 0
+    return scoring.benchmark_against_industry(avg)
+
+
 @app.get("/api/sustainability/report/pdf")
 def sustainability_report_pdf(user=Depends(get_current_user)):
     from reportlab.lib.pagesizes import A4

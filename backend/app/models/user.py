@@ -9,7 +9,11 @@ class User(Base):
 
     user_id = Column(Integer, primary_key=True, index=True)
 
-    username = Column(String(100), nullable=False)
+    username = Column(
+        String(100),
+        unique=True,
+        nullable=False
+    )
 
     email = Column(
         String(150),

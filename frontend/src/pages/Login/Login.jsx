@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FaUser, FaLock } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 
 import API from "../../api/axios";
@@ -9,7 +9,8 @@ import "./Login.css";
 
 function Login() {
 
-  const [username, setUsername] = useState("");
+  const location = useLocation();
+  const [username, setUsername] = useState(location.state?.username || "");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
   const [error, setError] = useState("");
@@ -170,6 +171,12 @@ function Login() {
             Login to continue
           </p>
 
+          {location.state?.message && (
+            <div className="form-message success-message" role="status">
+              {location.state.message}
+            </div>
+          )}
+
 
 
           {error && (
@@ -316,6 +323,10 @@ function Login() {
 
 
           </form>
+
+          <p className="auth-switch">
+            New to the platform? <Link to="/register">Create an account</Link>
+          </p>
 
 
         </div>

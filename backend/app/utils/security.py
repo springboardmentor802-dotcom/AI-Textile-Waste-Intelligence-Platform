@@ -1,43 +1,140 @@
-from datetime import datetime, timedelta
-from jose import JWTError, jwt
+import os
+
+from datetime import (
+    datetime,
+    timedelta,
+)
+
+from dotenv import load_dotenv
+
+from jose import (
+    JWTError,
+    jwt,
+)
+
 from passlib.context import CryptContext
 
 
-SECRET_KEY = "your-secret-key-change-later"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+# ==========================================================
+# LOAD ENVIRONMENT VARIABLES
+# ==========================================================
+
+load_dotenv()
 
 
-pwd_context = CryptContext(
-    schemes=["bcrypt"],
-    deprecated="auto"
+# ==========================================================
+# SECURITY CONFIGURATION
+# ==========================================================
+
+SECRET_KEY = os.getenv(
+    "SECRET_KEY"
+)
+
+ALGORITHM = os.getenv(
+    "ALGORITHM",
+    "HS256",
+)
+
+ACCESS_TOKEN_EXPIRE_MINUTES = int(
+    os.getenv(
+        "ACCESS_TOKEN_EXPIRE_MINUTES",
+        "60",
+    )
 )
 
 
-def hash_password(password):
-    return pwd_context.hash(password)
+if not SECRET_KEY:
+
+    raise RuntimeError(
+        "SECRET_KEY environment variable is not configured."
+    )
 
 
-def verify_password(password, hashed_password):
-    return pwd_context.verify(password, hashed_password)
+if len(SECRET_KEY) < 32:
+
+    raise RuntimeError(
+        "SECRET_KEY must contain at least 32 characters."
+    )
 
 
-def create_access_token(data: dict):
+# ==========================================================
+# PASSWORD HASHING
+# ==========================================================
+
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto",
+)
+
+
+# ==========================================================
+# HASH PASSWORD
+# ==========================================================
+
+def hash_password(
+    password: str,
+) -> str:
+
+    return pwd_context.hash(
+        password
+    )
+
+
+# ==========================================================
+# VERIFY PASSWORD
+# ==========================================================
+
+def verify_password(
+    password: str,
+    hashed_password: str,
+) -> bool:
+
+    return pwd_context.verify(
+        password,
+        hashed_password,
+    )
+
+
+# ==========================================================
+# CREATE JWT ACCESS TOKEN
+# ==========================================================
+
+def create_access_token(
+    data: dict,
+) -> str:
 
     to_encode = data.copy()
 
-    expire = datetime.utcnow() + timedelta(
-        minutes=ACCESS_TOKEN_EXPIRE_MINUTES
+    expire = (
+        datetime.utcnow()
+        +
+        timedelta(
+            minutes=
+                ACCESS_TOKEN_EXPIRE_MINUTES
+        )
     )
 
-    to_encode.update({
-        "exp": expire
-    })
+    to_encode.update(
+        {
+            "exp": expire
+        }
+    )
 
     return jwt.encode(
         to_encode,
         SECRET_KEY,
-        algorithm=ALGORITHM
+        algorithm=ALGORITHM,
     )
-def get_password_hash(password):
-    return pwd_context.hash(password)
+
+
+# ==========================================================
+# PASSWORD HASH ALIAS
+# ==========================================================
+
+def get_password_hash(
+    password: str,
+) -> str:
+
+    return hash_password(
+        password
+    )

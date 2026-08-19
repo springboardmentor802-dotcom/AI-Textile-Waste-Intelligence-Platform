@@ -361,6 +361,11 @@
 }
 
 
+.an-recovery-chart {
+  height: 500px;
+}
+
+
 .an-score-panel {
   display: flex;
   align-items: center;
@@ -965,6 +970,11 @@
 
 
 @media (max-width: 640px) {
+  .an-recovery-chart {
+    height: 540px;
+    margin-top: 4px;
+  }
+
   .an-page {
     padding: 16px;
   }

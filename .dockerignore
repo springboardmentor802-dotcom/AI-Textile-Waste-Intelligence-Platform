@@ -1,0 +1,40 @@
+# Git
+.git
+.gitignore
+
+# Python virtual environments / caches
+backend/venv/
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+
+# Secrets
+backend/.env
+.env
+
+# Frontend dependencies/build output
+frontend/node_modules/
+frontend/dist/
+
+# Backend temporary/runtime files
+backend/temp_uploads/
+backend/.pytest_cache/
+backend/validation/model_evaluation/
+
+# M4 local test scripts
+backend/m4_api_tests.py
+backend/m4_role_tests.py
+backend/m4_integration_tests.py
+backend/m4_performance_tests.py
+backend/m4_model_evaluation.py
+
+# Datasets / notebooks / docs not needed by runtime
+datasets/
+notebooks/
+docs/
+
+# IDE / OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

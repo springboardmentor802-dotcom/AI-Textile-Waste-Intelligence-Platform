@@ -1,0 +1,1871 @@
+==================== USER MODEL ====================
+from sqlalchemy import Column, Integer, String, TIMESTAMP
+from sqlalchemy.sql import func
+
+from app.database import Base
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    user_id = Column(Integer, primary_key=True, index=True)
+
+    username = Column(String(100), nullable=False)
+
+    email = Column(
+        String(150),
+        unique=True,
+        nullable=False
+    )
+
+    hashed_password = Column(
+        String(255),
+        nullable=False
+    )
+
+    role = Column(
+        String(50),
+        default="user"
+    )
+
+    created_at = Column(
+        TIMESTAMP,
+        server_default=func.now()
+    )
+==================== AUTH ROUTE ====================
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy.orm import Session
+
+from app.database import get_db
+from app.models.user import User
+
+from app.utils.security import (
+    verify_password,
+    create_access_token
+)
+
+
+router = APIRouter(
+    prefix="/auth",
+    tags=["Authentication"]
+)
+
+
+@router.post("/login")
+def login(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db)
+):
+
+    # Find user
+    user = db.query(User).filter(
+        User.username == form_data.username
+    ).first()
+
+
+    if not user:
+
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid username or password"
+        )
+
+
+
+    # Verify password
+    if not verify_password(
+        form_data.password,
+        user.hashed_password
+    ):
+
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid username or password"
+        )
+
+
+
+    # Generate JWT token
+    access_token = create_access_token(
+
+        data={
+
+            "sub": user.username,
+
+            "role": user.role
+
+        }
+
+    )
+
+
+    return {
+
+        "access_token": access_token,
+
+        "token_type": "bearer",
+
+        "user_id": user.user_id,
+
+        "username": user.username,
+
+        "role": user.role
+
+    }
+==================== USERS ROUTE ====================
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
+from app.database import get_db
+from app.models.user import User
+from app.schemas.user_schema import UserResponse
+
+
+router = APIRouter(
+    prefix="/users",
+    tags=["Users"]
+)
+
+
+@router.get("/")
+def get_users(db: Session = Depends(get_db)):
+
+    users = db.query(User).all()
+
+    return users
+==================== AUTH DEPENDENCY ====================
+from fastapi import Depends, HTTPException
+from fastapi.security import OAuth2PasswordBearer
+from jose import jwt, JWTError
+from sqlalchemy.orm import Session
+
+from app.database import get_db
+from app.models.user import User
+from app.utils.security import SECRET_KEY, ALGORITHM
+
+
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="/auth/login"
+)
+
+
+def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+
+    try:
+
+        payload = jwt.decode(
+            token,
+            SECRET_KEY,
+            algorithms=[ALGORITHM]
+        )
+
+        username = payload.get("sub")
+        role = payload.get("role")
+
+        if username is None:
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid token"
+            )
+
+        user = db.query(User).filter(
+            User.username == username
+        ).first()
+
+        if not user:
+            raise HTTPException(
+                status_code=401,
+                detail="User not found"
+            )
+
+        return {
+            "user_id": user.user_id,
+            "username": user.username,
+            "role": role
+        }
+
+    except JWTError:
+
+        raise HTTPException(
+            status_code=401,
+            detail="Token validation failed"
+        )
+==================== ROLE DEPENDENCY ====================
+from fastapi import Depends, HTTPException
+from app.utils.auth_dependency import get_current_user
+
+
+def require_role(allowed_roles):
+
+    def role_checker(
+        current_user: dict = Depends(get_current_user)
+    ):
+
+        if current_user["role"] not in allowed_roles:
+            raise HTTPException(
+                status_code=403,
+                detail="You do not have permission to perform this action"
+            )
+
+        return current_user
+
+    return role_checker
+==================== SECURITY ====================
+import os
+
+from datetime import (
+    datetime,
+    timedelta,
+)
+
+from dotenv import load_dotenv
+
+from jose import (
+    JWTError,
+    jwt,
+)
+
+from passlib.context import CryptContext
+
+
+# ==========================================================
+# LOAD ENVIRONMENT VARIABLES
+# ==========================================================
+
+load_dotenv()
+
+
+# ==========================================================
+# SECURITY CONFIGURATION
+# ==========================================================
+
+SECRET_KEY = os.getenv(
+    "SECRET_KEY"
+)
+
+ALGORITHM = os.getenv(
+    "ALGORITHM",
+    "HS256",
+)
+
+ACCESS_TOKEN_EXPIRE_MINUTES = int(
+    os.getenv(
+        "ACCESS_TOKEN_EXPIRE_MINUTES",
+        "60",
+    )
+)
+
+
+if not SECRET_KEY:
+
+    raise RuntimeError(
+        "SECRET_KEY environment variable is not configured."
+    )
+
+
+if len(SECRET_KEY) < 32:
+
+    raise RuntimeError(
+        "SECRET_KEY must contain at least 32 characters."
+    )
+
+
+# ==========================================================
+# PASSWORD HASHING
+# ==========================================================
+
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto",
+)
+
+
+# ==========================================================
+# HASH PASSWORD
+# ==========================================================
+
+def hash_password(
+    password: str,
+) -> str:
+
+    return pwd_context.hash(
+        password
+    )
+
+
+# ==========================================================
+# VERIFY PASSWORD
+# ==========================================================
+
+def verify_password(
+    password: str,
+    hashed_password: str,
+) -> bool:
+
+    return pwd_context.verify(
+        password,
+        hashed_password,
+    )
+
+
+# ==========================================================
+# CREATE JWT ACCESS TOKEN
+# ==========================================================
+
+def create_access_token(
+    data: dict,
+) -> str:
+
+    to_encode = data.copy()
+
+    expire = (
+        datetime.utcnow()
+        +
+        timedelta(
+            minutes=
+                ACCESS_TOKEN_EXPIRE_MINUTES
+        )
+    )
+
+    to_encode.update(
+        {
+            "exp": expire
+        }
+    )
+
+    return jwt.encode(
+        to_encode,
+        SECRET_KEY,
+        algorithm=ALGORITHM,
+    )
+
+
+# ==========================================================
+# PASSWORD HASH ALIAS
+# ==========================================================
+
+def get_password_hash(
+    password: str,
+) -> str:
+
+    return hash_password(
+        password
+    )
+==================== USER SCHEMA ====================
+from pydantic import BaseModel
+
+
+class UserBase(BaseModel):
+    username: str
+    role: str
+
+
+class UserCreate(UserBase):
+    password: str
+
+
+class UserResponse(UserBase):
+    id: int
+
+    class Config:
+        from_attributes = True
+==================== MAIN ====================
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.api import (
+    prediction,
+    analytics,
+)
+
+from app.routes import (
+    users,
+    inventory,
+    uploads,
+    recommendations,
+    notifications,
+    auth,
+)
+
+from app.database import (
+    Base,
+    engine,
+)
+
+# ==========================================================
+# IMPORT MODELS
+# ==========================================================
+
+from app.models.user import User
+from app.models.textile_inventory import TextileInventory
+from app.models.waste_upload import WasteUpload
+from app.models.recommendation import Recommendation
+from app.models.notification import Notification
+
+
+# ==========================================================
+# FASTAPI APP
+# ==========================================================
+
+app = FastAPI(
+    title="AI Textile Waste Intelligence Platform",
+    description=(
+        "Backend API for textile waste "
+        "classification and management"
+    ),
+    version="1.0",
+)
+
+
+# ==========================================================
+# DATABASE INITIALIZATION
+# ==========================================================
+
+@app.on_event("startup")
+def create_tables():
+
+    Base.metadata.create_all(
+        bind=engine
+    )
+
+
+# ==========================================================
+# STATIC AI INSPECTION IMAGES
+# ==========================================================
+
+app.mount(
+    "/temp_uploads",
+    StaticFiles(
+        directory="temp_uploads"
+    ),
+    name="temp_uploads",
+)
+
+
+# ==========================================================
+# CORS CONFIGURATION
+# ==========================================================
+
+allowed_origins = [
+    # Normal Vite frontend
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+
+    # Docker frontend
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
+]
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+# ==========================================================
+# API ROUTERS
+# ==========================================================
+
+app.include_router(
+    analytics.router
+)
+
+app.include_router(
+    prediction.router
+)
+
+app.include_router(
+    users.router
+)
+
+app.include_router(
+    inventory.router
+)
+
+app.include_router(
+    uploads.router
+)
+
+app.include_router(
+    recommendations.router
+)
+
+app.include_router(
+    notifications.router
+)
+
+app.include_router(
+    auth.router
+)
+
+
+# ==========================================================
+# ROOT ROUTE
+# ==========================================================
+
+@app.get("/")
+def home():
+
+    return {
+        "message":
+            "AI Textile Waste Intelligence Backend Running"
+    }
+
+
+# ==========================================================
+# HEALTH ROUTE
+# ==========================================================
+
+@app.get("/health")
+def health_check():
+
+    return {
+        "status":
+            "Backend is healthy"
+    }
+==================== ANALYTICS API ====================
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
+from app.database import get_db
+from app.models.waste_upload import WasteUpload
+
+from services.dataset_analytics_service import (
+    get_complete_dataset_analytics,
+)
+
+router = APIRouter(
+    prefix="/analytics",
+    tags=["Analytics"],
+)
+
+
+@router.get("/")
+def get_analytics(
+    db: Session = Depends(get_db),
+):
+    """
+    Existing application analytics based on uploaded
+    textile waste records stored in the database.
+    """
+
+    uploads = db.query(
+        WasteUpload
+    ).all()
+
+    total_uploads = len(
+        uploads
+    )
+
+    material_count = {}
+
+    impact_count = {}
+
+    recyclable_count = 0
+
+    for item in uploads:
+
+        if item.material:
+
+            material_count[
+                item.material
+            ] = (
+                material_count.get(
+                    item.material,
+                    0,
+                )
+                + 1
+            )
+
+        if item.environmental_impact:
+
+            impact_count[
+                item.environmental_impact
+            ] = (
+                impact_count.get(
+                    item.environmental_impact,
+                    0,
+                )
+                + 1
+            )
+
+        if item.recycling_method in [
+            "Mechanical Recycling",
+            "Chemical Recycling",
+            "Reuse",
+        ]:
+            recyclable_count += 1
+
+    recyclable_percentage = 0
+
+    if total_uploads > 0:
+        recyclable_percentage = round(
+            (
+                recyclable_count
+                / total_uploads
+            )
+            * 100,
+            2,
+        )
+
+    return {
+        "total_uploads": total_uploads,
+        "materials": material_count,
+        "environmental_impact": impact_count,
+        "recyclable_percentage": recyclable_percentage,
+    }
+
+
+@router.get("/dataset")
+def get_dataset_analytics():
+    """
+    Analytics generated from the synthetic
+    sustainability dataset.
+    """
+
+    return get_complete_dataset_analytics()
+==================== INVENTORY ROUTE ====================
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
+
+from app.database import get_db
+
+from app.models.textile_inventory import TextileInventory
+
+from app.schemas.inventory import InventoryCreate
+
+from app.utils.auth_dependency import get_current_user
+from app.utils.role_dependency import require_role
+
+from app.services.notification_service import (
+    create_collection_alert,
+    create_inventory_warning,
+)
+
+
+router = APIRouter(
+    prefix="/inventory",
+    tags=["Inventory"]
+)
+
+
+# ==========================================================
+# GET ALL BATCHES
+# ==========================================================
+
+@router.get("/")
+def get_inventory(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    return (
+        db.query(TextileInventory)
+        .all()
+    )
+
+
+# ==========================================================
+# ADD NEW BATCH
+# ==========================================================
+
+@router.post("/")
+def add_inventory(
+    item: InventoryCreate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(
+        require_role(["Admin", "Industry"])
+    )
+):
+    try:
+
+        # --------------------------------------------------
+        # CHECK DUPLICATE BATCH ID BEFORE INSERT
+        # --------------------------------------------------
+
+        existing_batch = (
+            db.query(TextileInventory)
+            .filter(
+                TextileInventory.batch_id
+                ==
+                item.batch_id
+            )
+            .first()
+        )
+
+        if existing_batch:
+
+            raise HTTPException(
+                status_code=409,
+                detail="Batch ID already exists"
+            )
+
+
+        # --------------------------------------------------
+        # CREATE INVENTORY BATCH
+        # --------------------------------------------------
+
+        new_batch = TextileInventory(
+            batch_id=item.batch_id,
+            material_profile=item.material_profile,
+            waste_origin=item.waste_origin,
+            condition_grade=item.condition_grade,
+            recovery_potential=item.recovery_potential,
+            processing_status=item.processing_status,
+            waste_weight=item.waste_weight
+        )
+
+        db.add(new_batch)
+
+        # Assign textile_id before notification creation
+        db.flush()
+
+
+        # --------------------------------------------------
+        # WASTE COLLECTION NOTIFICATION
+        # --------------------------------------------------
+
+        create_collection_alert(
+            db=db,
+            user_id=current_user["user_id"],
+            batch=new_batch,
+        )
+
+
+        # --------------------------------------------------
+        # INVENTORY WARNING
+        # --------------------------------------------------
+
+        create_inventory_warning(
+            db=db,
+            user_id=current_user["user_id"],
+            batch=new_batch,
+        )
+
+
+        # --------------------------------------------------
+        # COMMIT
+        # --------------------------------------------------
+
+        db.commit()
+
+        db.refresh(new_batch)
+
+        return new_batch
+
+
+    except HTTPException:
+
+        db.rollback()
+
+        raise
+
+
+    except IntegrityError:
+
+        db.rollback()
+
+        raise HTTPException(
+            status_code=409,
+            detail="Batch ID already exists"
+        )
+
+
+    except Exception as error:
+
+        db.rollback()
+
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to create inventory batch"
+        ) from error
+
+
+# ==========================================================
+# DELETE BATCH
+# ==========================================================
+
+@router.delete("/{item_id}")
+def delete_inventory(
+    item_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(
+        require_role(["Admin"])
+    )
+):
+
+    item = (
+        db.query(TextileInventory)
+        .filter(
+            TextileInventory.textile_id
+            ==
+            item_id
+        )
+        .first()
+    )
+
+    if not item:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Batch not found"
+        )
+
+
+    try:
+
+        db.delete(item)
+
+        db.commit()
+
+        return {
+            "message":
+                "Batch deleted successfully"
+        }
+
+
+    except Exception as error:
+
+        db.rollback()
+
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to delete inventory batch"
+        ) from error
+
+
+# ==========================================================
+# UPDATE BATCH
+# ==========================================================
+
+@router.put("/{item_id}")
+def update_inventory(
+    item_id: int,
+    item: InventoryCreate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(
+        require_role(["Admin", "Industry"])
+    )
+):
+
+    try:
+
+        batch = (
+            db.query(TextileInventory)
+            .filter(
+                TextileInventory.textile_id
+                ==
+                item_id
+            )
+            .first()
+        )
+
+        if not batch:
+
+            raise HTTPException(
+                status_code=404,
+                detail="Batch not found"
+            )
+
+
+        # --------------------------------------------------
+        # CHECK WHETHER NEW BATCH ID BELONGS TO ANOTHER ROW
+        # --------------------------------------------------
+
+        duplicate_batch = (
+            db.query(TextileInventory)
+            .filter(
+                TextileInventory.batch_id
+                ==
+                item.batch_id,
+
+                TextileInventory.textile_id
+                !=
+                item_id
+            )
+            .first()
+        )
+
+
+        if duplicate_batch:
+
+            raise HTTPException(
+                status_code=409,
+                detail="Batch ID already exists"
+            )
+
+
+        # --------------------------------------------------
+        # UPDATE
+        # --------------------------------------------------
+
+        batch.batch_id = (
+            item.batch_id
+        )
+
+        batch.material_profile = (
+            item.material_profile
+        )
+
+        batch.waste_origin = (
+            item.waste_origin
+        )
+
+        batch.condition_grade = (
+            item.condition_grade
+        )
+
+        batch.recovery_potential = (
+            item.recovery_potential
+        )
+
+        batch.processing_status = (
+            item.processing_status
+        )
+
+        batch.waste_weight = (
+            item.waste_weight
+        )
+
+
+        # --------------------------------------------------
+        # RECHECK INVENTORY WARNING
+        # --------------------------------------------------
+
+        create_inventory_warning(
+            db=db,
+            user_id=current_user["user_id"],
+            batch=batch,
+        )
+
+
+        db.commit()
+
+        db.refresh(batch)
+
+        return batch
+
+
+    except HTTPException:
+
+        db.rollback()
+
+        raise
+
+
+    except IntegrityError:
+
+        db.rollback()
+
+        raise HTTPException(
+            status_code=409,
+            detail="Batch ID already exists"
+        )
+
+
+    except Exception as error:
+
+        db.rollback()
+
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to update inventory batch"
+        ) from error
+==================== RECOMMENDATIONS ROUTE ====================
+from typing import Any
+
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+)
+from sqlalchemy.orm import Session
+
+from app.database import get_db
+from app.models.waste_upload import WasteUpload
+from app.services.model_service import (
+    get_fabric_class_metadata,
+)
+from app.utils.auth_dependency import (
+    get_current_user,
+)
+from services.sustainability_service import (
+    estimate_environmental_benefits,
+)
+
+
+router = APIRouter(
+    prefix="/recommendations",
+    tags=["Recommendations"],
+)
+
+
+def _clean_text(
+    value: Any,
+    default: str,
+) -> str:
+    """
+    Return a cleaned text value or the supplied
+    fallback when the value is empty.
+    """
+
+    if value is None:
+        return default
+
+    cleaned = str(value).strip()
+
+    return cleaned or default
+
+
+def _clean_number(
+    value: Any,
+    default: float = 0,
+) -> float:
+    """
+    Convert a value to float safely.
+    """
+
+    if value is None:
+        return default
+
+    try:
+        return float(value)
+
+    except (TypeError, ValueError):
+        return default
+
+
+def _build_fabric_prediction(
+    upload: WasteUpload,
+) -> dict[str, Any]:
+    """
+    Build visual fabric classification metadata for
+    one stored textile assessment.
+    """
+
+    class_id = _clean_text(
+        upload.predicted_class,
+        "Unknown",
+    )
+
+    metadata = (
+        get_fabric_class_metadata(
+            class_id
+        )
+        or {}
+    )
+
+    category = _clean_text(
+        metadata.get("name"),
+        f"Fabric Category {class_id}",
+    )
+
+    likely_fibres = metadata.get(
+        "likely_fibres",
+        [],
+    )
+
+    if not isinstance(
+        likely_fibres,
+        list,
+    ):
+        likely_fibres = []
+
+    return {
+        "class": class_id,
+        "class_id": class_id,
+        "category": category,
+        "fabric_name": category,
+
+        "construction": _clean_text(
+            metadata.get("construction"),
+            "Unknown",
+        ),
+
+        "visual_family": _clean_text(
+            metadata.get("visual_family"),
+            "Unknown",
+        ),
+
+        "assigned_material": (
+            metadata.get(
+                "assigned_material"
+            )
+        ),
+
+        "likely_fibres": likely_fibres,
+
+        "material_source": (
+            metadata.get(
+                "material_source",
+                "application_class_mapping",
+            )
+        ),
+
+        "material_verified": bool(
+            upload.material_known
+        ),
+
+        "mapping_scope": (
+            metadata.get(
+                "mapping_scope",
+                "academic_prototype",
+            )
+        ),
+
+        "confidence": _clean_number(
+            upload.confidence,
+            0,
+        ),
+
+        "classification_scope": (
+            "visual_fabric_category"
+        ),
+    }
+
+
+def _build_explanation(
+    upload: WasteUpload,
+) -> str:
+    """
+    Build an understandable explanation for the
+    selected textile recovery pathway.
+    """
+
+    material = _clean_text(
+        upload.material,
+        "the textile material",
+    )
+
+    condition = _clean_text(
+        upload.condition,
+        "an unassessed condition",
+    )
+
+    contamination = _clean_text(
+        upload.contamination_status,
+        "an unassessed contamination level",
+    )
+
+    recommendation = _clean_text(
+        upload.final_decision,
+        "Manual Review",
+    )
+
+    rule_name = _clean_text(
+        upload.decision_rule,
+        "the circular decision rules",
+    )
+
+    return (
+        f"{recommendation} was selected for "
+        f"{material} based on its {condition} "
+        f"condition and {contamination} "
+        f"contamination assessment. "
+        f"Decision rule: {rule_name}."
+    )
+
+
+def _serialize_recommendation(
+    upload: WasteUpload,
+) -> dict[str, Any]:
+    """
+    Convert one WasteUpload database record into the
+    complete recommendation response expected by the
+    frontend.
+    """
+
+    fabric_prediction = (
+        _build_fabric_prediction(
+            upload
+        )
+    )
+
+    material = _clean_text(
+        upload.material,
+        "Unverified",
+    )
+
+    material_type = _clean_text(
+        upload.material_type,
+        "Unknown",
+    )
+
+    condition = _clean_text(
+        upload.condition,
+        "Not Assessed",
+    )
+
+    contamination = _clean_text(
+        upload.contamination_status,
+        "Not Assessed",
+    )
+
+    damage_level = _clean_text(
+        upload.defect_severity,
+        "Unknown",
+    )
+
+    defect_status = _clean_text(
+        upload.defect_status,
+        "Not Assessed",
+    )
+
+    recommendation = _clean_text(
+        upload.final_decision,
+        "Manual Review",
+    )
+
+    recovery_path = _clean_text(
+        upload.recovery_path,
+        recommendation,
+    )
+
+    recovery_category = _clean_text(
+        upload.recovery_category,
+        "Unknown",
+    )
+
+    decision_rule = _clean_text(
+        upload.decision_rule,
+        "No matching rule",
+    )
+
+    circularity_level = _clean_text(
+        upload.circularity_level,
+        "Not Assessed",
+    )
+
+    assessment_status = _clean_text(
+        upload.assessment_status,
+        (
+            "Manual Review Required"
+            if upload.requires_manual_review
+            else "Completed"
+        ),
+    )
+
+    requires_manual_review = bool(
+        upload.requires_manual_review
+    )
+
+    material_known = bool(
+        upload.material_known
+    )
+
+    explanation = _build_explanation(
+        upload
+    )
+
+    weight_kg = _clean_number(
+        upload.weight_kg,
+        0,
+    )
+
+    sustainability_score = (
+        None
+        if upload.sustainability_score
+        is None
+        else _clean_number(
+            upload.sustainability_score
+        )
+    )
+
+    reuse_score = (
+        None
+        if upload.reuse_score is None
+        else _clean_number(
+            upload.reuse_score
+        )
+    )
+
+    recovery_score = (
+        None
+        if upload.recovery_score is None
+        else _clean_number(
+            upload.recovery_score
+        )
+    )
+
+    environmental_benefits = (
+        estimate_environmental_benefits(
+            weight_kg=weight_kg,
+            recovery_category=(
+                recovery_category
+            ),
+        )
+    )
+
+    stored_environmental_impact = _clean_text(
+        upload.environmental_impact,
+        "",
+    )
+
+    placeholder_impact_values = {
+        "",
+        "not available",
+        "unknown",
+        "not assessed",
+        "none",
+        "null",
+    }
+
+    normalized_stored_impact = (
+        stored_environmental_impact
+        .strip()
+        .lower()
+    )
+
+    if (
+        normalized_stored_impact
+        not in placeholder_impact_values
+    ):
+        environmental_impact = (
+            stored_environmental_impact
+        )
+    else:
+        environmental_impact = (
+            environmental_benefits.get(
+                "environmental_impact",
+                "Not Available",
+            )
+        )
+
+    material_status = (
+        "verified"
+        if material_known
+        else "application_assigned"
+    )
+
+    material_source = (
+        "user_verified"
+        if material_known
+        else "application_class_mapping"
+    )
+
+    return {
+        "id": upload.upload_id,
+
+        "recommendation_id": (
+            upload.upload_id
+        ),
+
+        "upload_id": upload.upload_id,
+
+        "created_at": upload.upload_date,
+
+        "material": material,
+
+        "material_name": material,
+
+        "fabric_name": (
+            fabric_prediction[
+                "fabric_name"
+            ]
+        ),
+
+        "fabric_category": (
+            fabric_prediction[
+                "category"
+            ]
+        ),
+
+        "condition": condition,
+
+        "contamination": contamination,
+
+        "contamination_level": (
+            contamination
+        ),
+
+        "damage_level": damage_level,
+
+        "recommendation": recommendation,
+
+        "final_decision": recommendation,
+
+        "recommended_action": (
+            recommendation
+        ),
+
+        "recovery_path": recovery_path,
+
+        "recovery_category": (
+            recovery_category
+        ),
+
+        "sustainability_score": (
+            sustainability_score
+        ),
+
+        "reuse_score": reuse_score,
+
+        "recovery_score": recovery_score,
+
+        "circularity_level": (
+            circularity_level
+        ),
+
+        "assessment_status": (
+            assessment_status
+        ),
+
+        "requires_manual_review": (
+            requires_manual_review
+        ),
+
+        "environmental_impact": (
+            environmental_impact
+        ),
+
+        "co2_saved_kg": (
+            environmental_benefits.get(
+                "co2_saved_kg",
+                0,
+            )
+        ),
+
+        "water_saved_liters": (
+            environmental_benefits.get(
+                "water_saved_liters",
+                0,
+            )
+        ),
+
+        "energy_saved_kwh": (
+            environmental_benefits.get(
+                "energy_saved_kwh",
+                0,
+            )
+        ),
+
+        "landfill_diverted_kg": (
+            environmental_benefits.get(
+                "landfill_diverted_kg",
+                0,
+            )
+        ),
+
+        "impact_calculation_status": (
+            environmental_benefits.get(
+                "calculation_status",
+                "Unavailable",
+            )
+        ),
+
+        "impact_is_estimate": (
+            environmental_benefits.get(
+                "is_estimate",
+                True,
+            )
+        ),
+
+        "impact_calculation_basis": (
+            environmental_benefits.get(
+                "calculation_basis",
+                (
+                    "textile_weight_kg × "
+                    "recovery_pathway_factor"
+                ),
+            )
+        ),
+
+        "rule_name": decision_rule,
+
+        "decision_priority": (
+            upload.decision_priority
+        ),
+
+        "weight_kg": weight_kg,
+
+        "image_path": upload.image_path,
+
+        "fabric_prediction": (
+            fabric_prediction
+        ),
+
+        "material_verification": {
+            "material": material,
+
+            "material_type": (
+                material_type
+            ),
+
+            "material_known": (
+                material_known
+            ),
+
+            "verified": material_known,
+
+            "status": material_status,
+
+            "source": material_source,
+        },
+
+        "condition_analysis": {
+            "condition": condition,
+
+            "defect": defect_status,
+
+            "defect_status": (
+                defect_status
+            ),
+
+            "severity": damage_level,
+
+            "damage_level": (
+                damage_level
+            ),
+
+            "defect_severity": (
+                damage_level
+            ),
+
+            "contamination": (
+                contamination
+            ),
+
+            "contamination_status": (
+                contamination
+            ),
+
+            "contamination_level": (
+                contamination
+            ),
+        },
+
+        "decision_analysis": {
+            "decision": {
+                "recommendation": (
+                    recommendation
+                ),
+
+                "final_decision": (
+                    recommendation
+                ),
+
+                "recovery_path": (
+                    recovery_path
+                ),
+
+                "recovery_category": (
+                    recovery_category
+                ),
+
+                "rule_name": (
+                    decision_rule
+                ),
+
+                "decision_rule": (
+                    decision_rule
+                ),
+
+                "priority": (
+                    upload.decision_priority
+                ),
+
+                "reason": explanation,
+
+                "explanation": (
+                    explanation
+                ),
+
+                "requires_manual_review": (
+                    requires_manual_review
+                ),
+            },
+
+            "material_data": {
+                "material": material,
+
+                "name": material,
+
+                "type": material_type,
+
+                "material_type": (
+                    material_type
+                ),
+
+                "recycling_method": (
+                    _clean_text(
+                        upload.recycling_method,
+                        recovery_path,
+                    )
+                ),
+
+                "environmental_impact": (
+                    environmental_impact
+                ),
+
+                "biodegradable": bool(
+                    upload.biodegradable
+                ),
+
+                "reusable": bool(
+                    upload.reusable
+                ),
+            },
+
+            "material_known": (
+                material_known
+            ),
+
+            "material_status": (
+                material_status
+            ),
+
+            "material_source": (
+                material_source
+            ),
+        },
+
+        "sustainability_analysis": {
+            "material": material,
+
+            "material_known": (
+                material_known
+            ),
+
+            "condition": condition,
+
+            "contamination": (
+                contamination
+            ),
+
+            "damage_level": (
+                damage_level
+            ),
+
+            "recommendation": (
+                recommendation
+            ),
+
+            "recovery_path": (
+                recovery_path
+            ),
+
+            "recovery_category": (
+                recovery_category
+            ),
+
+            "sustainability_score": (
+                sustainability_score
+            ),
+
+            "reuse_score": reuse_score,
+
+            "recovery_score": (
+                recovery_score
+            ),
+
+            "circularity_level": (
+                circularity_level
+            ),
+
+            "assessment_status": (
+                assessment_status
+            ),
+
+            "requires_manual_review": (
+                requires_manual_review
+            ),
+
+            "weight_kg": weight_kg,
+
+            "co2_saved_kg": (
+                environmental_benefits.get(
+                    "co2_saved_kg",
+                    0,
+                )
+            ),
+
+            "water_saved_liters": (
+                environmental_benefits.get(
+                    "water_saved_liters",
+                    0,
+                )
+            ),
+
+            "energy_saved_kwh": (
+                environmental_benefits.get(
+                    "energy_saved_kwh",
+                    0,
+                )
+            ),
+
+            "landfill_diverted_kg": (
+                environmental_benefits.get(
+                    "landfill_diverted_kg",
+                    0,
+                )
+            ),
+
+            "environmental_impact": (
+                environmental_impact
+            ),
+
+            "impact_calculation_status": (
+                environmental_benefits.get(
+                    "calculation_status",
+                    "Unavailable",
+                )
+            ),
+
+            "impact_is_estimate": (
+                environmental_benefits.get(
+                    "is_estimate",
+                    True,
+                )
+            ),
+
+            "impact_calculation_basis": (
+                environmental_benefits.get(
+                    "calculation_basis",
+                    (
+                        "textile_weight_kg × "
+                        "recovery_pathway_factor"
+                    ),
+                )
+            ),
+        },
+
+        "stored_assessment": {
+            "material": material,
+
+            "material_type": (
+                material_type
+            ),
+
+            "material_verified": (
+                material_known
+            ),
+
+            "material_source": (
+                material_source
+            ),
+
+            "final_decision": (
+                recommendation
+            ),
+
+            "recovery_path": (
+                recovery_path
+            ),
+
+            "recovery_category": (
+                recovery_category
+            ),
+
+            "sustainability_score": (
+                sustainability_score
+            ),
+
+            "reuse_score": reuse_score,
+
+            "recovery_score": (
+                recovery_score
+            ),
+
+            "circularity_level": (
+                circularity_level
+            ),
+
+            "assessment_status": (
+                assessment_status
+            ),
+
+            "requires_manual_review": (
+                requires_manual_review
+            ),
+
+            "weight_kg": weight_kg,
+
+            "environmental_impact": (
+                environmental_impact
+            ),
+
+            "co2_saved_kg": (
+                environmental_benefits.get(
+                    "co2_saved_kg",
+                    0,
+                )
+            ),
+
+            "water_saved_liters": (
+                environmental_benefits.get(
+                    "water_saved_liters",
+                    0,
+                )
+            ),
+
+            "energy_saved_kwh": (
+                environmental_benefits.get(
+                    "energy_saved_kwh",
+                    0,
+                )
+            ),
+
+            "landfill_diverted_kg": (
+                environmental_benefits.get(
+                    "landfill_diverted_kg",
+                    0,
+                )
+            ),
+        },
+    }
+
+
+@router.get("/")
+def get_recommendations(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(
+        get_current_user
+    ),
+):
+    """
+    Return complete textile recovery recommendations,
+    newest first.
+
+    WasteUpload is the source of truth because it
+    contains the material, condition, circular
+    decision and sustainability assessment.
+    """
+
+    try:
+        uploads = (
+            db.query(WasteUpload)
+            .order_by(
+                WasteUpload.upload_id.desc()
+            )
+            .all()
+        )
+
+        return [
+            _serialize_recommendation(
+                upload
+            )
+            for upload in uploads
+        ]
+
+    except Exception as error:
+        print(
+            "Recommendations API error:",
+            repr(error),
+        )
+
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                "Failed to load complete "
+                "textile recommendations."
+            ),
+        ) from error

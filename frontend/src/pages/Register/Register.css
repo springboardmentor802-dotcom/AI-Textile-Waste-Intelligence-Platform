@@ -1,0 +1,45 @@
+.register-card {
+  padding-top: 36px;
+  padding-bottom: 36px;
+}
+
+.form-message {
+  margin-bottom: 20px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.error-message {
+  color: #b42318;
+  background: #fef3f2;
+  border: 1px solid #fecdca;
+}
+
+.success-message {
+  color: #067647;
+  background: #ecfdf3;
+  border: 1px solid #abefc6;
+}
+
+.auth-switch {
+  margin: 22px 0 0 !important;
+  text-align: center;
+  font-size: 14px;
+}
+
+.auth-switch a {
+  color: #1565c0;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-switch a:hover {
+  text-decoration: underline;
+}
+
+.login-card button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+  transform: none;
+}

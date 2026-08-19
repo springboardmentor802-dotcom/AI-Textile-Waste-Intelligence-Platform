@@ -10,9 +10,11 @@ import {
   FaChartLine,
   FaCheckCircle,
   FaCloudUploadAlt,
+  FaIndustry,
   FaLeaf,
   FaRecycle,
   FaRobot,
+  FaShieldAlt,
   FaUsers,
 } from "react-icons/fa";
 
@@ -33,17 +35,9 @@ import {
 } from "../../contexts/AuthContext";
 
 import {
-  getUsers,
-} from "../../services/userService";
-import {
-  getInventory,
-} from "../../services/inventoryService";
-import {
-  getRecommendations,
-} from "../../services/recommendationService";
-import {
-  getAnalytics,
-} from "../../services/analyticsService";
+  getDashboardData,
+} from "../../services/dashboardService";
+
 import {
   getPredictionHistory,
 } from "../../services/predictionService";
@@ -82,31 +76,8 @@ const normalizeList = (response) => {
       response?.history,
       response?.results,
       response?.items,
-      response?.users,
-      response?.inventory,
-      response?.recommendations,
-      response?.rules,
     ].find(Array.isArray) || []
   );
-};
-
-
-const getCount = (response) => {
-  const explicitCount = firstValue(
-    response?.count,
-    response?.total,
-    response?.total_count,
-  );
-
-  if (
-    Number.isFinite(
-      Number(explicitCount),
-    )
-  ) {
-    return Number(explicitCount);
-  }
-
-  return normalizeList(response).length;
 };
 
 
@@ -137,18 +108,49 @@ const titleCase = (value) =>
     );
 
 
+const objectToChartData = (
+  object = {},
+  excludedValues = [],
+) =>
+  Object.entries(object)
+    .filter(
+      ([name]) =>
+        !excludedValues.includes(
+          String(name).trim(),
+        ),
+    )
+    .map(([name, value]) => ({
+      name: titleCase(name),
+      value: Number(value || 0),
+    }))
+    .filter(
+      (item) =>
+        item.value > 0,
+    )
+    .sort(
+      (first, second) =>
+        second.value - first.value,
+    );
+
+
 const readRecord = (item) => {
   const fabric =
     item?.fabric_prediction || {};
+
   const verification =
     item?.material_verification || {};
+
   const decisionAnalysis =
     item?.decision_analysis || {};
+
   const decision =
     decisionAnalysis?.decision ||
-    decisionAnalysis || {};
+    decisionAnalysis ||
+    {};
+
   const sustainability =
     item?.sustainability_analysis || {};
+
   const stored =
     item?.stored_assessment || {};
 
@@ -173,8 +175,7 @@ const readRecord = (item) => {
 
   const sustainabilityScore =
     firstValue(
-      sustainability
-        ?.sustainability_score,
+      sustainability?.sustainability_score,
       stored?.sustainability_score,
       item?.sustainability_score,
     );
@@ -204,6 +205,7 @@ const readRecord = (item) => {
       item?.id,
       "—",
     ),
+
     classId: String(
       firstValue(
         fabric?.class_id,
@@ -213,6 +215,7 @@ const readRecord = (item) => {
         "—",
       ),
     ).padStart(3, "0"),
+
     fabricName: firstValue(
       fabric?.fabric_name,
       fabric?.category,
@@ -220,20 +223,24 @@ const readRecord = (item) => {
       item?.fabric_category,
       "Unknown visual class",
     ),
+
     material: firstValue(
       verification?.material,
       stored?.material,
       item?.material,
       "Unverified",
     ),
+
     materialSource,
+
     verified,
+
     condition: firstValue(
-      item?.condition_analysis
-        ?.condition,
+      item?.condition_analysis?.condition,
       item?.condition,
       "Unknown",
     ),
+
     recommendation: firstValue(
       decision?.final_decision,
       decision?.recommendation,
@@ -241,12 +248,14 @@ const readRecord = (item) => {
       item?.final_decision,
       "Not assessed",
     ),
+
     recoveryCategory: firstValue(
       decision?.recovery_category,
       stored?.recovery_category,
       item?.recovery_category,
       "Not assessed",
     ),
+
     confidence: normalizeConfidence(
       firstValue(
         fabric?.confidence,
@@ -254,8 +263,11 @@ const readRecord = (item) => {
         0,
       ),
     ),
+
     sustainabilityScore,
+
     assessmentStatus,
+
     date:
       date &&
       !Number.isNaN(date.getTime())
@@ -269,20 +281,15 @@ function Dashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const [users, setUsers] =
-    useState(0);
-  const [inventory, setInventory] =
-    useState(0);
-  const [
-    recommendationRules,
-    setRecommendationRules,
-  ] = useState(0);
-  const [analytics, setAnalytics] =
-    useState({});
+  const [dashboardData, setDashboardData] =
+    useState(null);
+
   const [history, setHistory] =
     useState([]);
+
   const [loading, setLoading] =
     useState(true);
+
   const [warning, setWarning] =
     useState("");
 
@@ -296,11 +303,8 @@ function Dashboard() {
 
       const results =
         await Promise.allSettled([
-          getUsers(),
-          getInventory(),
+          getDashboardData(),
           getPredictionHistory(),
-          getRecommendations(),
-          getAnalytics(),
         ]);
 
       if (!active) {
@@ -311,8 +315,12 @@ function Dashboard() {
         results[0].status ===
         "fulfilled"
       ) {
-        setUsers(
-          getCount(results[0].value),
+        setDashboardData(
+          results[0].value,
+        );
+      } else {
+        setWarning(
+          "Role-based dashboard data could not be loaded.",
         );
       }
 
@@ -320,52 +328,21 @@ function Dashboard() {
         results[1].status ===
         "fulfilled"
       ) {
-        setInventory(
-          getCount(results[1].value),
-        );
-      }
-
-      if (
-        results[2].status ===
-        "fulfilled"
-      ) {
         setHistory(
           normalizeList(
-            results[2].value,
+            results[1].value,
           ),
         );
       }
 
       if (
-        results[3].status ===
-        "fulfilled"
+        results[0].status ===
+          "rejected" &&
+        results[1].status ===
+          "rejected"
       ) {
-        setRecommendationRules(
-          getCount(results[3].value),
-        );
-      }
-
-      if (
-        results[4].status ===
-        "fulfilled"
-      ) {
-        setAnalytics(
-          results[4].value || {},
-        );
-      }
-
-      const failures =
-        results.filter(
-          (result) =>
-            result.status ===
-            "rejected",
-        ).length;
-
-      if (failures) {
         setWarning(
-          `${failures} dashboard data source${
-            failures === 1 ? "" : "s"
-          } could not be loaded.`,
+          "Dashboard data sources could not be loaded.",
         );
       }
 
@@ -381,112 +358,44 @@ function Dashboard() {
 
 
   const records = useMemo(
-    () => history.map(readRecord),
+    () =>
+      history.map(
+        readRecord,
+      ),
     [history],
   );
 
 
-  const totalSamples = Number(
-    firstValue(
-      analytics?.total_uploads,
-      records.length,
-      0,
-    ),
+  const recentRecords = useMemo(
+    () =>
+      [...records]
+        .sort(
+          (first, second) => {
+            if (!first.date) return 1;
+            if (!second.date) return -1;
+
+            return (
+              second.date -
+              first.date
+            );
+          },
+        )
+        .slice(0, 5),
+    [records],
   );
 
-  const averageConfidence =
-    records.length
-      ? records.reduce(
-          (sum, item) =>
-            sum + item.confidence,
-          0,
-        ) / records.length
-      : 0;
 
-  const provisionalCount =
-    records.filter(
-      (item) =>
-        item.materialSource ===
-          "application_class_mapping" ||
-        String(
-          item.assessmentStatus,
-        ).toLowerCase() ===
-          "provisional",
-    ).length;
+  const common =
+    dashboardData?.common || {};
 
-  const verifiedCount =
-    records.filter(
-      (item) => item.verified,
-    ).length;
+  const dashboardType =
+    dashboardData?.dashboard_type ||
+    "basic";
 
-  const scoredRecords =
-    records.filter(
-      (item) =>
-        Number.isFinite(
-          Number(
-            item.sustainabilityScore,
-          ),
-        ),
-    );
-
-  const averageSustainability =
-    scoredRecords.length
-      ? scoredRecords.reduce(
-          (sum, item) =>
-            sum +
-            Number(
-              item.sustainabilityScore,
-            ),
-          0,
-        ) / scoredRecords.length
-      : Number(
-          analytics
-            ?.recyclable_percentage || 0,
-        );
-
-  const recoveryData = useMemo(() => {
-    const counts = records.reduce(
-      (result, item) => {
-        const name = titleCase(
-          item.recoveryCategory,
-        );
-
-        result[name] =
-          (result[name] || 0) + 1;
-
-        return result;
-      },
-      {},
-    );
-
-    return Object.entries(counts)
-      .map(([name, value]) => ({
-        name,
-        value,
-      }))
-      .sort(
-        (first, second) =>
-          second.value - first.value,
-      );
-  }, [records]);
-
-  const assessedRecoveryData =
-    recoveryData.filter(
-      (item) =>
-        ![
-          "Not Assessed",
-          "Unknown",
-          "Manual Verification",
-        ].includes(item.name),
-    );
-
-  const recentRecords = [...records]
-    .sort((first, second) => {
-      if (!first.date) return 1;
-      if (!second.date) return -1;
-      return second.date - first.date;
-    })
-    .slice(0, 5);
+  const displayRole =
+    dashboardData?.display_role ||
+    user?.role ||
+    "User";
 
   const userName = firstValue(
     user?.username,
@@ -495,15 +404,738 @@ function Dashboard() {
   );
 
 
+  const config = useMemo(() => {
+    switch (dashboardType) {
+      case "admin":
+        return {
+          eyebrow:
+            "Platform administration",
+
+          description:
+            "Monitor users, textile activity, inventory and platform-wide circular intelligence from one administrative workspace.",
+
+          primaryAction: {
+            label:
+              "Analyse textile",
+            path:
+              "/upload-waste",
+          },
+
+          secondaryAction: {
+            label:
+              "View analytics",
+            path:
+              "/analytics",
+          },
+
+          scoreLabel:
+            "Platform sustainability",
+
+          chartTitle:
+            "Recovery pathway distribution",
+
+          chartLabel:
+            "Platform circularity",
+
+          chartData:
+            objectToChartData(
+              common.recovery_categories,
+              [
+                "Not Assessed",
+                "Unknown",
+                "Manual Verification",
+              ],
+            ),
+
+          metrics: [
+            {
+              label:
+                "Platform users",
+              value:
+                dashboardData
+                  ?.admin
+                  ?.total_users ?? 0,
+              description:
+                "Registered users across all platform roles",
+              icon:
+                FaUsers,
+            },
+            {
+              label:
+                "AI analyses",
+              value:
+                common.total_analyses ?? 0,
+              description:
+                "Total textile intelligence records",
+              icon:
+                FaCloudUploadAlt,
+            },
+            {
+              label:
+                "Inventory batches",
+              value:
+                dashboardData
+                  ?.admin
+                  ?.total_inventory_batches ??
+                0,
+              description:
+                "Textile waste batches currently registered",
+              icon:
+                FaBoxes,
+            },
+            {
+              label:
+                "Manual reviews",
+              value:
+                common.manual_review_required ??
+                0,
+              description:
+                "Assessments requiring human verification",
+              icon:
+                FaShieldAlt,
+            },
+          ],
+
+          operations: [
+            {
+              label:
+                "Platform users",
+              value:
+                dashboardData
+                  ?.admin
+                  ?.total_users ?? 0,
+              path:
+                null,
+              icon:
+                FaUsers,
+            },
+            {
+              label:
+                "Inventory batches",
+              value:
+                dashboardData
+                  ?.admin
+                  ?.total_inventory_batches ??
+                0,
+              path:
+                "/inventory",
+              icon:
+                FaBoxes,
+            },
+            {
+              label:
+                "Completed assessments",
+              value:
+                common.completed_assessments ??
+                0,
+              path:
+                "/analytics",
+              icon:
+                FaCheckCircle,
+            },
+            {
+              label:
+                "Total waste weight",
+              value:
+                `${Number(
+                  common.total_weight_kg ||
+                    0,
+                ).toFixed(1)} kg`,
+              path:
+                null,
+              icon:
+                FaRecycle,
+            },
+          ],
+        };
+
+
+      case "manufacturer":
+        return {
+          eyebrow:
+            "Textile manufacturing intelligence",
+
+          description:
+            "Track your production waste, material mix, recovery potential and sustainability performance from a manufacturer-focused workspace.",
+
+          primaryAction: {
+            label:
+              "Register waste",
+            path:
+              "/upload-waste",
+          },
+
+          secondaryAction: {
+            label:
+              "Batch analysis",
+            path:
+              "/batch-analysis",
+          },
+
+          scoreLabel:
+            "Waste sustainability",
+
+          chartTitle:
+            "Material distribution",
+
+          chartLabel:
+            "Production profile",
+
+          chartData:
+            objectToChartData(
+              dashboardData
+                ?.manufacturer
+                ?.material_distribution,
+              [
+                "Unverified",
+                "Awaiting Material Verification",
+              ],
+            ),
+
+          metrics: [
+            {
+              label:
+                "Production waste",
+              value:
+                `${Number(
+                  dashboardData
+                    ?.manufacturer
+                    ?.production_waste_kg ||
+                    0,
+                ).toFixed(1)} kg`,
+              description:
+                "Total waste represented by your analyses",
+              icon:
+                FaIndustry,
+            },
+            {
+              label:
+                "AI analyses",
+              value:
+                common.total_analyses ?? 0,
+              description:
+                "Your recorded textile assessments",
+              icon:
+                FaRobot,
+            },
+            {
+              label:
+                "High recovery items",
+              value:
+                dashboardData
+                  ?.manufacturer
+                  ?.high_recovery_items ??
+                0,
+              description:
+                "Assessments with recovery score of 70 or higher",
+              icon:
+                FaRecycle,
+            },
+            {
+              label:
+                "Manual reviews",
+              value:
+                common.manual_review_required ??
+                0,
+              description:
+                "Waste samples needing confirmation",
+              icon:
+                FaCheckCircle,
+            },
+          ],
+
+          operations: [
+            {
+              label:
+                "Reusable items",
+              value:
+                common.reusable_items ??
+                0,
+              path:
+                "/recommendations",
+              icon:
+                FaRecycle,
+            },
+            {
+              label:
+                "Completed assessments",
+              value:
+                common.completed_assessments ??
+                0,
+              path:
+                null,
+              icon:
+                FaCheckCircle,
+            },
+            {
+              label:
+                "Average recovery",
+              value:
+                `${Number(
+                  common.average_recovery_score ||
+                    0,
+                ).toFixed(1)}/100`,
+              path:
+                "/recommendations",
+              icon:
+                FaChartLine,
+            },
+            {
+              label:
+                "Total analysed weight",
+              value:
+                `${Number(
+                  common.total_weight_kg ||
+                    0,
+                ).toFixed(1)} kg`,
+              path:
+                "/analytics",
+              icon:
+                FaBoxes,
+            },
+          ],
+        };
+
+
+      case "recycler":
+        return {
+          eyebrow:
+            "Recycling facility intelligence",
+
+          description:
+            "Prioritize recoverable textile streams, monitor processing opportunities and evaluate recycling pathways across platform waste records.",
+
+          primaryAction: {
+            label:
+              "View recommendations",
+            path:
+              "/recommendations",
+          },
+
+          secondaryAction: {
+            label:
+              "Open inventory",
+            path:
+              "/inventory",
+          },
+
+          scoreLabel:
+            "Average recovery potential",
+
+          chartTitle:
+            "Recycling pathway distribution",
+
+          chartLabel:
+            "Processing intelligence",
+
+          chartData:
+            objectToChartData(
+              dashboardData
+                ?.recycler
+                ?.recycling_methods,
+              [
+                "Awaiting Material Verification",
+                "Awaiting Optional Material Confirmation",
+              ],
+            ),
+
+          metrics: [
+            {
+              label:
+                "Recovery opportunities",
+              value:
+                dashboardData
+                  ?.recycler
+                  ?.recovery_opportunities ??
+                0,
+              description:
+                "Waste streams scoring 70+ for recovery",
+              icon:
+                FaRecycle,
+            },
+            {
+              label:
+                "Mechanical recycling",
+              value:
+                dashboardData
+                  ?.recycler
+                  ?.mechanical_recycling ??
+                0,
+              description:
+                "Records directed toward mechanical recycling",
+              icon:
+                FaBoxes,
+            },
+            {
+              label:
+                "Chemical recycling",
+              value:
+                dashboardData
+                  ?.recycler
+                  ?.chemical_recycling ??
+                0,
+              description:
+                "Records directed toward chemical recycling",
+              icon:
+                FaRobot,
+            },
+            {
+              label:
+                "Manual review queue",
+              value:
+                dashboardData
+                  ?.recycler
+                  ?.manual_review_queue ??
+                0,
+              description:
+                "Cases requiring operator verification",
+              icon:
+                FaCheckCircle,
+            },
+          ],
+
+          operations: [
+            {
+              label:
+                "Total analysed waste",
+              value:
+                `${Number(
+                  common.total_weight_kg ||
+                    0,
+                ).toFixed(1)} kg`,
+              path:
+                "/inventory",
+              icon:
+                FaBoxes,
+            },
+            {
+              label:
+                "Reusable opportunities",
+              value:
+                dashboardData
+                  ?.recycler
+                  ?.reuse_opportunities ??
+                0,
+              path:
+                "/recommendations",
+              icon:
+                FaRecycle,
+            },
+            {
+              label:
+                "Recyclable records",
+              value:
+                common.recyclable_items ??
+                0,
+              path:
+                "/recommendations",
+              icon:
+                FaCheckCircle,
+            },
+            {
+              label:
+                "Average recovery score",
+              value:
+                `${Number(
+                  common.average_recovery_score ||
+                    0,
+                ).toFixed(1)}/100`,
+              path:
+                null,
+              icon:
+                FaChartLine,
+            },
+          ],
+        };
+
+
+      case "sustainability":
+        return {
+          eyebrow:
+            "Sustainability intelligence",
+
+          description:
+            "Monitor sustainability performance, circularity levels and recovery outcomes across the textile waste intelligence platform.",
+
+          primaryAction: {
+            label:
+              "Open analytics",
+            path:
+              "/analytics",
+          },
+
+          secondaryAction: {
+            label:
+              "View recommendations",
+            path:
+              "/recommendations",
+          },
+
+          scoreLabel:
+            "Average sustainability",
+
+          chartTitle:
+            "Circularity level distribution",
+
+          chartLabel:
+            "Circular economy",
+
+          chartData:
+            objectToChartData(
+              dashboardData
+                ?.sustainability
+                ?.circularity_levels,
+              [
+                "Not Assessed",
+                "Insufficient Data",
+              ],
+            ),
+
+          metrics: [
+            {
+              label:
+                "Scored assessments",
+              value:
+                dashboardData
+                  ?.sustainability
+                  ?.scored_assessments ??
+                0,
+              description:
+                "Assessments with sustainability scoring",
+              icon:
+                FaLeaf,
+            },
+            {
+              label:
+                "High sustainability",
+              value:
+                dashboardData
+                  ?.sustainability
+                  ?.high_sustainability_assessments ??
+                0,
+              description:
+                "Assessments scoring 70 or above",
+              icon:
+                FaCheckCircle,
+            },
+            {
+              label:
+                "Low sustainability",
+              value:
+                dashboardData
+                  ?.sustainability
+                  ?.low_sustainability_assessments ??
+                0,
+              description:
+                "Assessments scoring below 40",
+              icon:
+                FaChartLine,
+            },
+            {
+              label:
+                "Manual reviews",
+              value:
+                common.manual_review_required ??
+                0,
+              description:
+                "Records awaiting human verification",
+              icon:
+                FaRobot,
+            },
+          ],
+
+          operations: [
+            {
+              label:
+                "Average sustainability",
+              value:
+                `${Number(
+                  common.average_sustainability_score ||
+                    0,
+                ).toFixed(1)}/100`,
+              path:
+                "/analytics",
+              icon:
+                FaLeaf,
+            },
+            {
+              label:
+                "Average recovery",
+              value:
+                `${Number(
+                  common.average_recovery_score ||
+                    0,
+                ).toFixed(1)}/100`,
+              path:
+                "/recommendations",
+              icon:
+                FaRecycle,
+            },
+            {
+              label:
+                "Reusable records",
+              value:
+                common.reusable_items ??
+                0,
+              path:
+                null,
+              icon:
+                FaCheckCircle,
+            },
+            {
+              label:
+                "Analysed textile weight",
+              value:
+                `${Number(
+                  common.total_weight_kg ||
+                    0,
+                ).toFixed(1)} kg`,
+              path:
+                "/analytics",
+              icon:
+                FaBoxes,
+            },
+          ],
+        };
+
+
+      default:
+        return {
+          eyebrow:
+            "AI textile intelligence",
+
+          description:
+            "Monitor textile waste analysis, recovery pathways and sustainability intelligence.",
+
+          primaryAction: {
+            label:
+              "Analyse textile",
+            path:
+              "/upload-waste",
+          },
+
+          secondaryAction: {
+            label:
+              "View recommendations",
+            path:
+              "/recommendations",
+          },
+
+          scoreLabel:
+            "Average sustainability",
+
+          chartTitle:
+            "Recovery pathway distribution",
+
+          chartLabel:
+            "Circular pathways",
+
+          chartData:
+            objectToChartData(
+              common.recovery_categories,
+            ),
+
+          metrics: [
+            {
+              label:
+                "AI analyses",
+              value:
+                common.total_analyses ?? 0,
+              description:
+                "Textile intelligence records",
+              icon:
+                FaRobot,
+            },
+            {
+              label:
+                "Completed assessments",
+              value:
+                common.completed_assessments ??
+                0,
+              description:
+                "Fully assessed samples",
+              icon:
+                FaCheckCircle,
+            },
+            {
+              label:
+                "Reusable items",
+              value:
+                common.reusable_items ??
+                0,
+              description:
+                "Potential reuse opportunities",
+              icon:
+                FaRecycle,
+            },
+            {
+              label:
+                "Manual reviews",
+              value:
+                common.manual_review_required ??
+                0,
+              description:
+                "Records requiring verification",
+              icon:
+                FaChartLine,
+            },
+          ],
+
+          operations: [],
+        };
+    }
+  }, [
+    dashboardType,
+    dashboardData,
+    common,
+  ]);
+
+
+  const score =
+    dashboardType === "recycler"
+      ? Number(
+          common.average_recovery_score ||
+            0,
+        )
+      : Number(
+          common.average_sustainability_score ||
+            0,
+        );
+
+
   if (loading) {
     return (
       <main className="db-page db-loading">
         <div className="db-loader" />
+
         <h2>
           Preparing your intelligence workspace
         </h2>
+
         <p>
-          Connecting textile analyses, recovery rules and operational data.
+          Loading role-based textile intelligence and operational data.
+        </p>
+      </main>
+    );
+  }
+
+
+  if (!dashboardData) {
+    return (
+      <main className="db-page db-loading">
+        <FaRobot
+          style={{
+            fontSize: "42px",
+            marginBottom: "16px",
+          }}
+        />
+
+        <h2>
+          Dashboard unavailable
+        </h2>
+
+        <p>
+          The role-based dashboard could not be loaded.
         </p>
       </main>
     );
@@ -512,28 +1144,40 @@ function Dashboard() {
 
   return (
     <main className="db-page">
+
+      {/* ================================================= */}
+      {/* HERO */}
+      {/* ================================================= */}
+
       <section className="db-hero">
+
         <div className="db-hero-copy">
+
           <span className="db-eyebrow">
-            AI textile intelligence
+            {config.eyebrow}
           </span>
+
           <h1>
             Welcome back, {userName}.
           </h1>
+
           <p>
-            Track visual fabric recognition, condition intelligence and
-            explainable circular recovery outcomes from one focused workspace.
+            {config.description}
           </p>
 
           <div className="db-hero-actions">
+
             <button
               type="button"
               className="db-primary-action"
               onClick={() =>
-                navigate("/upload-waste")
+                navigate(
+                  config.primaryAction.path,
+                )
               }
             >
-              Analyse textile
+              {config.primaryAction.label}
+
               <FaArrowRight />
             </button>
 
@@ -541,136 +1185,196 @@ function Dashboard() {
               type="button"
               className="db-secondary-action"
               onClick={() =>
-                navigate("/batch-analysis")
+                navigate(
+                  config.secondaryAction.path,
+                )
               }
             >
-              Open batch analysis
+              {config.secondaryAction.label}
             </button>
+
           </div>
+
         </div>
 
+
         <div className="db-hero-score">
+
           <div
             className="db-score-ring"
             style={{
               "--score":
-                `${Math.round(
-                  averageSustainability,
-                ) * 3.6}deg`,
+                `${
+                  Math.min(
+                    100,
+                    Math.max(
+                      0,
+                      Math.round(score),
+                    ),
+                  ) * 3.6
+                }deg`,
             }}
           >
+
             <div>
+
               <strong>
-                {Math.round(
-                  averageSustainability,
-                )}
+                {Math.round(score)}
               </strong>
+
               <span>/100</span>
+
             </div>
+
           </div>
 
+
           <div>
+
             <span>
-              Average sustainability
+              {config.scoreLabel}
             </span>
+
             <strong>
-              {scoredRecords.length} scored assessments
+              {displayRole}
             </strong>
+
             <small>
-              Based on persisted explainable results
+              Role-specific intelligence generated from persisted platform data
             </small>
+
           </div>
+
         </div>
+
       </section>
+
+
+      {/* ================================================= */}
+      {/* WARNING */}
+      {/* ================================================= */}
 
       {warning && (
         <div className="db-warning">
+
           <span>i</span>
-          <p>{warning}</p>
+
+          <p>
+            {warning}
+          </p>
+
         </div>
       )}
 
+
+      {/* ================================================= */}
+      {/* KPI CARDS */}
+      {/* ================================================= */}
+
       <section className="db-metrics">
-        <article className="db-metric db-metric-dark">
-          <div className="db-metric-icon">
-            <FaCloudUploadAlt />
-          </div>
-          <span>Total AI samples</span>
-          <strong>{totalSamples}</strong>
-          <p>
-            Complete historical analysis activity
-          </p>
-        </article>
 
-        <article className="db-metric">
-          <div className="db-metric-icon">
-            <FaRobot />
-          </div>
-          <span>Provisional results</span>
-          <strong>
-            {provisionalCount}
-          </strong>
-          <p>
-            Using academic class mapping
-          </p>
-        </article>
+        {config.metrics.map(
+          (
+            metric,
+            index,
+          ) => {
 
-        <article className="db-metric">
-          <div className="db-metric-icon">
-            <FaCheckCircle />
-          </div>
-          <span>Verified materials</span>
-          <strong>{verifiedCount}</strong>
-          <p>
-            Completed with confirmation evidence
-          </p>
-        </article>
+            const Icon =
+              metric.icon;
 
-        <article className="db-metric">
-          <div className="db-metric-icon">
-            <FaChartLine />
-          </div>
-          <span>Average confidence</span>
-          <strong>
-            {averageConfidence.toFixed(1)}%
-          </strong>
-          <p>
-            CNN confidence—not test accuracy
-          </p>
-        </article>
+            return (
+              <article
+                key={
+                  metric.label
+                }
+                className={
+                  index === 0
+                    ? "db-metric db-metric-dark"
+                    : "db-metric"
+                }
+              >
+
+                <div className="db-metric-icon">
+                  <Icon />
+                </div>
+
+                <span>
+                  {metric.label}
+                </span>
+
+                <strong>
+                  {metric.value}
+                </strong>
+
+                <p>
+                  {metric.description}
+                </p>
+
+              </article>
+            );
+          },
+        )}
+
       </section>
 
+
+      {/* ================================================= */}
+      {/* CHART + OPERATIONS */}
+      {/* ================================================= */}
+
       <section className="db-main-grid">
+
         <article className="db-panel db-recovery-panel">
+
           <div className="db-panel-heading">
+
             <div>
+
               <span className="db-section-label">
-                Circular pathways
+                {config.chartLabel}
               </span>
-              <h2>Assessed recovery outcomes</h2>
+
+              <h2>
+                {config.chartTitle}
+              </h2>
+
             </div>
+
             <button
               type="button"
               onClick={() =>
-                navigate("/analytics")
+                navigate(
+                  dashboardType ===
+                    "manufacturer"
+                    ? "/recommendations"
+                    : "/analytics",
+                )
               }
             >
-              Full analytics
+              Explore
+
               <FaArrowRight />
             </button>
+
           </div>
 
+
           <div className="db-recovery-content">
+
             <div className="db-donut">
-              {assessedRecoveryData.length ? (
+
+              {config.chartData.length ? (
+
                 <ResponsiveContainer
                   width="100%"
                   height="100%"
                 >
+
                   <PieChart>
+
                     <Pie
                       data={
-                        assessedRecoveryData
+                        config.chartData
                       }
                       dataKey="value"
                       nameKey="name"
@@ -679,10 +1383,16 @@ function Dashboard() {
                       paddingAngle={5}
                       cornerRadius={8}
                     >
-                      {assessedRecoveryData.map(
-                        (item, index) => (
+
+                      {config.chartData.map(
+                        (
+                          item,
+                          index,
+                        ) => (
                           <Cell
-                            key={item.name}
+                            key={
+                              item.name
+                            }
                             fill={
                               CHART_COLORS[
                                 index %
@@ -692,251 +1402,408 @@ function Dashboard() {
                           />
                         ),
                       )}
+
                     </Pie>
+
                     <Tooltip />
+
                   </PieChart>
+
                 </ResponsiveContainer>
+
               ) : (
+
                 <div className="db-empty">
+
                   <FaRecycle />
+
                   <p>
-                    Recovery outcomes will appear after assessed predictions.
+                    Role-specific chart data will appear after assessed textile records are available.
                   </p>
+
                 </div>
+
               )}
+
             </div>
+
 
             <div className="db-recovery-list">
-              {assessedRecoveryData
+
+              {config.chartData
                 .slice(0, 6)
-                .map((item, index) => (
-                  <div key={item.name}>
-                    <span
-                      style={{
-                        background:
-                          CHART_COLORS[
-                            index %
-                              CHART_COLORS.length
-                          ],
-                      }}
-                    />
-                    <p>{item.name}</p>
-                    <strong>
-                      {item.value}
-                    </strong>
-                  </div>
-                ))}
+                .map(
+                  (
+                    item,
+                    index,
+                  ) => (
+
+                    <div
+                      key={
+                        item.name
+                      }
+                    >
+
+                      <span
+                        style={{
+                          background:
+                            CHART_COLORS[
+                              index %
+                                CHART_COLORS.length
+                            ],
+                        }}
+                      />
+
+                      <p>
+                        {item.name}
+                      </p>
+
+                      <strong>
+                        {item.value}
+                      </strong>
+
+                    </div>
+
+                  ),
+                )}
+
             </div>
+
           </div>
+
 
           <div className="db-data-note">
+
             <span>i</span>
+
             <p>
-              Legacy “Not Assessed” records are excluded from this recovery
-              chart so it represents only completed or provisional outcomes.
+              Dashboard data is filtered and summarized according to the authenticated user's platform role.
             </p>
+
           </div>
+
         </article>
+
 
         <article className="db-panel db-operations-panel">
+
           <div className="db-panel-heading">
+
             <div>
+
               <span className="db-section-label">
-                Platform operations
+                {displayRole}
               </span>
-              <h2>Workspace status</h2>
+
+              <h2>
+                Workspace status
+              </h2>
+
             </div>
+
           </div>
+
 
           <div className="db-operation-list">
-            <button
-              type="button"
-              onClick={() =>
-                navigate("/inventory")
-              }
-            >
-              <span className="db-operation-icon">
-                <FaBoxes />
-              </span>
-              <span>
-                <strong>
-                  {inventory}
-                </strong>
-                <small>
-                  Inventory items
-                </small>
-              </span>
-              <FaArrowRight />
-            </button>
 
-            <button
-              type="button"
-              onClick={() =>
-                navigate(
-                  "/recommendations",
-                )
-              }
-            >
-              <span className="db-operation-icon">
-                <FaRecycle />
-              </span>
-              <span>
-                <strong>
-                  {recommendationRules}
-                </strong>
-                <small>
-                  Recommendation records
-                </small>
-              </span>
-              <FaArrowRight />
-            </button>
+            {config.operations.map(
+              (
+                operation,
+              ) => {
 
-            <div className="db-operation-static">
-              <span className="db-operation-icon">
-                <FaUsers />
-              </span>
-              <span>
-                <strong>{users}</strong>
-                <small>
-                  Platform users
-                </small>
-              </span>
-            </div>
+                const Icon =
+                  operation.icon;
 
-            <div className="db-operation-static">
-              <span className="db-operation-icon">
-                <FaLeaf />
-              </span>
-              <span>
-                <strong>
-                  {scoredRecords.length}
-                </strong>
-                <small>
-                  Sustainability assessments
-                </small>
-              </span>
-            </div>
+                if (
+                  operation.path
+                ) {
+                  return (
+                    <button
+                      key={
+                        operation.label
+                      }
+                      type="button"
+                      onClick={() =>
+                        navigate(
+                          operation.path,
+                        )
+                      }
+                    >
+
+                      <span className="db-operation-icon">
+                        <Icon />
+                      </span>
+
+                      <span>
+
+                        <strong>
+                          {operation.value}
+                        </strong>
+
+                        <small>
+                          {operation.label}
+                        </small>
+
+                      </span>
+
+                      <FaArrowRight />
+
+                    </button>
+                  );
+                }
+
+
+                return (
+                  <div
+                    key={
+                      operation.label
+                    }
+                    className="db-operation-static"
+                  >
+
+                    <span className="db-operation-icon">
+                      <Icon />
+                    </span>
+
+                    <span>
+
+                      <strong>
+                        {operation.value}
+                      </strong>
+
+                      <small>
+                        {operation.label}
+                      </small>
+
+                    </span>
+
+                  </div>
+                );
+              },
+            )}
+
           </div>
+
         </article>
+
       </section>
 
+
+      {/* ================================================= */}
+      {/* RECENT ANALYSES */}
+      {/* ================================================= */}
+
       <section className="db-panel db-recent-panel">
+
         <div className="db-panel-heading">
+
           <div>
+
             <span className="db-section-label">
               Latest intelligence
             </span>
-            <h2>Recent textile analyses</h2>
+
+            <h2>
+              Recent textile analyses
+            </h2>
+
           </div>
+
           <button
             type="button"
             onClick={() =>
-              navigate("/analytics")
+              navigate(
+                "/analytics",
+              )
             }
           >
             View all
+
             <FaArrowRight />
           </button>
+
         </div>
 
+
         {recentRecords.length ? (
+
           <div className="db-table-wrap">
+
             <table>
+
               <thead>
+
                 <tr>
-                  <th>Visual fabric class</th>
-                  <th>Material</th>
-                  <th>Condition</th>
-                  <th>Decision</th>
-                  <th>Confidence</th>
-                  <th>Status</th>
+                  <th>
+                    Visual fabric class
+                  </th>
+
+                  <th>
+                    Material
+                  </th>
+
+                  <th>
+                    Condition
+                  </th>
+
+                  <th>
+                    Decision
+                  </th>
+
+                  <th>
+                    Confidence
+                  </th>
+
+                  <th>
+                    Status
+                  </th>
                 </tr>
+
               </thead>
+
+
               <tbody>
+
                 {recentRecords.map(
-                  (item) => (
+                  (
+                    item,
+                  ) => (
+
                     <tr
-                      key={`${item.id}-${item.classId}`}
+                      key={
+                        `${item.id}-${item.classId}`
+                      }
                     >
+
                       <td>
+
                         <strong>
                           {item.fabricName}
                         </strong>
+
                         <small>
                           Class {item.classId}
                         </small>
+
                       </td>
+
+
                       <td>
+
                         <strong>
                           {item.material}
                         </strong>
+
                         <small>
+
                           {item.verified
                             ? "User verified"
+
                             : item.materialSource ===
-                                "application_class_mapping"
+                              "application_class_mapping"
+
                               ? "Application assigned"
+
                               : item.material ===
-                                  "Unverified"
+                                "Unverified"
+
                                 ? "Unverified"
+
                                 : "Legacy record"}
+
                         </small>
+
                       </td>
+
+
                       <td>
+
                         <span
-                          className={`db-condition db-condition-${String(
-                            item.condition,
-                          ).toLowerCase()}`}
+                          className={
+                            `db-condition db-condition-${String(
+                              item.condition,
+                            ).toLowerCase()}`
+                          }
                         >
                           {item.condition}
                         </span>
+
                       </td>
+
+
                       <td>
+
                         <strong className="db-decision">
                           {item.recommendation}
                         </strong>
+
                         <small>
                           {item.recoveryCategory}
                         </small>
+
                       </td>
+
+
                       <td>
-                        {item.confidence.toFixed(1)}%
+                        {item.confidence.toFixed(
+                          1,
+                        )}%
                       </td>
+
+
                       <td>
+
                         <span
-                          className={`db-status ${
-                            String(
-                              item.assessmentStatus,
-                            ).toLowerCase() ===
-                            "provisional"
-                              ? "is-provisional"
-                              : "is-complete"
-                          }`}
+                          className={
+                            `db-status ${
+                              String(
+                                item.assessmentStatus,
+                              ).toLowerCase() ===
+                              "provisional"
+
+                                ? "is-provisional"
+
+                                : "is-complete"
+                            }`
+                          }
                         >
                           {item.assessmentStatus}
                         </span>
+
                       </td>
+
                     </tr>
+
                   ),
                 )}
+
               </tbody>
+
             </table>
+
           </div>
+
         ) : (
+
           <div className="db-empty db-empty-wide">
+
             <FaCloudUploadAlt />
+
             <p>
-              Analyse a textile sample to create your first intelligence record.
+              Textile analyses will appear here after assessment records become available.
             </p>
+
           </div>
+
         )}
+
       </section>
 
+
       <p className="db-disclaimer">
-        Application-assigned materials are representative assumptions for this
-        academic prototype and are not fibre-composition ground truth supplied
-        by the Ten Fabrics Dataset.
+        Dashboard intelligence is generated from persisted textile assessments and is presented according to the authenticated platform role.
       </p>
+
     </main>
   );
 }

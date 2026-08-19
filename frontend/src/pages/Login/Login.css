@@ -106,6 +106,35 @@
   margin-bottom: 30px;
 }
 
+.form-message {
+  margin-bottom: 20px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.success-message {
+  color: #067647;
+  background: #ecfdf3;
+  border: 1px solid #abefc6;
+}
+
+.auth-switch {
+  margin: 22px 0 0 !important;
+  text-align: center;
+  font-size: 14px;
+}
+
+.auth-switch a {
+  color: #1565c0;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-switch a:hover {
+  text-decoration: underline;
+}
+
 .form-group {
   margin-bottom: 22px;
 }

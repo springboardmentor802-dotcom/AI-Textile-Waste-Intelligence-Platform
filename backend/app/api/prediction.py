@@ -21,6 +21,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.utils.auth_dependency import get_current_user
 
 from app.models.waste_upload import WasteUpload
 from app.models.recommendation import Recommendation
@@ -30,6 +31,10 @@ from app.services.model_service import (
     predict_image,
 )
 from app.services.condition_service import analyze_condition
+
+from app.services.notification_service import (
+    create_analysis_notifications,
+)
 
 from services.decision_service import make_textile_decision
 from services.sustainability_service import (
@@ -1144,6 +1149,7 @@ async def predict_textile(
     file: UploadFile = File(...),
     weight: float = Form(...),
     db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
 ):
     """
     Analyse the uploaded textile image.
@@ -1531,7 +1537,7 @@ async def predict_textile(
             # provisional until corrected or confirmed.
             requires_manual_review=True,
 
-            uploaded_by=1,
+            uploaded_by=current_user["user_id"],
         )
 
         db.add(
@@ -1714,15 +1720,31 @@ async def predict_textile(
 )
 def get_upload_history(
     db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
 ):
     """
-    Return all textile analyses,
-    newest first.
+    Return textile analyses newest first.
+
+    Access scope:
+    - Admin: platform-wide history
+    - Recycler: platform-wide recycling workload
+    - NGO: platform-wide sustainability history
+    - Industry: only analyses uploaded by that user
     """
 
     try:
+        role = current_user["role"]
+        user_id = current_user["user_id"]
+
+        query = db.query(WasteUpload)
+
+        if role == "Industry":
+            query = query.filter(
+                WasteUpload.uploaded_by == user_id
+            )
+
         uploads = (
-            db.query(WasteUpload)
+            query
             .order_by(
                 WasteUpload.upload_id.desc()
             )
@@ -1736,9 +1758,13 @@ def get_upload_history(
 
         return {
             "status": "success",
+            "role": role,
             "count": len(results),
             "uploads": results,
         }
+
+    except HTTPException:
+        raise
 
     except Exception as error:
         print(
@@ -1752,7 +1778,7 @@ def get_upload_history(
                 "Failed to load textile "
                 "analysis history."
             ),
-        )
+        ) from error
 
 
 # ==========================================================
@@ -1784,6 +1810,7 @@ def confirm_upload_material(
     upload_id: int,
     payload: MaterialConfirmationRequest,
     db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
 ):
     """
     Confirm the textile material for an
@@ -1814,6 +1841,19 @@ def confirm_upload_material(
                 detail=(
                     "Textile analysis record "
                     "not found."
+                ),
+            )
+
+        if (
+            upload_record.uploaded_by
+            != current_user["user_id"]
+            and current_user["role"] != "Admin"
+        ):
+            raise HTTPException(
+                status_code=403,
+                detail=(
+                    "You are not allowed to modify "
+                    "this textile analysis."
                 ),
             )
 
@@ -2095,6 +2135,15 @@ def confirm_upload_material(
             recommendation_record
         )
 
+        # ----------------------------------------------
+        # CREATE AUTOMATIC NOTIFICATIONS
+        # ----------------------------------------------
+
+        create_analysis_notifications(
+            db=db,
+            upload=upload_record,
+        )
+
         db.commit()
 
         db.refresh(
@@ -2273,6 +2322,12 @@ def confirm_upload_material(
 @router.get(
     "/{upload_id}",
     responses={
+        403: {
+            "description": (
+                "The authenticated user is not allowed "
+                "to view this textile analysis."
+            ),
+        },
         404: {
             "description": (
                 "Textile analysis record not found."
@@ -2288,9 +2343,14 @@ def confirm_upload_material(
 def get_upload_analysis(
     upload_id: int,
     db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
 ):
     """
     Return one textile analysis by ID.
+
+    Industry users may only view analyses that they own.
+    Admin, Recycler and NGO roles may view platform records
+    needed by their role-specific dashboards.
     """
 
     try:
@@ -2309,6 +2369,19 @@ def get_upload_analysis(
                 detail=(
                     "Textile analysis record "
                     "not found."
+                ),
+            )
+
+        if (
+            current_user["role"] == "Industry"
+            and upload_record.uploaded_by
+            != current_user["user_id"]
+        ):
+            raise HTTPException(
+                status_code=403,
+                detail=(
+                    "You are not allowed to view "
+                    "this textile analysis."
                 ),
             )
 
@@ -2334,4 +2407,4 @@ def get_upload_analysis(
                 "Failed to load textile "
                 "analysis."
             ),
-        )
+        ) from error

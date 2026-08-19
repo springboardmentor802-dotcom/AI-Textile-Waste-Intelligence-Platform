@@ -5,6 +5,7 @@ import {
 } from "react";
 
 import {
+  FaBell,
   FaBoxes,
   FaChartBar,
   FaCog,
@@ -28,69 +29,105 @@ import {
 
 import {
   hasPermission,
+  PERMISSIONS,
 } from "../../utils/permissions";
 
 import "./Sidebar.css";
-
 
 const MENU_ITEMS = [
   {
     path: "/dashboard",
     name: "Dashboard",
-    description: "Platform overview",
+    description:
+      "Platform overview",
     icon: FaTachometerAlt,
+    permission:
+      PERMISSIONS.VIEW_DASHBOARD,
     end: true,
   },
+
   {
     path: "/inventory",
     name: "Inventory",
-    description: "Textile stock records",
+    description:
+      "Textile stock records",
     icon: FaBoxes,
-    permission: "VIEW_INVENTORY",
+    permission:
+      PERMISSIONS.VIEW_INVENTORY,
   },
+
   {
     path: "/upload-waste",
     name: "Upload Waste",
-    description: "Single-sample analysis",
+    description:
+      "Single-sample analysis",
     icon: FaUpload,
-    permission: "UPLOAD_WASTE",
+    permission:
+      PERMISSIONS.UPLOAD_WASTE,
   },
+
   {
     path: "/batch-analysis",
     name: "Batch Analysis",
-    description: "Multi-sample processing",
+    description:
+      "Multi-sample processing",
     icon: FaLayerGroup,
-    permission: "UPLOAD_WASTE",
+    permission:
+      PERMISSIONS.UPLOAD_WASTE,
   },
+
   {
     path: "/analytics",
     name: "Analytics",
-    description: "Circularity intelligence",
+    description:
+      "Circularity intelligence",
     icon: FaChartBar,
-    permission: "VIEW_ANALYTICS",
+    permission:
+      PERMISSIONS.VIEW_ANALYTICS,
   },
+
   {
     path: "/recommendations",
     name: "Recommendations",
-    description: "Recovery guidance",
+    description:
+      "Recovery guidance",
     icon: FaLightbulb,
-    permission: "VIEW_RECOMMENDATIONS",
+    permission:
+      PERMISSIONS
+        .VIEW_RECOMMENDATIONS,
   },
+
+  {
+    path: "/notifications",
+    name: "Notifications",
+    description:
+      "Platform alerts",
+    icon: FaBell,
+    permission:
+      PERMISSIONS
+        .VIEW_NOTIFICATIONS,
+  },
+
   {
     path: "/profile",
     name: "Profile",
-    description: "Account information",
+    description:
+      "Account information",
     icon: FaUser,
+    permission:
+      PERMISSIONS.VIEW_PROFILE,
   },
+
   {
     path: "/settings",
     name: "Settings",
-    description: "Workspace preferences",
+    description:
+      "Workspace preferences",
     icon: FaCog,
-    permission: "VIEW_SETTINGS",
+    permission:
+      PERMISSIONS.VIEW_SETTINGS,
   },
 ];
-
 
 function Sidebar() {
   const {
@@ -98,7 +135,8 @@ function Sidebar() {
     user,
   } = useAuth();
 
-  const location = useLocation();
+  const location =
+    useLocation();
 
   const [
     mobileOpen,
@@ -107,24 +145,32 @@ function Sidebar() {
 
   const role = user?.role;
 
-  const visibleItems = useMemo(
-    () =>
-      MENU_ITEMS.filter(
-        (item) =>
-          !item.permission ||
-          hasPermission(
-            role,
-            item.permission,
-          ),
-      ),
-    [role],
-  );
+  // ==========================================
+  // FILTER MENU BASED ON ROLE
+  // ==========================================
 
+  const visibleItems =
+    useMemo(
+      () =>
+        MENU_ITEMS.filter(
+          (item) =>
+            hasPermission(
+              role,
+              item.permission,
+            ),
+        ),
+      [role],
+    );
+
+  // ==========================================
+  // MOBILE SIDEBAR OPEN EVENT
+  // ==========================================
 
   useEffect(() => {
-    const handleOpenSidebar = () => {
-      setMobileOpen(true);
-    };
+    const handleOpenSidebar =
+      () => {
+        setMobileOpen(true);
+      };
 
     window.addEventListener(
       "app-sidebar:open",
@@ -139,11 +185,17 @@ function Sidebar() {
     };
   }, []);
 
+  // ==========================================
+  // CLOSE WHEN ROUTE CHANGES
+  // ==========================================
 
   useEffect(() => {
     setMobileOpen(false);
   }, [location.pathname]);
 
+  // ==========================================
+  // MOBILE BODY LOCK
+  // ==========================================
 
   useEffect(() => {
     if (!mobileOpen) {
@@ -158,8 +210,12 @@ function Sidebar() {
       "sidebar-mobile-lock",
     );
 
-    const handleEscape = (event) => {
-      if (event.key === "Escape") {
+    const handleEscape = (
+      event,
+    ) => {
+      if (
+        event.key === "Escape"
+      ) {
         setMobileOpen(false);
       }
     };
@@ -181,12 +237,14 @@ function Sidebar() {
     };
   }, [mobileOpen]);
 
+  // ==========================================
+  // LOGOUT
+  // ==========================================
 
   const handleLogout = () => {
     setMobileOpen(false);
     logout();
   };
-
 
   return (
     <>
@@ -225,7 +283,8 @@ function Sidebar() {
         <div className="app-sidebar-mobile-header">
           <div>
             <strong>
-              AI Textile Intelligence
+              AI Textile
+              Intelligence
             </strong>
 
             <small>
@@ -236,19 +295,28 @@ function Sidebar() {
           <button
             type="button"
             onClick={() =>
-              setMobileOpen(false)
+              setMobileOpen(
+                false,
+              )
             }
             aria-label="Close navigation"
           >
-            <FaTimes aria-hidden="true" />
+            <FaTimes
+              aria-hidden="true"
+            />
           </button>
         </div>
 
         <div className="app-sidebar-heading">
-          <span>Navigation</span>
+          <span>
+            Navigation
+          </span>
 
           <small>
-            {visibleItems.length} modules
+            {
+              visibleItems.length
+            }{" "}
+            modules
           </small>
         </div>
 
@@ -258,17 +326,30 @@ function Sidebar() {
         >
           {visibleItems.map(
             (item) => {
-              const Icon = item.icon;
+              const Icon =
+                item.icon;
 
               return (
                 <NavLink
-                  key={item.path}
-                  to={item.path}
-                  end={item.end}
-                  title={item.name}
-                  aria-label={item.name}
+                  key={
+                    item.path
+                  }
+                  to={
+                    item.path
+                  }
+                  end={
+                    item.end
+                  }
+                  title={
+                    item.name
+                  }
+                  aria-label={
+                    item.name
+                  }
                   onClick={() =>
-                    setMobileOpen(false)
+                    setMobileOpen(
+                      false,
+                    )
                   }
                   className={({
                     isActive,
@@ -276,30 +357,40 @@ function Sidebar() {
                   }) =>
                     [
                       "app-sidebar-link",
+
                       isActive
                         ? "is-active"
                         : "",
+
                       isPending
                         ? "is-pending"
                         : "",
                     ]
-                      .filter(Boolean)
+                      .filter(
+                        Boolean,
+                      )
                       .join(" ")
                   }
                 >
                   <span className="app-sidebar-active-mark" />
 
                   <span className="app-sidebar-icon">
-                    <Icon aria-hidden="true" />
+                    <Icon
+                      aria-hidden="true"
+                    />
                   </span>
 
                   <span className="app-sidebar-copy">
                     <strong>
-                      {item.name}
+                      {
+                        item.name
+                      }
                     </strong>
 
                     <small>
-                      {item.description}
+                      {
+                        item.description
+                      }
                     </small>
                   </span>
                 </NavLink>
@@ -314,11 +405,13 @@ function Sidebar() {
 
             <div>
               <strong>
-                Intelligence online
+                Intelligence
+                online
               </strong>
 
               <small>
-                AI + CV services ready
+                AI + CV
+                services ready
               </small>
             </div>
           </div>
@@ -326,18 +419,24 @@ function Sidebar() {
           <button
             type="button"
             className="app-sidebar-logout"
-            onClick={handleLogout}
+            onClick={
+              handleLogout
+            }
             title="Logout"
             aria-label="Logout"
           >
-            <FaSignOutAlt aria-hidden="true" />
-            <span>Logout</span>
+            <FaSignOutAlt
+              aria-hidden="true"
+            />
+
+            <span>
+              Logout
+            </span>
           </button>
         </div>
       </aside>
     </>
   );
 }
-
 
 export default Sidebar;

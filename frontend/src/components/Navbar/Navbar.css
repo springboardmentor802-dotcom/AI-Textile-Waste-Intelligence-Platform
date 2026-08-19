@@ -1,369 +1,845 @@
-/* 
-   Eco-Tech Modern Navbar
-   AI + Sustainability Theme
-*/
-
+/* =========================================================
+   NAVBAR
+========================================================= */
 
 .navbar {
+    width: 100%;
+    height: 78px;
 
-    height:78px;
+    box-sizing: border-box;
 
-    background:#0F172A;
+    background: #0f172a;
 
-    display:flex;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
-    align-items:center;
+    padding: 0 32px;
 
-    justify-content:space-between;
+    position: sticky;
+    top: 0;
 
-    padding:0 40px;
+    z-index: 1000;
 
     box-shadow:
-    0 4px 20px rgba(15,23,42,0.15);
-
-    position:relative;
-
-    z-index:20;
-
+        0 4px 20px rgba(15, 23, 42, 0.18);
 }
 
 
+/* =========================================================
+   LEFT
+========================================================= */
 
-/* ==========================
-      BRAND SECTION
-========================== */
+.navbar-left {
+    min-width: 0;
 
+    display: flex;
+    align-items: center;
+
+    gap: 14px;
+}
+
+
+.navbar-menu-button {
+    width: 42px;
+    height: 42px;
+
+    flex-shrink: 0;
+
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+
+    background: rgba(255, 255, 255, 0.06);
+
+    color: #ffffff;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 18px;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+
+.navbar-menu-button:hover {
+    background: rgba(16, 185, 129, 0.16);
+
+    color: #6ee7b7;
+}
+
+
+/* =========================================================
+   BRAND
+========================================================= */
 
 .navbar-brand {
+    min-width: 0;
 
-    display:flex;
+    display: flex;
+    align-items: center;
 
-    align-items:center;
-
-    gap:16px;
-
+    gap: 14px;
 }
-
 
 
 .brand-icon {
+    width: 46px;
+    height: 46px;
 
+    flex-shrink: 0;
 
-    width:46px;
-
-    height:46px;
-
-    border-radius:14px;
-
+    border-radius: 14px;
 
     background:
-    linear-gradient(
-        135deg,
-        #10B981,
-        #059669
-    );
+        linear-gradient(
+            135deg,
+            #10b981,
+            #059669
+        );
 
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-    display:flex;
+    color: #ffffff;
 
-    align-items:center;
-
-    justify-content:center;
-
-
-    color:white;
-
-    font-size:22px;
-
+    font-size: 22px;
 
     box-shadow:
+        0 8px 20px rgba(16, 185, 129, 0.25);
 
-    0 8px 20px
-    rgba(16,185,129,0.25);
-
-
-    transition:all .3s ease;
-
+    transition: 0.25s ease;
 }
-
 
 
 .brand-icon:hover {
-
-
     transform:
-
-    translateY(-3px)
-    rotate(4deg);
-
-
+        translateY(-2px)
+        rotate(3deg);
 }
 
 
-
+.brand-text {
+    min-width: 0;
+}
 
 
 .brand-text h2 {
+    margin: 0;
 
+    color: #ffffff;
 
-    margin:0;
+    font-size: 21px;
+    font-weight: 700;
 
+    letter-spacing: 0.1px;
 
-    color:#ffffff;
-
-
-    font-size:24px;
-
-
-    font-weight:700;
-
-
-    letter-spacing:.2px;
-
-
+    white-space: nowrap;
 }
-
 
 
 .brand-text p {
+    margin: 4px 0 0;
+
+    color: #94a3b8;
+
+    font-size: 12px;
+
+    white-space: nowrap;
+}
 
 
-    margin-top:4px;
+/* =========================================================
+   RIGHT ACTIONS
+========================================================= */
 
+.navbar-actions {
+    display: flex;
+    align-items: center;
 
-    color:#94A3B8;
+    gap: 10px;
 
-
-    font-size:13px;
-
-
-    letter-spacing:.3px;
-
-
+    flex-shrink: 0;
 }
 
 
 
+/* =========================================================
+   NOTIFICATION WRAPPER
+========================================================= */
+
+.notification-wrapper {
+    position: relative;
+}
 
 
+/* =========================================================
+   BELL BUTTON
+========================================================= */
+
+.notification-button {
+    width: 42px;
+    height: 42px;
+
+    position: relative;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.09);
+
+    border-radius: 12px;
+
+    background:
+        rgba(255, 255, 255, 0.06);
+
+    color: #cbd5e1;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 17px;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
 
 
+.notification-button:hover {
+    background:
+        rgba(16, 185, 129, 0.14);
+
+    color: #6ee7b7;
+}
 
 
-/* ==========================
-        USER SECTION
-========================== */
+.notification-badge {
+    min-width: 18px;
+    height: 18px;
 
+    box-sizing: border-box;
+
+    padding: 0 5px;
+
+    position: absolute;
+
+    top: -6px;
+    right: -6px;
+
+    border:
+        2px solid #0f172a;
+
+    border-radius: 999px;
+
+    background: #ef4444;
+
+    color: #ffffff;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 9px;
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   DROPDOWN
+========================================================= */
+
+.notification-dropdown {
+    width: 390px;
+    max-height: 570px;
+
+    overflow: hidden;
+
+    position: absolute;
+
+    top: calc(100% + 14px);
+    right: 0;
+
+    border:
+        1px solid #e2e8f0;
+
+    border-radius: 18px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 24px 55px rgba(15, 23, 42, 0.22);
+
+    z-index: 2000;
+}
+
+
+/* =========================================================
+   DROPDOWN HEADER
+========================================================= */
+
+.notification-dropdown-header {
+    padding: 17px 18px;
+
+    border-bottom:
+        1px solid #e2e8f0;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 14px;
+}
+
+
+.notification-dropdown-header h3 {
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size: 17px;
+    font-weight: 800;
+}
+
+
+.notification-dropdown-header > div:first-child > span {
+    display: block;
+
+    margin-top: 3px;
+
+    color: #64748b;
+
+    font-size: 11px;
+}
+
+
+.notification-header-actions {
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+}
+
+
+.mark-all-button {
+    min-height: 34px;
+
+    padding: 0 9px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    background: #ecfdf5;
+
+    color: #047857;
+
+    display: flex;
+    align-items: center;
+
+    gap: 6px;
+
+    font-family: inherit;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+
+.mark-all-button:hover {
+    background: #d1fae5;
+}
+
+
+.notification-close-button {
+    width: 34px;
+    height: 34px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    background: #f8fafc;
+
+    color: #64748b;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+}
+
+
+.notification-close-button:hover {
+    background: #f1f5f9;
+
+    color: #0f172a;
+}
+
+
+/* =========================================================
+   NOTIFICATION LIST
+========================================================= */
+
+.notification-list {
+    max-height: 410px;
+
+    overflow-y: auto;
+}
+
+
+.notification-list::-webkit-scrollbar {
+    width: 5px;
+}
+
+
+.notification-list::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+
+    background: #cbd5e1;
+}
+
+
+/* =========================================================
+   NOTIFICATION ITEM
+========================================================= */
+
+.notification-item {
+    width: 100%;
+
+    padding: 14px 17px;
+
+    border: none;
+    border-bottom:
+        1px solid #f1f5f9;
+
+    background: #ffffff;
+
+    display: flex;
+
+    gap: 12px;
+
+    text-align: left;
+
+    font-family: inherit;
+
+    cursor: pointer;
+
+    transition: background 0.2s ease;
+}
+
+
+.notification-item:hover {
+    background: #f8fafc;
+}
+
+
+.notification-item.unread {
+    background: #f0fdf9;
+}
+
+
+.notification-item.unread:hover {
+    background: #ecfdf5;
+}
+
+
+.notification-item.read {
+    opacity: 0.88;
+}
+
+
+/* =========================================================
+   TYPE ICON
+========================================================= */
+
+.notification-type-icon {
+    width: 38px;
+    height: 38px;
+
+    flex-shrink: 0;
+
+    border-radius: 11px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 15px;
+}
+
+
+.notification-type-icon.info {
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+
+.notification-type-icon.success {
+    background: #ecfdf5;
+
+    color: #059669;
+}
+
+
+.notification-type-icon.warning {
+    background: #fffbeb;
+
+    color: #d97706;
+}
+
+
+.notification-type-icon.critical,
+.notification-type-icon.error {
+    background: #fef2f2;
+
+    color: #dc2626;
+}
+
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.notification-content {
+    min-width: 0;
+
+    flex: 1;
+}
+
+
+.notification-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 8px;
+}
+
+
+.notification-title-row h4 {
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    line-height: 1.4;
+}
+
+
+.unread-dot {
+    width: 7px;
+    height: 7px;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    background: #10b981;
+}
+
+
+.notification-content p {
+    margin: 5px 0 7px;
+
+    color: #64748b;
+
+    font-size: 11px;
+
+    line-height: 1.5;
+}
+
+
+.notification-time {
+    color: #94a3b8;
+
+    font-size: 9px;
+}
+
+
+/* =========================================================
+   EMPTY / LOADING STATE
+========================================================= */
+
+.notification-state {
+    min-height: 180px;
+
+    padding: 30px;
+
+    box-sizing: border-box;
+
+    color: #64748b;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    text-align: center;
+
+    font-size: 12px;
+}
+
+
+.notification-state strong {
+    color: #334155;
+
+    font-size: 13px;
+}
+
+
+.empty-bell-icon {
+    margin-bottom: 5px;
+
+    color: #94a3b8;
+
+    font-size: 25px;
+}
+
+
+/* =========================================================
+   DROPDOWN FOOTER
+========================================================= */
+
+.notification-dropdown-footer {
+    padding: 11px;
+
+    border-top:
+        1px solid #e2e8f0;
+
+    background: #f8fafc;
+}
+
+
+.view-all-notifications-button {
+    width: 100%;
+
+    min-height: 39px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: #0f172a;
+
+    color: #ffffff;
+
+    font-family: inherit;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+
+.view-all-notifications-button:hover {
+    background: #10b981;
+}
+
+
+/* =========================================================
+   USER
+========================================================= */
 
 .navbar-user {
+    display: flex;
+    align-items: center;
 
+    gap: 10px;
 
-    display:flex;
+    padding: 7px 10px;
 
-    align-items:center;
+    border-radius: 12px;
 
-    gap:14px;
-
-
-    padding:8px 14px;
-
-
-    border-radius:14px;
-
-
-    transition:.3s ease;
-
-
+    transition: 0.2s ease;
 }
-
 
 
 .navbar-user:hover {
-
-
     background:
-
-    rgba(255,255,255,0.07);
-
-
+        rgba(255, 255, 255, 0.06);
 }
-
-
-
-
 
 
 .user-icon {
+    width: 36px;
+    height: 36px;
 
-
-    width:38px;
-
-    height:38px;
-
-
-    color:#10B981;
-
-
+    color: #10b981;
 }
-
-
-
-
 
 
 .user-info {
-
-
-    display:flex;
-
-    flex-direction:column;
-
-    justify-content:center;
-
-
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
-
-
-
-
 
 
 .user-info h4 {
+    margin: 0;
 
+    color: #ffffff;
 
-    margin:0;
+    font-size: 13px;
+    font-weight: 700;
 
-
-    color:white;
-
-
-    font-size:15px;
-
-
-    font-weight:600;
-
-
-    text-transform:capitalize;
-
-
-    line-height:20px;
-
-
+    text-transform: capitalize;
 }
-
-
-
-
 
 
 .user-info span {
+    width: max-content;
 
+    margin-top: 3px;
 
-    margin-top:3px;
+    padding: 2px 8px;
 
-
-    width:max-content;
-
-
-    padding:3px 10px;
-
-
-    border-radius:20px;
-
+    border-radius: 20px;
 
     background:
+        rgba(16, 185, 129, 0.15);
 
-    rgba(16,185,129,0.15);
+    color: #6ee7b7;
 
-
-    color:#6EE7B7;
-
-
-    font-size:12px;
-
-
-    font-weight:500;
-
-
-}
-.navbar {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  width: 100%;
-  background: #0d1729;
+    font-size: 10px;
+    font-weight: 600;
 }
 
 
+/* =========================================================
+   TABLET
+========================================================= */
 
-
-
-
-
-
-/* ==========================
-        RESPONSIVE
-========================== */
-
-
-@media(max-width:900px){
-
+@media (max-width: 1023px) {
 
     .navbar {
-
-
-        padding:0 25px;
-
-
+        padding: 0 20px;
     }
-
-
-}
-
-
-
-
-
-@media(max-width:768px){
-
-
-    .navbar {
-
-
-        height:70px;
-
-
-    }
-
-
 
     .brand-text h2 {
-
-
-        font-size:20px;
-
-
+        font-size: 18px;
     }
-
-
 
     .brand-text p {
+        display: none;
+    }
+}
 
 
-        display:none;
+/* =========================================================
+   MOBILE
+========================================================= */
 
+@media (max-width: 700px) {
 
+    .navbar {
+        height: 68px;
+
+        padding: 0 12px;
     }
 
+    .navbar-left {
+        gap: 8px;
+    }
 
+    .navbar-brand {
+        gap: 8px;
+    }
+
+    .brand-icon {
+        width: 38px;
+        height: 38px;
+
+        border-radius: 11px;
+
+        font-size: 18px;
+    }
+
+    .brand-text h2 {
+        max-width: 150px;
+
+        overflow: hidden;
+
+        font-size: 14px;
+
+        text-overflow: ellipsis;
+
+        white-space: nowrap;
+    }
+
+    .navbar-actions {
+        gap: 6px;
+    }
+
+    .notification-button {
+        width: 38px;
+        height: 38px;
+        min-height: 38px;
+    }
 
     .user-info {
-
-
-        display:none;
-
-
+        display: none;
     }
 
+    .navbar-user {
+        padding: 0;
+    }
+
+    .user-icon {
+        width: 32px;
+        height: 32px;
+    }
+
+    .notification-dropdown {
+        width:
+            min(
+                360px,
+                calc(100vw - 24px)
+            );
+
+        position: fixed;
+
+        top: 76px;
+        right: 12px;
+    }
+
+}
+
+
+/* =========================================================
+   VERY SMALL MOBILE
+========================================================= */
+
+@media (max-width: 430px) {
+
+    .brand-text {
+        display: none;
+    }
+
+    .notification-dropdown {
+        left: 12px;
+        right: 12px;
+
+        width: auto;
+    }
+
+    .mark-all-button span {
+        display: none;
+    }
 
 }

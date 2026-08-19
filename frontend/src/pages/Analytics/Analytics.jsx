@@ -48,6 +48,26 @@ const titleCase = (value) =>
     .replaceAll("_", " ")
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 
+const shortRecommendationLabel = (value) => {
+  const label = String(value || "Unknown").trim();
+
+  const replacements = {
+    "Fiber Recovery": "Fiber Recovery",
+    "Repair and Reuse": "Repair & Reuse",
+    "Donation": "Donation",
+    "Specialized Treatment": "Specialized",
+    "Cleaning and Reassessment": "Clean & Reassess",
+    "Material Separation": "Material Separation",
+    "Chemical Recycling": "Chemical Recycling",
+    "Direct Reuse": "Direct Reuse",
+    "Hazardous Textile Waste Treatment": "Hazardous Treatment",
+    "Upcycling": "Upcycling",
+    "Mechanical Recycling": "Mechanical Recycling",
+  };
+
+  return replacements[label] || label;
+};
+
 const formatNumber = (value, maximumFractionDigits = 0) =>
   new Intl.NumberFormat("en-IN", {
     maximumFractionDigits,
@@ -321,10 +341,15 @@ function Analytics() {
   const recommendationData = useMemo(
     () =>
       (datasetAnalytics?.recommendation_distribution || []).map(
-        (item) => ({
-          name: item?.recommendation || "Unknown",
-          value: Number(item?.record_count) || 0,
-        }),
+        (item) => {
+          const name = item?.recommendation || "Unknown";
+
+          return {
+            name,
+            shortName: shortRecommendationLabel(name),
+            value: Number(item?.record_count) || 0,
+          };
+        },
       ),
     [datasetAnalytics?.recommendation_distribution],
   );
@@ -878,46 +903,60 @@ function Analytics() {
         <div className="an-panel-heading">
           <div>
             <span className="an-section-label">
-              Recommendation intelligence
+              Recovery pathways
             </span>
-            <h2>Recovery recommendation distribution</h2>
+            <h2>Recommended recovery pathways</h2>
           </div>
           <span className="an-live-pill">
             {recommendationData.length} pathways
           </span>
         </div>
 
-        <div className="an-chart-height">
+        <div className="an-chart-height an-recovery-chart">
           {recommendationData.length ? (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={recommendationData.slice(0, 10)}
-                margin={{ top: 10, right: 16, left: 0, bottom: 65 }}
+                layout="vertical"
+                margin={{ top: 8, right: 18, left: 8, bottom: 8 }}
               >
                 <CartesianGrid
                   stroke="#dce9e6"
                   strokeDasharray="4 7"
-                  vertical={false}
+                  horizontal={false}
                 />
                 <XAxis
-                  dataKey="name"
-                  interval={0}
-                  angle={-28}
-                  textAnchor="end"
-                  height={82}
+                  type="number"
+                  allowDecimals={false}
+                  axisLine={false}
+                  tickLine={false}
                 />
-                <YAxis allowDecimals={false} />
-                <Tooltip />
+                <YAxis
+                  type="category"
+                  dataKey="shortName"
+                  width={138}
+                  interval={0}
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 11 }}
+                />
+                <Tooltip
+                  formatter={(value) => [formatNumber(value), "Records"]}
+                  labelFormatter={(_, payload) =>
+                    payload?.[0]?.payload?.name || "Recovery pathway"
+                  }
+                />
                 <Bar
                   dataKey="value"
                   name="Records"
                   fill="#0f766e"
-                  radius={[8, 8, 0, 0]}
+                  radius={[0, 8, 8, 0]}
+                  maxBarSize={28}
                 />
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <EmptyChart message="No recommendation distribution." />
+            <EmptyChart message="No recovery pathway data available." />
           )}
         </div>
       </section>
@@ -1106,7 +1145,7 @@ function Analytics() {
                     <td>
                       <strong>{item.fabricName}</strong>
                       <small>
-                        Class {item.classId} · {item.construction}
+                        Class {item.classId} Â· {item.construction}
                       </small>
                     </td>
                     <td>
@@ -1193,7 +1232,7 @@ function Analytics() {
                 <span className="an-section-label">Textile report</span>
                 <h2 id="an-report-title">{selectedRecord.fabricName}</h2>
                 <p>
-                  Upload {selectedRecord.id} · Class {selectedRecord.classId}
+                  Upload {selectedRecord.id} Â· Class {selectedRecord.classId}
                 </p>
               </div>
 
@@ -1203,7 +1242,7 @@ function Analytics() {
                 onClick={() => setSelectedRecord(null)}
                 aria-label="Close report"
               >
-                ×
+                Ã—
               </button>
             </div>
 
@@ -1278,7 +1317,7 @@ function Analytics() {
               <span className="an-section-label">Construction</span>
               <h3>{selectedRecord.construction}</h3>
               <p>
-                Visual class: {selectedRecord.fabricName} · Class{" "}
+                Visual class: {selectedRecord.fabricName} Â· Class{" "}
                 {selectedRecord.classId}
               </p>
             </section>

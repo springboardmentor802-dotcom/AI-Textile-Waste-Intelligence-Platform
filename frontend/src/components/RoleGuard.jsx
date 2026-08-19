@@ -1,23 +1,67 @@
-import { Navigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
-import { hasPermission } from "../utils/permissions";
+import {
+  Navigate,
+  useLocation,
+} from "react-router-dom";
 
-function RoleGuard({ permission, children }) {
+import {
+  useAuth,
+} from "../contexts/AuthContext";
 
-    const { user } = useAuth();
+import {
+  hasPermission,
+} from "../utils/permissions";
 
-    // User not logged in
-    if (!user) {
-        return <Navigate to="/" replace />;
-    }
+function RoleGuard({
+  permission,
+  children,
+}) {
+  const {
+    user,
+    isAuthenticated,
+  } = useAuth();
 
-    // User does not have permission
-    if (!hasPermission(user.role, permission)) {
-        return <Navigate to="/unauthorized" replace />;
-    }
+  const location = useLocation();
 
-    // Permission granted
-    return children;
+  // ==========================================
+  // NOT LOGGED IN
+  // ==========================================
+
+  if (!isAuthenticated || !user) {
+    return (
+      <Navigate
+        to="/"
+        replace
+        state={{
+          from: location.pathname,
+        }}
+      />
+    );
+  }
+
+  // ==========================================
+  // ROLE DOES NOT HAVE PERMISSION
+  // ==========================================
+
+  if (
+    permission &&
+    !hasPermission(
+      user.role,
+      permission,
+    )
+  ) {
+    return (
+      <Navigate
+        to="/unauthorized"
+        replace
+      />
+    );
+  }
+
+  // ==========================================
+  // ACCESS GRANTED
+  // ==========================================
+
+  return children;
 }
 
 export default RoleGuard;

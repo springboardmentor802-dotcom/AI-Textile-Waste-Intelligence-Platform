@@ -1,4 +1,4 @@
-# AI Textile Waste Intelligence Platform (SorTex)
+# AI Textile Waste Intelligence Platform (SorTexAI)
 
 This project is a comprehensive, AI-powered platform designed to revolutionize textile recycling. By integrating computer vision, material classification, and sustainability intelligence, the platform automates textile sorting, tracks waste diversion, and facilitates a circular economy between recycling facilitators, fashion brands, retailers, and manufacturers.
 
@@ -77,7 +77,7 @@ The final phase of the project finalized all reporting features, validated syste
 
 ---
 
-## 🛠 Local Development Setup
+## Local Development Setup
 
 ### Prerequisites
 * Node.js (v18+)

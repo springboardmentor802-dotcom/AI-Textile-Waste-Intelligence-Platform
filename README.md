@@ -96,23 +96,30 @@ python -m venv venv
 
 pip install fastapi uvicorn motor pydantic bcrypt pyjwt python-dotenv certifi torch torchvision pandas scikit-learn pillow xgboost opencv-python
 Create a .env file in the backend directory:
+
 Code snippet
 MONGO_URI=your_mongodb_connection_string
+POSTGRES_URI=your_postgresql_connection_string
 JWT_SECRET=your_super_secret_key_here
 Start the backend server:
+
 Bash
 uvicorn main:app --reload
 The API will be available at: http://localhost:8000
-
-2. Frontend Setup (Next.js)
+```
+### 2. Frontend Setup (Next.js)
 Navigate to the frontend directory:
-Bash
+
+```bash
 cd frontend/sortex
 npm install
 Create a .env.local file in the frontend/sortex directory:
+
 Code snippet
 NEXT_PUBLIC_API_BASE_URL=[http://127.0.0.1:8000](http://127.0.0.1:8000)
 Start the development server:
+
 Bash
 npm run dev
 The dashboard will be available at: http://localhost:3000
+```

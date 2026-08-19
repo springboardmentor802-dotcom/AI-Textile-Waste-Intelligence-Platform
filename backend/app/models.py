@@ -4,15 +4,11 @@ from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Enu
 from sqlalchemy.orm import relationship
 from app.database import Base
 
-# ==========================================
-# 🔐 USER ACCOUNT ENUMS & MODELS
-# ==========================================
-
 class UserRole(str, enum.Enum):
-    RECYCLING_OPERATOR = "Recycling_Operator"
-    SUSTAINABILITY_MANAGER = "Sustainability_Manager"
-    MANUFACTURER = "Manufacturer"
-    ADMIN = "Admin"
+    RECYCLING_OPERATOR = "RECYCLING_OPERATOR"
+    SUSTAINABILITY_MANAGER = "SUSTAINABILITY_MANAGER"
+    MANUFACTURER = "MANUFACTURER"
+    ADMIN = "ADMIN"
 
 class User(Base):
     __tablename__ = "users"
@@ -22,13 +18,9 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     role = Column(SQLEnum(UserRole), default=UserRole.MANUFACTURER, nullable=False)
 
-    # FIXED: Back-reference added here to sync perfectly with Inventory model
     inventory_items = relationship("Inventory", back_populates="owner", cascade="all, delete-orphan")
+    scan_logs = relationship("ScanLog", back_populates="user", cascade="all, delete-orphan")
 
-
-# ==========================================
-# 📦 TEXTILE INVENTORY ENUMS & MODELS
-# ==========================================
 
 class FabricTypeEnum(str, enum.Enum):
     cotton = "Cotton"
@@ -69,5 +61,31 @@ class Inventory(Base):
     collection_date = Column(DateTime, default=datetime.utcnow, nullable=False)
     status = Column(SQLEnum(StatusEnum), default=StatusEnum.pending, nullable=False)
 
-    # Relationship setup matching perfectly with User model
     owner = relationship("User", back_populates="inventory_items")
+
+
+class ScanLog(Base):
+    __tablename__ = "scan_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    scan_code = Column(String, unique=True, index=True, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    role = Column(String, nullable=False)
+    fabric_type = Column(String, nullable=False)
+    weight_kg = Column(Float, nullable=False)
+    co2_saved = Column(Float, nullable=False)
+    water_saved = Column(Float, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    user = relationship("User", back_populates="scan_logs")
+
+
+class CircularityDataset(Base):
+    __tablename__ = "circularity_dataset"
+
+    id = Column(Integer, primary_key=True, index=True)
+    material_type = Column(String, nullable=False)
+    material_condition = Column(String, nullable=False)
+    waste_weight_kg = Column(Float, nullable=False)
+    recyclability_score = Column(Float, nullable=False)
+    image_path = Column(String, nullable=True)

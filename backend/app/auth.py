@@ -1,82 +1,47 @@
 import os
 import bcrypt
+import jwt
 from datetime import datetime, timedelta
 from typing import Optional
-import jwt
-from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
-
 from app.database import get_db
-from app.models import User 
+from app.models import User
 
-load_dotenv()
-
-SECRET_KEY = os.getenv("SECRET_KEY", "DEVELOPMENT_SECRET_KEY_CHANGE_THIS_IN_PRODUCTION_123456")
+SECRET_KEY = os.getenv("SECRET_KEY", "super_secret_textile_intelligence_key_2026")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 
-# OAuth2 layout
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login") 
-
-def get_password_hash(password: str) -> str:
-    """
-    Generates a secure hash from a plain text password natively via bcrypt.
-    """
-    # 1. Password string ko bytes mein convert karo
-    password_bytes = str(password).encode('utf-8')
-    # 2. Salt generate karo aur hash compute karo
-    salt = bcrypt.gensalt()
-    hashed = bcrypt.hashpw(password_bytes, salt)
-    # 3. Final string representation return karo database storage ke liye
-    return hashed.decode('utf-8')
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login", auto_error=False)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """
-    Checks if a plain text password matches a known hash natively via bcrypt safely.
-    """
     try:
-        if not plain_password or not hashed_password:
-            return False
-        
-        password_bytes = str(plain_password).encode('utf-8')
-        hashed_bytes = str(hashed_password).encode('utf-8')
-        
-        return bcrypt.checkpw(password_bytes, hashed_bytes)
+        return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
     except Exception as e:
-        print(f"Native Bcrypt verification fallback log error: {str(e)}")
+        print("Bcrypt verification error:", str(e))
         return False
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
-    """Generates a secure JWT token with user context and expiration date."""
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt 
+def get_password_hash(password: str) -> str:
+    pwd_bytes = password.encode('utf-8')
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(pwd_bytes, salt).decode('utf-8')
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
-    """Extracts token, decodes it, and retrieves the currently logged-in user from the database."""
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+def get_current_user(token: Optional[str] = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> Optional[User]:
+    if not token:
+        return None
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id: str = payload.get("sub") 
+        user_id: str = payload.get("sub")
         if user_id is None:
-            raise credentials_exception
-    except jwt.PyJWTError:
-        raise credentials_exception
-        
-    user = db.query(User).filter(User.id == int(user_id)).first()
-    if user is None:
-        raise credentials_exception
-        
-    return user
+            return None
+    except Exception:
+        return None
+
+    return db.query(User).filter(User.id == int(user_id)).first()

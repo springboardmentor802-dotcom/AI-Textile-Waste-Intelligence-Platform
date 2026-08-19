@@ -15,22 +15,24 @@ function Login({ onSwitchToRegister, onLoginSuccess }) {
     setLoading(true);
 
     try {
-      // Form Data preparation for FastAPI OAuth2 / JSON auth compatibility
       const response = await API.post('/auth/login', formData);
-      
       const access_token = response.data.access_token || response.data.token;
-      const role = response.data.role || 'Admin';
+      const role = response.data.role || 'MANUFACTURER';
 
       if (access_token) {
-        // Save both keys to ensure full compatibility with api.js interceptor
         localStorage.setItem('access_token', access_token);
         localStorage.setItem('token', access_token);
         localStorage.setItem('role', role);
+        localStorage.setItem('user_email', formData.email);
 
         setMessage({ type: 'success', text: 'Login Successful! Redirecting...' });
         
         setTimeout(() => {
-          onLoginSuccess();
+          if (onLoginSuccess) {
+            onLoginSuccess(response.data);
+          } else {
+            window.location.href = '/dashboard';
+          }
         }, 600);
       } else {
         setMessage({ type: 'error', text: 'Authentication failed. No token received.' });

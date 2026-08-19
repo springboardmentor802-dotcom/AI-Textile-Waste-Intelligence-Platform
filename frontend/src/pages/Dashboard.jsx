@@ -1,51 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { sustainabilityService, inventoryService, analyticsService } from '../services/api';
+import { inventoryService, adminService, analyticsService } from '../services/api';
 import AdminDashboard from '../components/AdminDashboard';
-import API from '../services/api';
+import SustainabilityManagerDashboard from '../components/SustainabilityManagerDashboard';
+import ManufacturerDashboard from '../components/ManufacturerDashboard';
+import FabricScannerComponent from '../components/FabricScannerComponent';
 import { 
-  ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend,
+  ResponsiveContainer, PieChart, Pie, Cell, Tooltip,
   LineChart, Line, XAxis, YAxis, CartesianGrid,
   BarChart, Bar
 } from 'recharts';
 import { 
-  Package, BarChart3, Shield, LogOut, Leaf, Scale, 
-  RefreshCw, Upload, FileText, CheckCircle2, Image as ImageIcon, 
-  Droplet, Box, Activity, Search, Users
+  Package, BarChart3, Shield, LogOut, Leaf, 
+  RefreshCw, CheckCircle2, Image as ImageIcon, 
+  Droplet, Box, Search, Users, Factory, FileSpreadsheet,
+  Sparkles, TrendingUp, ArrowRight, Clock, Percent, FileText
 } from 'lucide-react';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [userRole, setUserRole] = useState('');
-  const [dataset, setDataset] = useState([]);
   const [inventory, setInventory] = useState([]);
+  const [scansList, setScansList] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Search & Filter State for Inventory Table
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFabricFilter, setSelectedFabricFilter] = useState('All');
-
-  // AI Image Upload & Vision State
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
-  const [analyzingImage, setAnalyzingImage] = useState(false);
-  const [imageAnalysisResult, setImageAnalysisResult] = useState(null);
-  
-  // Single vs Batch Upload Mode State
-  const [isBatchUpload, setIsBatchUpload] = useState(false);
-  const [batchWeightInput, setBatchWeightInput] = useState(100.0);
-
-  // Selected Engine Dropdown State
-  const [selectedEngine, setSelectedEngine] = useState('image_analysis_engine');
-
-  const engineNames = [
-    { id: 'image_analysis_engine', label: '1. Textile Image Analysis Engine' },
-    { id: 'material_classification_engine', label: '2. Material Classification Engine' },
-    { id: 'waste_classification_engine', label: '3. Textile Waste Classification Engine' },
-    { id: 'recycling_recommendation_engine', label: '4. Recycling Recommendation Engine' },
-    { id: 'sustainability_intelligence_engine', label: '5. Sustainability Intelligence Engine' },
-    { id: 'environmental_impact_engine', label: '6. Environmental Impact Assessment Engine' },
-    { id: 'waste_scoring_engine', label: '7. Waste Scoring Engine' }
-  ];
 
   // Inventory Form State
   const [inventoryForm, setInventoryForm] = useState({
@@ -60,141 +40,221 @@ const Dashboard = () => {
   const [registering, setRegistering] = useState(false);
   const [registerSuccess, setRegisterSuccess] = useState('');
 
-  // Assessment Calculator State
-  const [assessmentForm, setAssessmentForm] = useState({
-    material_type: 'Cotton',
-    material_condition: 'Good',
-    waste_weight_kg: 50.0,
-    reuse_potential: 'High',
-    environmental_benefit: 'High',
-    processing_feasibility: 'Easy'
-  });
-  const [assessmentResult, setAssessmentResult] = useState(null);
-  const [assessing, setAssessing] = useState(false);
-
-  useEffect(() => {
-    const role = localStorage.getItem('role') || 'Admin';
-    setUserRole(role);
-    if (role === 'Admin') {
-      setActiveTab('admin');
+  // Recycling Opportunities States
+  const [selectedOppFilter, setSelectedOppFilter] = useState('ALL');
+  const [dispatchedIds, setDispatchedIds] = useState([]);
+  const matchedOpportunities = [
+    {
+      id: 'OPP-8921',
+      fabric: 'Cotton (Denim & Yarn scraps)',
+      quantityKg: 850,
+      targetIndustry: 'Mechanical Spinning Mill',
+      conversionRoute: 'Open-End Yarn Spinning',
+      purityScore: 92,
+      estimatedValue: '₹42,500',
+      urgency: 'Immediate Pickup',
+      status: 'Ready for Dispatch'
+    },
+    {
+      id: 'OPP-7412',
+      fabric: 'Polyester Filament Blend',
+      quantityKg: 1200,
+      targetIndustry: 'Chemical Depolymerization Plant',
+      conversionRoute: 'rPET Pelletization',
+      purityScore: 84,
+      estimatedValue: '₹38,400',
+      urgency: 'Scheduled (3 Days)',
+      status: 'Matched'
+    },
+    {
+      id: 'OPP-6304',
+      fabric: 'Wool & Mixed Knits',
+      quantityKg: 420,
+      targetIndustry: 'Felt & Non-Woven Manufacturer',
+      conversionRoute: 'Thermal Insulation Padding',
+      purityScore: 78,
+      estimatedValue: '₹21,000',
+      urgency: 'Standard',
+      status: 'Matched'
+    },
+    {
+      id: 'OPP-5190',
+      fabric: 'Pure Linen Scraps',
+      quantityKg: 310,
+      targetIndustry: 'Eco-Textile Upcycling Hub',
+      conversionRoute: 'Handloom Blended Weft',
+      purityScore: 95,
+      estimatedValue: '₹24,800',
+      urgency: 'High Demand',
+      status: 'Ready for Dispatch'
     }
-    fetchInitialData();
-  }, []);
+  ];
+
+  // Recovery Statistics Data
+  const recoveryEfficiencyData = [
+    { fabric: 'Cotton', inflow: 1450, recovered: 1276, rate: 88, fill: '#10B981' },
+    { fabric: 'Denim', inflow: 980, recovered: 823, rate: 84, fill: '#3B82F6' },
+    { fabric: 'Polyester', inflow: 1200, recovered: 960, rate: 80, fill: '#8B5CF6' },
+    { fabric: 'Wool', inflow: 540, recovered: 453, rate: 84, fill: '#F59E0B' },
+    { fabric: 'Linen', inflow: 420, recovered: 378, rate: 90, fill: '#06B6D4' },
+    { fabric: 'Mixed Blends', inflow: 650, recovered: 422, rate: 65, fill: '#64748B' },
+  ];
+
+  const processingRoutesData = [
+    { name: 'Mechanical Shredding & Carding', value: 52, color: '#10B981' },
+    { name: 'Chemical Depolymerization', value: 28, color: '#3B82F6' },
+    { name: 'Thermal Non-Woven Felt', value: 14, color: '#F59E0B' },
+    { name: 'Downcycled Padding', value: 6, color: '#94A3B8' },
+  ];
 
   const fetchInitialData = async () => {
     setLoading(true);
     try {
-      const [datasetRes, inventoryRes] = await Promise.all([
-        sustainabilityService.getDataset(5000).catch(() => ({ data: [] })),
-        inventoryService.getInventory().catch(() => ({ data: [] }))
+      const [inventoryRes, scansRes] = await Promise.all([
+        inventoryService.getInventory().catch(() => ({ data: [] })),
+        analyticsService.getScans('all_time').catch(() => [])
       ]);
-      setDataset(datasetRes.data || datasetRes || []);
       setInventory(inventoryRes.data || inventoryRes || []);
+      setScansList(Array.isArray(scansRes) ? scansRes : (scansRes.data || []));
     } catch (err) {
-      console.error('Error loading dashboard data:', err);
+      console.error('Error loading dashboard dynamic data:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const calculateFabricDistribution = () => {
-    const combinedItems = [
-      ...dataset.map(d => ({ fabric: d.material_type || d.Material_Type || 'Cotton' })),
-      ...inventory.map(i => ({ fabric: i.fabric_type || 'Cotton' }))
-    ];
+  useEffect(() => {
+    const role = localStorage.getItem('role') || 'ADMIN';
+    setUserRole(role);
+    if (role === 'ADMIN' || role === 'Admin') {
+      setActiveTab('admin');
+    }
+    fetchInitialData();
 
-    if (combinedItems.length === 0) {
+    const handleScanCompleted = () => {
+      fetchInitialData();
+    };
+
+    window.addEventListener('textile_scan_completed', handleScanCompleted);
+    return () => window.removeEventListener('textile_scan_completed', handleScanCompleted);
+  }, []);
+
+  const normalizeFabricName = (rawName) => {
+    const s = (rawName || '').toLowerCase();
+    if (s.includes('denim')) return 'Denim';
+    if (s.includes('cotton') || s.includes('canvas')) return 'Cotton';
+    if (s.includes('poly') || s.includes('mesh') || s.includes('synthetic') || s.includes('filament')) return 'Polyester';
+    if (s.includes('wool') || s.includes('fleece') || s.includes('sherpa') || s.includes('plush') || s.includes('knit')) return 'Wool';
+    if (s.includes('linen') || s.includes('flax')) return 'Linen';
+    if (s.includes('silk')) return 'Silk';
+    if (s.includes('nylon')) return 'Nylon';
+    if (s.includes('leather')) return 'Vegan Leather';
+    return 'Mixed Fabrics';
+  };
+
+  // 1. DYNAMIC MATERIAL DISTRIBUTION
+  const calculateFabricDistribution = () => {
+    const counts = {};
+    const categoryColors = {
+      'Cotton': '#10B981',
+      'Denim': '#3B82F6',
+      'Polyester': '#8B5CF6',
+      'Wool': '#F59E0B',
+      'Linen': '#06B6D4',
+      'Silk': '#EC4899',
+      'Nylon': '#6366F1',
+      'Vegan Leather': '#14B8A6',
+      'Mixed Fabrics': '#64748B'
+    };
+
+    inventory.forEach(item => {
+      const fab = normalizeFabricName(item.fabric_type);
+      counts[fab] = (counts[fab] || 0) + (parseFloat(item.quantity) || 1);
+    });
+
+    scansList.forEach(scan => {
+      const fab = normalizeFabricName(scan.fabric);
+      counts[fab] = (counts[fab] || 0) + (parseFloat(scan.weight) || 1);
+    });
+
+    const totalWeight = Object.values(counts).reduce((a, b) => a + b, 0);
+
+    if (totalWeight === 0) {
       return [
-        { name: 'Cotton', value: 45, color: '#10B981' },
-        { name: 'Denim', value: 25, color: '#3B82F6' },
-        { name: 'Polyester', value: 20, color: '#8B5CF6' },
-        { name: 'Wool', value: 10, color: '#F59E0B' },
+        { name: 'Cotton', value: 50, color: '#10B981' },
+        { name: 'Denim', value: 30, color: '#3B82F6' },
+        { name: 'Polyester', value: 20, color: '#8B5CF6' }
       ];
     }
 
-    const colorPalette = ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EC4899', '#06B6D4', '#6366F1'];
-    const counts = {};
-
-    combinedItems.forEach(item => {
-      const mat = item.fabric || 'Cotton';
-      counts[mat] = (counts[mat] || 0) + 1;
-    });
-
-    const total = combinedItems.length;
-    return Object.keys(counts).map((key, idx) => ({
+    return Object.keys(counts).map((key) => ({
       name: key,
-      value: Math.round((counts[key] / total) * 100) || 1,
-      color: colorPalette[idx % colorPalette.length]
+      value: Math.round((counts[key] / totalWeight) * 100) || 1,
+      color: categoryColors[key] || '#64748B'
     }));
   };
 
+  // 2. DYNAMIC MONTHLY WASTE DIVERSION
   const calculateMonthlyDiversion = () => {
-    if (!inventory || inventory.length === 0) {
-      return [
-        { month: 'Jan', weightKg: 120 },
-        { month: 'Feb', weightKg: 280 },
-        { month: 'Mar', weightKg: 450 },
-        { month: 'Apr', weightKg: 620 },
-        { month: 'May', weightKg: 780 },
-        { month: 'Jun', weightKg: 950 },
-      ];
-    }
-
-    const monthsMap = { Jan: 0, Feb: 0, Mar: 0, Apr: 0, May: 0, Jun: 0, Jul: 0, Aug: 0, Sep: 0, Oct: 0, Nov: 0, Dec: 0 };
-    let hasValidData = false;
+    const monthsMap = {};
+    const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    const currentMonthStr = new Date().toLocaleString('default', { month: 'short' });
+    monthsMap[currentMonthStr] = 0;
 
     inventory.forEach(item => {
       const dateVal = item.collection_date || item.created_at;
       if (dateVal) {
-        const dateObj = new Date(dateVal);
-        const monthName = dateObj.toLocaleString('default', { month: 'short' });
-        if (monthsMap[monthName] !== undefined) {
-          monthsMap[monthName] += parseFloat(item.quantity || 0);
-          hasValidData = true;
-        }
+        const m = new Date(dateVal).toLocaleString('default', { month: 'short' });
+        monthsMap[m] = (monthsMap[m] || 0) + (parseFloat(item.quantity) || 0);
       }
     });
 
-    if (!hasValidData) {
-      const totalInventoryQty = inventory.reduce((acc, i) => acc + (parseFloat(i.quantity) || 0), 0);
-      return [
-        { month: 'Jan', weightKg: 100 },
-        { month: 'Feb', weightKg: 200 },
-        { month: 'Mar', weightKg: 350 },
-        { month: 'Apr', weightKg: 500 },
-        { month: 'May', weightKg: 650 },
-        { month: 'Current', weightKg: totalInventoryQty || 800 },
-      ];
-    }
+    scansList.forEach(scan => {
+      const dateVal = scan.timestamp;
+      if (dateVal) {
+        const m = new Date(dateVal).toLocaleString('default', { month: 'short' });
+        monthsMap[m] = (monthsMap[m] || 0) + (parseFloat(scan.weight) || 0);
+      }
+    });
 
-    return Object.keys(monthsMap)
-      .filter(m => monthsMap[m] > 0)
-      .map(m => ({ month: m, weightKg: monthsMap[m] }));
+    const result = Object.keys(monthsMap)
+      .sort((a, b) => monthOrder.indexOf(a) - monthOrder.indexOf(b))
+      .map(m => ({
+        month: m,
+        weightKg: Math.round(monthsMap[m])
+      }));
+
+    return result.length > 0 ? result : [{ month: currentMonthStr, weightKg: 100 }];
   };
 
+  // 3. DYNAMIC CIRCULARITY SCORE DISTRIBUTION
   const calculateScoreDistribution = () => {
-    const combinedItems = [
-      ...dataset.map(d => ({ score: parseFloat(d.recyclability_score || d.Recyclability_Score || 75) })),
-      ...inventory.map(i => ({ score: i.condition === 'Excellent' ? 95 : i.condition === 'Good' ? 80 : i.condition === 'Fair' ? 65 : 40 }))
-    ];
+    let high = 0, mod = 0, low = 0;
 
-    if (combinedItems.length === 0) {
+    inventory.forEach(item => {
+      const c = (item.condition || '').toLowerCase();
+      if (c.includes('excellent') || c.includes('good')) high++;
+      else if (c.includes('fair')) mod++;
+      else low++;
+    });
+
+    scansList.forEach(scan => {
+      const c = (scan.fabric || '').toLowerCase();
+      if (c.includes('cotton') || c.includes('denim') || c.includes('linen')) high++;
+      else if (c.includes('poly') || c.includes('wool')) mod++;
+      else low++;
+    });
+
+    const total = high + mod + low;
+    if (total === 0) {
       return [
-        { range: 'High Potential (80-100)', percentage: 60, fill: '#10B981' },
-        { range: 'Moderate (50-80)', percentage: 30, fill: '#F59E0B' },
+        { range: 'High Potential (80-100)', percentage: 65, fill: '#10B981' },
+        { range: 'Moderate (50-80)', percentage: 25, fill: '#F59E0B' },
         { range: 'Low Recyclability (<50)', percentage: 10, fill: '#EF4444' },
       ];
     }
 
-    let high = 0, mod = 0, low = 0;
-    combinedItems.forEach(item => {
-      const score = item.score;
-      if (score >= 80) high++;
-      else if (score >= 50) mod++;
-      else low++;
-    });
-
-    const total = combinedItems.length;
     return [
       { range: 'High Potential (80-100)', percentage: Math.round((high / total) * 100), fill: '#10B981' },
       { range: 'Moderate (50-80)', percentage: Math.round((mod / total) * 100), fill: '#F59E0B' },
@@ -206,86 +266,25 @@ const Dashboard = () => {
   const dynamicMonthlyData = calculateMonthlyDiversion();
   const dynamicScoreData = calculateScoreDistribution();
 
-  const totalDatasetWeight = dataset.reduce((acc, curr) => acc + (parseFloat(curr.waste_weight_kg || curr.Waste_Weight_KG) || 0), 0);
-  const totalInventoryWeight = inventory.reduce((acc, curr) => acc + (parseFloat(curr.quantity) || 0), 0);
-  const combinedTotalWeight = totalDatasetWeight + totalInventoryWeight;
+  // Cumulative Live Metrics
+  const totalInvWeight = inventory.reduce((acc, curr) => acc + (parseFloat(curr.quantity) || 0), 0);
+  const totalScanWeight = scansList.reduce((acc, curr) => acc + (parseFloat(curr.weight) || 0), 0);
+  const totalActiveWeight = totalInvWeight + totalScanWeight;
 
-  const liveCo2Saved = (combinedTotalWeight * 3.2).toFixed(1);
-  const liveWaterSaved = Math.round(combinedTotalWeight * 1200);
-  const liveLandfillVolume = (combinedTotalWeight * 0.0025).toFixed(2);
+  const totalScansCo2 = scansList.reduce((acc, curr) => acc + (parseFloat(curr.co2Saved) || 0), 0);
+  const totalInvCo2 = totalInvWeight * 3.2;
+  const liveCo2Saved = (totalScansCo2 + totalInvCo2).toFixed(1);
 
-  const handleFileSelect = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-      setPreviewUrl(URL.createObjectURL(file));
-      setImageAnalysisResult(null);
-    }
-  };
+  const totalScansWater = scansList.reduce((acc, curr) => acc + (parseFloat(curr.waterSaved) || 0), 0);
+  const totalInvWater = totalInvWeight * 1200;
+  const liveWaterSaved = Math.round(totalScansWater + totalInvWater);
 
-  const handleImageUploadAndAnalyze = async (e) => {
-    e.preventDefault();
-    if (!selectedFile) {
-      alert('Please select an image file first.');
-      return;
-    }
-    setAnalyzingImage(true);
-    try {
-      const res = await analyticsService.uploadTextileImage(selectedFile, isBatchUpload, batchWeightInput);
-      if (res && res.results) {
-        setImageAnalysisResult(res);
+  const liveLandfillVolume = (totalActiveWeight * 0.0025).toFixed(2);
 
-        const fabricTypeStr = (res.results.material_classification_engine?.fabric_type_classification || "Cotton").toLowerCase();
-        const recyclabilityVal = parseFloat(res.results.waste_classification_engine?.recyclability_assessment) || 85.0;
-        const co2Val = parseFloat(res.results.environmental_impact_engine?.co2_savings_estimation) || 1.35;
-        const gradeVal = res.results.material_classification_engine?.material_quality_estimation || "Grade A - Premium Quality";
-
-        let catKey = 'cotton';
-        if (fabricTypeStr.includes('denim')) catKey = 'denim';
-        else if (fabricTypeStr.includes('poly') || fabricTypeStr.includes('synthetic')) catKey = 'polyester';
-        else if (fabricTypeStr.includes('wool') || fabricTypeStr.includes('jute') || fabricTypeStr.includes('fleece') || fabricTypeStr.includes('textured')) catKey = 'wool';
-        else if (fabricTypeStr.includes('linen')) catKey = 'linen';
-        else if (fabricTypeStr.includes('canvas') || fabricTypeStr.includes('dyed') || fabricTypeStr.includes('woven')) catKey = 'canvas';
-        else if (fabricTypeStr.includes('silk')) catKey = 'silk';
-
-        const latestScanPayload = {
-          categoryKey: catKey,
-          fabricType: fabricTypeStr,
-          recyclability: recyclabilityVal,
-          co2Saved: co2Val,
-          conditionGrade: gradeVal,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-        };
-
-        localStorage.setItem('latest_scanned_fabric_data', JSON.stringify(latestScanPayload));
-      }
-    } catch (err) {
-      console.error('Failed to process image analysis request:', err);
-      alert('API Request failed.');
-    } finally {
-      setAnalyzingImage(false);
-    }
-  };
-
-  const handleDownloadFullPdf = async () => {
-    if (!imageAnalysisResult?.results) return;
-    try {
-      const response = await API.post('/analytics/export-multi-engine-pdf', {
-        batch_id: 'BATCH-AI-' + Math.floor(1000 + Math.random() * 9000),
-        results: imageAnalysisResult.results
-      }, { responseType: 'blob' });
-
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', 'Full_Multi_Engine_Textile_Report.txt');
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } catch (err) {
-      alert('Failed to download report.');
-    }
-  };
+  // Recovery Aggregates
+  const totalInflowKg = recoveryEfficiencyData.reduce((acc, curr) => acc + curr.inflow, 0);
+  const totalRecoveredKg = recoveryEfficiencyData.reduce((acc, curr) => acc + curr.recovered, 0);
+  const facilityYieldRate = Math.round((totalRecoveredKg / totalInflowKg) * 100);
 
   const handleRegisterInventory = async (e) => {
     e.preventDefault();
@@ -311,23 +310,91 @@ const Dashboard = () => {
     }
   };
 
-  const handleAssessmentSubmit = async (e) => {
-    e.preventDefault();
-    setAssessing(true);
-    try {
-      const res = await analyticsService.assessMaterialSustainability(assessmentForm);
-      setAssessmentResult(res);
-    } catch (err) {
-      alert('Failed to calculate sustainability assessment.');
-    } finally {
-      setAssessing(false);
-    }
+  const handleDispatch = (id) => {
+    setDispatchedIds((prev) => [...prev, id]);
   };
 
   const handleLogout = () => {
     localStorage.clear();
     window.location.href = '/';
   };
+
+  const filteredOpportunities = selectedOppFilter === 'ALL'
+    ? matchedOpportunities
+    : matchedOpportunities.filter(o => o.status === selectedOppFilter);
+
+  const roleUpper = (userRole || '').toUpperCase();
+  const isAdmin = roleUpper === 'ADMIN' || roleUpper === 'ADMINISTRATOR';
+  const isSustainabilityManager = roleUpper.includes('SUSTAINABILITY');
+  const isManufacturer = roleUpper.includes('MANUFACTURER');
+
+  if (isSustainabilityManager) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800">
+        <header className="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-50 shadow-md">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-emerald-500 rounded-xl shadow-lg">
+                <Leaf className="w-5 h-5 text-slate-950" />
+              </div>
+              <span className="font-bold text-lg tracking-tight">AI Textile Intelligence</span>
+            </div>
+
+            <div className="flex items-center space-x-4">
+              <div className="text-right hidden sm:block">
+                <p className="text-xs text-slate-400">Authenticated Role</p>
+                <p className="text-sm font-semibold text-emerald-400">Sustainability Manager</p>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition flex items-center gap-1.5 text-xs font-medium"
+                title="Logout"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden md:inline">Sign Out</span>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <SustainabilityManagerDashboard />
+      </div>
+    );
+  }
+
+  if (isManufacturer) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800">
+        <header className="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-50 shadow-md">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-emerald-500 rounded-xl shadow-lg">
+                <Factory className="w-5 h-5 text-slate-950" />
+              </div>
+              <span className="font-bold text-lg tracking-tight">AI Textile Intelligence</span>
+            </div>
+
+            <div className="flex items-center space-x-4">
+              <div className="text-right hidden sm:block">
+                <p className="text-xs text-slate-400">Authenticated Role</p>
+                <p className="text-sm font-semibold text-emerald-400">Textile Manufacturer</p>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition flex items-center gap-1.5 text-xs font-medium"
+                title="Logout"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden md:inline">Sign Out</span>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <ManufacturerDashboard />
+      </div>
+    );
+  }
 
   const filteredInventory = inventory.filter((item) => {
     const matchesSearch = item.batch_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -346,12 +413,7 @@ const Dashboard = () => {
             <div className="p-2 bg-emerald-500 rounded-xl shadow-lg">
               <Leaf className="w-5 h-5 text-slate-950" />
             </div>
-            <div>
-              <span className="font-bold text-lg tracking-tight">AI Textile Intelligence</span>
-              <span className="hidden sm:inline-block ml-2 px-2 py-0.5 text-xs bg-slate-800 text-emerald-400 font-mono rounded-full border border-slate-700">
-                Enterprise v1.0
-              </span>
-            </div>
+            <span className="font-bold text-lg tracking-tight">AI Textile Intelligence</span>
           </div>
 
           <div className="flex items-center space-x-4">
@@ -371,13 +433,13 @@ const Dashboard = () => {
         </div>
       </header>
 
-      {/* Main Layout Container with Always Visible Sidebar */}
+      {/* Main Layout Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* Sidebar Navigation */}
         <aside className="lg:col-span-3 space-y-2">
           <nav className="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-1">
-            {userRole === 'Admin' && (
+            {isAdmin ? (
               <>
                 <button
                   onClick={() => setActiveTab('admin')}
@@ -400,63 +462,207 @@ const Dashboard = () => {
                 >
                   <Users className="w-4 h-4 mr-3" /> User Management
                 </button>
+
+                <button
+                  onClick={() => setActiveTab('overview')}
+                  className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition ${
+                    activeTab === 'overview'
+                      ? 'bg-emerald-600 text-white font-semibold shadow-md'
+                      : 'text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <BarChart3 className="w-4 h-4 mr-3" /> Platform Analytics
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('reports')}
+                  className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition ${
+                    activeTab === 'reports'
+                      ? 'bg-emerald-600 text-white font-semibold shadow-md'
+                      : 'text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <FileText className="w-4 h-4 mr-3" /> Report Management
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('scanner')}
+                  className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition ${
+                    activeTab === 'scanner'
+                      ? 'bg-emerald-600 text-white font-semibold shadow-md'
+                      : 'text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <ImageIcon className="w-4 h-4 mr-3" /> AI Fabric Scanner
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('inventory')}
+                  className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition ${
+                    activeTab === 'inventory'
+                      ? 'bg-emerald-600 text-white font-semibold shadow-md'
+                      : 'text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <Package className="w-4 h-4 mr-3" /> Waste Inventory Logging
+                </button>
+              </>
+            ) : (
+              <>
+                {/* Platform Analytics Tab for Recycling Operator */}
+                <button
+                  onClick={() => setActiveTab('overview')}
+                  className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition ${
+                    activeTab === 'overview'
+                      ? 'bg-emerald-600 text-white font-semibold shadow-md'
+                      : 'text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <BarChart3 className="w-4 h-4 mr-3" /> Platform Analytics
+                </button>
+
+                {/* AI Fabric Scanner */}
+                <button
+                  onClick={() => setActiveTab('scanner')}
+                  className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition ${
+                    activeTab === 'scanner'
+                      ? 'bg-emerald-600 text-white font-semibold shadow-md'
+                      : 'text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <ImageIcon className="w-4 h-4 mr-3" /> AI Fabric Scanner
+                </button>
+
+                {/* Waste Inventory Logging */}
+                <button
+                  onClick={() => setActiveTab('inventory')}
+                  className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition ${
+                    activeTab === 'inventory'
+                      ? 'bg-emerald-600 text-white font-semibold shadow-md'
+                      : 'text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <Package className="w-4 h-4 mr-3" /> Waste Inventory Logging
+                </button>
+
+                {/* Recycling Opportunities */}
+                <button
+                  onClick={() => setActiveTab('opportunities')}
+                  className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition ${
+                    activeTab === 'opportunities'
+                      ? 'bg-emerald-600 text-white font-semibold shadow-md'
+                      : 'text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <Sparkles className="w-4 h-4 mr-3" /> Recycling Opportunities
+                </button>
+
+                {/* Recovery Statistics */}
+                <button
+                  onClick={() => setActiveTab('recovery')}
+                  className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition ${
+                    activeTab === 'recovery'
+                      ? 'bg-emerald-600 text-white font-semibold shadow-md'
+                      : 'text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <TrendingUp className="w-4 h-4 mr-3" /> Recovery Statistics
+                </button>
               </>
             )}
-
-            <button
-              onClick={() => setActiveTab('overview')}
-              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition ${
-                activeTab === 'overview'
-                  ? 'bg-emerald-600 text-white font-semibold shadow-md'
-                  : 'text-slate-600 hover:bg-slate-50'
-              }`}
-            >
-              <BarChart3 className="w-4 h-4 mr-3" /> Platform Analytics
-            </button>
-
-            <button
-              onClick={() => setActiveTab('scanner')}
-              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition ${
-                activeTab === 'scanner'
-                  ? 'bg-emerald-600 text-white font-semibold shadow-md'
-                  : 'text-slate-600 hover:bg-slate-50'
-              }`}
-            >
-              <ImageIcon className="w-4 h-4 mr-3" /> AI Fabric Scanner
-            </button>
-
-            <button
-              onClick={() => setActiveTab('calculator')}
-              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition ${
-                activeTab === 'calculator'
-                  ? 'bg-emerald-600 text-white font-semibold shadow-md'
-                  : 'text-slate-600 hover:bg-slate-50'
-              }`}
-            >
-              <Scale className="w-4 h-4 mr-3" /> Sustainability Calculator
-            </button>
-
-            <button
-              onClick={() => setActiveTab('inventory')}
-              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition ${
-                activeTab === 'inventory'
-                  ? 'bg-emerald-600 text-white font-semibold shadow-md'
-                  : 'text-slate-600 hover:bg-slate-50'
-              }`}
-            >
-              <Package className="w-4 h-4 mr-3" /> Waste Inventory Logging
-            </button>
           </nav>
         </aside>
 
         {/* Content Area */}
         <main className="lg:col-span-9 space-y-6">
           
-          {/* TAB 0: OVERVIEW (ADMIN MONITORING GRID) */}
+          {/* TAB 0: ADMIN OVERVIEW */}
           {activeTab === 'admin' && <AdminDashboard viewMode="overview" />}
 
-          {/* TAB 0.5: USER MANAGEMENT (SIDEBAR CLICKABLE TAB) */}
+          {/* TAB 0.5: ADMIN USER MANAGEMENT */}
           {activeTab === 'users' && <AdminDashboard viewMode="users" />}
+
+          {/* TAB 0.8: ADMIN REPORT MANAGEMENT */}
+          {activeTab === 'reports' && (
+            <div className="space-y-6">
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-3">
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-800 flex items-center">
+                      <FileText className="w-5 h-5 mr-2 text-emerald-600" />
+                      Platform Report Management & Audit Exports
+                    </h2>
+                    <p className="text-xs text-slate-400 mt-0.5">Generate, audit, and download comprehensive platform performance sheets.</p>
+                  </div>
+                  <button
+                    onClick={() => adminService.downloadExcelReport()}
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition flex items-center shadow-xs shrink-0"
+                  >
+                    <FileSpreadsheet className="w-4 h-4 mr-2" /> Download Master Excel Audit (.xlsx)
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">Logged Inflow Batches</span>
+                    <p className="text-xl font-black text-slate-900">{inventory.length}</p>
+                    <span className="text-[11px] text-slate-500 font-medium">Ready for compliance audit</span>
+                  </div>
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">AI Quality Diagnostics</span>
+                    <p className="text-xl font-black text-emerald-600">{scansList.length}</p>
+                    <span className="text-[11px] text-emerald-700 font-medium">Verified classifications</span>
+                  </div>
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">Total Diverted Volume</span>
+                    <p className="text-xl font-black text-blue-600">{totalActiveWeight} KG</p>
+                    <span className="text-[11px] text-blue-700 font-medium">Calculated live across logs</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Batches Table for Reporting */}
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <h3 className="text-sm font-bold text-slate-800">Master Waste Logs Registry</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm border-collapse">
+                    <thead>
+                      <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold text-xs uppercase">
+                        <th className="py-3 px-4">Batch ID</th>
+                        <th className="py-3 px-4">Fabric Type</th>
+                        <th className="py-3 px-4">Quantity (KG)</th>
+                        <th className="py-3 px-4">Condition</th>
+                        <th className="py-3 px-4">Origin Source</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-slate-700 text-xs">
+                      {inventory.length > 0 ? (
+                        inventory.map((item, idx) => (
+                          <tr key={item.id || idx} className="hover:bg-slate-50 transition">
+                            <td className="py-3.5 px-4 font-mono font-medium text-slate-800">{item.batch_id || `BATCH-${idx + 101}`}</td>
+                            <td className="py-3.5 px-4 font-medium">{item.fabric_type || item.fabric}</td>
+                            <td className="py-3.5 px-4 font-bold text-slate-900">{item.quantity || item.weight} KG</td>
+                            <td className="py-3.5 px-4">
+                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                                {item.condition || 'Good'}
+                              </span>
+                            </td>
+                            <td className="py-3.5 px-4 text-slate-500">{item.source || 'Post-Consumer'}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="5" className="py-8 text-center text-slate-400">
+                            {loading ? 'Fetching report registry...' : 'No inventory records logged in the database.'}
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* TAB 1: PLATFORM ANALYTICS */}
           {activeTab === 'overview' && (
@@ -509,20 +715,23 @@ const Dashboard = () => {
                 </h2>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                  {/* Clean Material Distribution Card */}
+                  <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3 flex flex-col justify-between">
                     <div>
                       <h3 className="font-bold text-slate-800 text-sm">Material Distribution Index</h3>
+                      <p className="text-[11px] text-slate-400">Live breakdown of scanned & logged fabrics</p>
                     </div>
-                    <div className="h-64 w-full">
+
+                    <div className="h-48 w-full">
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                           <Pie
                             data={dynamicFabricData}
                             cx="50%"
                             cy="50%"
-                            innerRadius={60}
-                            outerRadius={85}
-                            paddingAngle={5}
+                            innerRadius={45}
+                            outerRadius={70}
+                            paddingAngle={4}
                             dataKey="value"
                           >
                             {dynamicFabricData.map((entry, index) => (
@@ -530,15 +739,26 @@ const Dashboard = () => {
                             ))}
                           </Pie>
                           <Tooltip formatter={(value) => `${value}%`} />
-                          <Legend verticalAlign="bottom" height={36} />
                         </PieChart>
                       </ResponsiveContainer>
                     </div>
+
+                    <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-[11px]">
+                      {dynamicFabricData.map((item) => (
+                        <div key={item.name} className="flex items-center space-x-1.5 truncate">
+                          <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: item.color }} />
+                          <span className="font-medium text-slate-700 truncate">{item.name}</span>
+                          <span className="text-slate-400 font-bold ml-auto">{item.value}%</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
+                  {/* Monthly Waste Diversion Line Chart */}
                   <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
                     <div>
                       <h3 className="font-bold text-slate-800 text-sm">Monthly Waste Diversion (KG)</h3>
+                      <p className="text-[11px] text-slate-400">Landfill weight diverted over time</p>
                     </div>
                     <div className="h-64 w-full">
                       <ResponsiveContainer width="100%" height="100%">
@@ -553,16 +773,18 @@ const Dashboard = () => {
                     </div>
                   </div>
 
+                  {/* Circularity Score Distribution Bar Chart */}
                   <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3 lg:col-span-2">
                     <div>
                       <h3 className="font-bold text-slate-800 text-sm">Circularity Score Distribution (%)</h3>
+                      <p className="text-[11px] text-slate-400">Score spread across all processed textile scans</p>
                     </div>
                     <div className="h-64 w-full">
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={dynamicScoreData} margin={{ top: 10, right: 20, left: -10, bottom: 0 }}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
                           <XAxis dataKey="range" stroke="#94A3B8" fontSize={11} />
-                          <YAxis stroke="#94A3B8" fontSize={11} />
+                          <YAxis stroke="#94A3B8" fontSize={11} domain={[0, 100]} />
                           <Tooltip formatter={(value) => `${value}%`} />
                           <Bar dataKey="percentage" radius={[8, 8, 0, 0]}>
                             {dynamicScoreData.map((entry, index) => (
@@ -579,236 +801,9 @@ const Dashboard = () => {
           )}
 
           {/* TAB 2: AI FABRIC SCANNER */}
-          {activeTab === 'scanner' && (
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
-              <div className="border-b border-slate-100 pb-4">
-                <h2 className="text-xl font-bold text-slate-800 flex items-center">
-                  <ImageIcon className="w-5 h-5 mr-2 text-emerald-600" />
-                  Fabric Analysis Engine
-                </h2>
-                <p className="text-slate-500 text-sm mt-1">
-                  Upload fabric photos once to generate multi-engine sustainability diagnostics across all 7 processing engines.
-                </p>
-              </div>
+          {activeTab === 'scanner' && <FabricScannerComponent />}
 
-              <form onSubmit={handleImageUploadAndAnalyze} className="space-y-4">
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Scan Mode</label>
-                    <select
-                      value={isBatchUpload ? 'batch' : 'single'}
-                      onChange={(e) => setIsBatchUpload(e.target.value === 'batch')}
-                      className="w-full bg-white border border-slate-300 rounded-xl p-2 text-xs font-semibold focus:ring-2 focus:ring-emerald-500"
-                    >
-                      <option value="single">Single Garment Scan (Dynamic Reference Lookup)</option>
-                      <option value="batch">Industrial Batch Scan (Dataset Benchmark)</option>
-                    </select>
-                  </div>
-
-                  {isBatchUpload && (
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">Total Batch Weight (KG)</label>
-                      <input
-                        type="number"
-                        step="0.1"
-                        value={batchWeightInput}
-                        onChange={(e) => setBatchWeightInput(parseFloat(e.target.value) || 100.0)}
-                        placeholder="e.g. 100.0"
-                        className="w-full bg-white border border-slate-300 rounded-xl p-2 text-xs font-semibold focus:ring-2 focus:ring-emerald-500"
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <div className="border-2 border-dashed border-slate-300 hover:border-emerald-500 rounded-2xl p-8 text-center transition bg-slate-50 cursor-pointer">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileSelect}
-                    className="hidden"
-                    id="textile-image-upload"
-                  />
-                  <label htmlFor="textile-image-upload" className="cursor-pointer block">
-                    {previewUrl ? (
-                      <div className="flex flex-col items-center">
-                        <img src={previewUrl} alt="Fabric Preview" className="h-48 object-cover rounded-xl shadow-md mb-3" />
-                        <span className="text-xs text-emerald-600 font-semibold">Change Fabric Sample Image</span>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center py-6">
-                        <Upload className="w-12 h-12 text-slate-400 mb-3" />
-                        <p className="text-sm font-semibold text-slate-700">Click to upload or drag & drop fabric sample</p>
-                        <p className="text-xs text-slate-400 mt-1">High resolution PNG, JPG, or WEBP supported</p>
-                      </div>
-                    )}
-                  </label>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={analyzingImage || !selectedFile}
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl transition shadow-sm flex items-center justify-center text-sm disabled:opacity-50"
-                >
-                  {analyzingImage ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <ImageIcon className="w-4 h-4 mr-2" />}
-                  Process Fabric Image Across All 7 Engines
-                </button>
-              </form>
-
-              {imageAnalysisResult && (
-                <div className="space-y-5 pt-4 border-t border-slate-100">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 p-4 rounded-2xl text-white shadow-md">
-                    <div className="flex-1">
-                      <span className="text-xs text-emerald-400 font-semibold uppercase tracking-wider block">
-                        Select Diagnostic Engine View
-                      </span>
-                      <select
-                        value={selectedEngine}
-                        onChange={(e) => setSelectedEngine(e.target.value)}
-                        className="mt-1 block w-full bg-slate-800 text-white border border-slate-700 rounded-xl px-3 py-2 text-sm font-semibold focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                      >
-                        {engineNames.map((eng) => (
-                          <option key={eng.id} value={eng.id}>
-                            {eng.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <button
-                      onClick={handleDownloadFullPdf}
-                      className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs rounded-xl flex items-center shadow-md transition self-end sm:self-center"
-                    >
-                      <FileText className="w-4 h-4 mr-2" /> Download Complete Report
-                    </button>
-                  </div>
-
-                  <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4">
-                    <h3 className="text-base font-bold text-slate-800 border-b border-slate-200 pb-2">
-                      {engineNames.find(e => e.id === selectedEngine)?.label}
-                    </h3>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                      {imageAnalysisResult.results[selectedEngine] &&
-                        Object.entries(imageAnalysisResult.results[selectedEngine]).map(([key, val]) => (
-                          <div key={key} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
-                            <span className="text-slate-400 font-semibold block uppercase text-[10px] tracking-wider">
-                              {key.replace(/_/g, ' ')}
-                            </span>
-                            <span className="font-bold text-slate-800 text-sm leading-snug block">
-                              {val.toString()}
-                            </span>
-                          </div>
-                        ))
-                      }
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* TAB 3: SUSTAINABILITY CALCULATOR */}
-          {activeTab === 'calculator' && (
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
-              <div className="border-b border-slate-100 pb-4">
-                <h2 className="text-xl font-bold text-slate-800 flex items-center">
-                  <Scale className="w-5 h-5 mr-2 text-emerald-600" />
-                  Sustainability Calculator
-                </h2>
-              </div>
-
-              <form onSubmit={handleAssessmentSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Fabric Material Type</label>
-                  <select
-                    value={assessmentForm.material_type}
-                    onChange={(e) => setAssessmentForm({ ...assessmentForm, material_type: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-emerald-500"
-                  >
-                    <option value="Cotton">Cotton</option>
-                    <option value="Polyester">Polyester</option>
-                    <option value="Wool">Wool</option>
-                    <option value="Silk">Silk</option>
-                    <option value="Linen">Linen</option>
-                    <option value="Denim">Denim</option>
-                    <option value="Nylon">Nylon</option>
-                    <option value="Rayon">Rayon</option>
-                    <option value="Acrylic">Acrylic</option>
-                    <option value="Mixed Fabrics">Mixed Fabrics</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Material Condition</label>
-                  <select
-                    value={assessmentForm.material_condition}
-                    onChange={(e) => setAssessmentForm({ ...assessmentForm, material_condition: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-emerald-500"
-                  >
-                    <option value="Excellent">Excellent</option>
-                    <option value="Good">Good</option>
-                    <option value="Fair">Fair</option>
-                    <option value="Poor">Poor</option>
-                    <option value="Contaminated">Contaminated</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Waste Batch Weight (KG)</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={assessmentForm.waste_weight_kg}
-                    onChange={(e) => setAssessmentForm({ ...assessmentForm, waste_weight_kg: parseFloat(e.target.value) || 0 })}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-emerald-500"
-                  />
-                </div>
-
-                <div className="md:col-span-3">
-                  <button
-                    type="submit"
-                    disabled={assessing}
-                    className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 rounded-xl transition shadow-sm flex items-center justify-center text-sm disabled:opacity-50"
-                  >
-                    {assessing ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Scale className="w-4 h-4 mr-2" />}
-                    Calculate Weighted Circularity Score & Impact
-                  </button>
-                </div>
-              </form>
-
-              {assessmentResult && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
-                  <div className="bg-emerald-950 text-white p-6 rounded-2xl shadow-md border border-emerald-800 space-y-3">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400">Circularity Score</span>
-                    <p className="text-4xl font-black text-emerald-300">
-                      {assessmentResult.circularity.circularity_score} <span className="text-lg font-normal text-slate-400">/ 100</span>
-                    </p>
-                    <div className="pt-2 border-t border-emerald-900/80">
-                      <p className="text-xs text-slate-300 font-medium">Circularity Category:</p>
-                      <p className="text-sm font-bold text-white mt-0.5">{assessmentResult.circularity.category}</p>
-                    </div>
-                  </div>
-
-                  <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-3">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Recommended Strategy</span>
-                    <p className="text-xl font-bold text-slate-800">{assessmentResult.recommendation.primary_strategy}</p>
-                    <p className="text-xs text-slate-500 leading-relaxed">{assessmentResult.recommendation.action_plan}</p>
-                  </div>
-
-                  <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-3">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Environmental Benefit</span>
-                    <div className="space-y-1">
-                      <p className="text-sm font-semibold text-emerald-700">🌱 {assessmentResult.environmental_impact.co2_savings_kg} Kg CO₂ Offsets</p>
-                      <p className="text-sm font-semibold text-blue-700">💧 {assessmentResult.environmental_impact.water_savings_liters} Liters Water Saved</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* TAB 4: WASTE INVENTORY LOGGING */}
+          {/* TAB 3: WASTE INVENTORY LOGGING */}
           {activeTab === 'inventory' && (
             <div className="space-y-8">
               <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
@@ -918,9 +913,20 @@ const Dashboard = () => {
                 </form>
               </div>
 
+              {/* LOGGED INVENTORY TABLE */}
               <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <h2 className="text-lg font-bold text-slate-800">Logged Inventory Batches</h2>
+                  <div className="flex items-center space-x-3">
+                    <h2 className="text-lg font-bold text-slate-800">Logged Inventory Batches</h2>
+                    <button
+                      onClick={() => adminService.downloadExcelReport()}
+                      className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold rounded-xl transition flex items-center shadow-xs"
+                      title="Export Excel Audit Sheet"
+                    >
+                      <FileSpreadsheet className="w-3.5 h-3.5 mr-1 text-emerald-600" /> Export Excel Audit
+                    </button>
+                  </div>
+
                   <div className="flex items-center space-x-3">
                     <div className="relative">
                       <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
@@ -988,6 +994,198 @@ const Dashboard = () => {
                       )}
                     </tbody>
                   </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: RECYCLING OPPORTUNITIES */}
+          {activeTab === 'opportunities' && (
+            <div className="space-y-6">
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-lg font-bold text-slate-800 flex items-center">
+                    <Sparkles className="w-5 h-5 mr-2 text-emerald-600" />
+                    Recycling Opportunities & Batch Matching
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-0.5">Automated buyer matching based on fabric purity and batch weight.</p>
+                </div>
+
+                <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-xl border border-slate-200 text-xs">
+                  <button
+                    onClick={() => setSelectedOppFilter('ALL')}
+                    className={`px-3 py-1.5 rounded-lg font-semibold transition ${
+                      selectedOppFilter === 'ALL' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    All ({matchedOpportunities.length})
+                  </button>
+                  <button
+                    onClick={() => setSelectedOppFilter('Ready for Dispatch')}
+                    className={`px-3 py-1.5 rounded-lg font-semibold transition ${
+                      selectedOppFilter === 'Ready for Dispatch' ? 'bg-emerald-600 text-white' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    Ready for Dispatch
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {filteredOpportunities.map((opp) => {
+                  const isDispatched = dispatchedIds.includes(opp.id);
+                  return (
+                    <div key={opp.id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+                      <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+                        <div>
+                          <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">{opp.id}</span>
+                          <h3 className="text-sm font-bold text-slate-900 mt-0.5">{opp.fabric}</h3>
+                        </div>
+                        <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          {opp.purityScore}% AI Purity
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3 text-xs bg-slate-50 p-3.5 rounded-xl border border-slate-200/70">
+                        <div>
+                          <span className="text-slate-400 block text-[10px] uppercase font-semibold">Batch Volume</span>
+                          <span className="font-bold text-slate-800 text-sm">{opp.quantityKg} KG</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-400 block text-[10px] uppercase font-semibold">Est. Value</span>
+                          <span className="font-bold text-emerald-700 text-sm">{opp.estimatedValue}</span>
+                        </div>
+                        <div className="col-span-2">
+                          <span className="text-slate-400 block text-[10px] uppercase font-semibold">Target Route</span>
+                          <span className="font-semibold text-slate-700">{opp.targetIndustry} • {opp.conversionRoute}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-1">
+                        <span className="text-xs text-slate-400 flex items-center">
+                          <Clock className="w-3.5 h-3.5 mr-1 text-slate-400" /> {opp.urgency}
+                        </span>
+
+                        <button
+                          onClick={() => handleDispatch(opp.id)}
+                          disabled={isDispatched}
+                          className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center ${
+                            isDispatched ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-slate-900 hover:bg-slate-800 text-white shadow-xs'
+                          }`}
+                        >
+                          {isDispatched ? (
+                            <>
+                              <CheckCircle2 className="w-3.5 h-3.5 mr-1.5 text-emerald-500" /> Dispatched
+                            </>
+                          ) : (
+                            <>
+                              Initiate Transfer <ArrowRight className="w-3.5 h-3.5 ml-1.5 text-emerald-400" />
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: RECOVERY STATISTICS */}
+          {activeTab === 'recovery' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
+                  <div className="flex items-center justify-between text-xs text-slate-500 font-semibold">
+                    <span>Total Inflow</span>
+                    <Box className="w-4 h-4 text-slate-400" />
+                  </div>
+                  <p className="text-2xl font-black text-slate-900">{totalInflowKg.toLocaleString()} KG</p>
+                  <span className="text-[11px] text-slate-400 font-medium">Recorded across all input batches</span>
+                </div>
+
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
+                  <div className="flex items-center justify-between text-xs text-slate-500 font-semibold">
+                    <span>Clean Recovered Fiber</span>
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  </div>
+                  <p className="text-2xl font-black text-emerald-600">{totalRecoveredKg.toLocaleString()} KG</p>
+                  <span className="text-[11px] text-emerald-700 font-bold">Usable output for spinning & yarn</span>
+                </div>
+
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
+                  <div className="flex items-center justify-between text-xs text-slate-500 font-semibold">
+                    <span>Avg. Facility Yield Rate</span>
+                    <Percent className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <p className="text-2xl font-black text-blue-600">{facilityYieldRate}%</p>
+                  <span className="text-[11px] text-blue-700 font-bold">Closed-loop recovery efficiency</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div className="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                  <div className="border-b border-slate-100 pb-3">
+                    <h3 className="text-sm font-bold text-slate-800 flex items-center">
+                      <TrendingUp className="w-4 h-4 mr-2 text-emerald-600" />
+                      Material Inflow vs. Recovered Output (KG)
+                    </h3>
+                    <p className="text-xs text-slate-400 mt-0.5">Yield comparison per textile category</p>
+                  </div>
+
+                  <div className="h-72 w-full pt-2">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={recoveryEfficiencyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
+                        <XAxis dataKey="fabric" stroke="#64748B" fontSize={11} />
+                        <YAxis stroke="#94A3B8" fontSize={11} />
+                        <Tooltip formatter={(val) => `${val} KG`} />
+                        <Bar dataKey="inflow" name="Inflow (KG)" fill="#CBD5E1" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="recovered" name="Recovered (KG)" fill="#10B981" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                  <div className="border-b border-slate-100 pb-3">
+                    <h3 className="text-sm font-bold text-slate-800 flex items-center">
+                      <Factory className="w-4 h-4 mr-2 text-emerald-600" />
+                      Processing Pathway Distribution
+                    </h3>
+                    <p className="text-xs text-slate-400 mt-0.5">Active facility route allocation</p>
+                  </div>
+
+                  <div className="h-56 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={processingRoutesData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={45}
+                          outerRadius={75}
+                          paddingAngle={3}
+                          dataKey="value"
+                        >
+                          {processingRoutesData.map((entry, index) => (
+                            <Cell key={`route-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(val) => `${val}%`} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-[10px]">
+                    {processingRoutesData.map((item) => (
+                      <div key={item.name} className="flex items-center space-x-1.5 truncate">
+                        <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: item.color }} />
+                        <span className="font-medium text-slate-700 truncate">{item.name}</span>
+                        <span className="text-slate-400 font-bold ml-auto">{item.value}%</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>

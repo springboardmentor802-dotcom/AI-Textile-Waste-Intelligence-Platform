@@ -1,106 +1,151 @@
 import React, { useState } from 'react';
-import API from '../services/api';
+import { authService } from '../services/api';
+import { Leaf, Lock, Mail, UserCheck, CheckCircle2 } from 'lucide-react';
 
-function Register({ onSwitchToLogin }) {
+const Register = ({ onSwitchToLogin }) => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    role: 'Recycling Facility'
+    role: 'SUSTAINABILITY_MANAGER'
   });
-  const [message, setMessage] = useState({ type: '', text: '' });
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage({ type: '', text: '' });
+    setErrorMsg('');
+    setSuccessMsg('');
     setLoading(true);
 
     try {
-      await API.post('/auth/register', formData);
-      setMessage({ type: 'success', text: 'Registration Successful! Switching to login...' });
+      // Sending payload object directly
+      await authService.register(formData);
+      
+      setSuccessMsg('Account registered successfully! Redirecting to login...');
       
       setTimeout(() => {
-        onSwitchToLogin();
+        if (onSwitchToLogin) {
+          onSwitchToLogin();
+        } else {
+          window.location.href = '/login';
+        }
       }, 1200);
-    } catch (error) {
-      const errorMsg = error.response?.data?.detail || 'Registration failed. Try again.';
-      setMessage({ type: 'error', text: errorMsg });
+
+    } catch (err) {
+      console.error("Registration Error:", err);
+      const detail = err.response?.data?.detail;
+      setErrorMsg(
+        typeof detail === 'string' 
+          ? detail 
+          : Array.isArray(detail) 
+            ? detail[0]?.msg || 'Validation failed.' 
+            : 'Registration failed. Check credentials.'
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full border border-slate-100">
-        <h2 className="text-3xl font-bold text-slate-900 text-center mb-2">Create Account</h2>
-        <p className="text-slate-500 text-center mb-6 text-sm">Join the Textile Waste Intelligence Platform</p>
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 font-sans text-slate-800">
+      <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full border border-slate-100 space-y-6">
         
-        {message.text && (
-          <div className={`p-3 rounded-xl text-sm mb-4 text-center font-medium ${
-            message.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
-          }`}>
-            {message.text}
+        {/* Header (Light Theme Matching Login.jsx) */}
+        <div className="text-center space-y-1">
+          <div className="inline-flex p-3 bg-emerald-50 rounded-2xl mb-2 text-emerald-600">
+            <Leaf className="w-8 h-8" />
+          </div>
+          <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Create Account 👋</h2>
+          <p className="text-slate-500 text-sm">Join the AI Textile Waste Intelligence Platform</p>
+        </div>
+
+        {/* Alerts */}
+        {errorMsg && (
+          <div className="p-3.5 bg-red-50 border border-red-100 text-red-700 text-xs rounded-xl font-medium text-center">
+            {errorMsg}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        {successMsg && (
+          <div className="p-3.5 bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs rounded-xl font-medium flex items-center justify-center">
+            <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-600 shrink-0" />
+            {successMsg}
+          </div>
+        )}
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1">Email Address</label>
-            <input 
-              type="email" 
-              required
-              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition text-sm"
-              placeholder="user@textile.ai"
-              value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
-            />
+            <div className="relative">
+              <Mail className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
+              <input
+                type="email"
+                required
+                placeholder="operator@test.com"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="w-full px-4 py-2.5 pl-10 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition text-sm"
+              />
+            </div>
           </div>
 
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1">Password</label>
-            <input 
-              type="password" 
-              required
-              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition text-sm"
-              placeholder="••••••••"
-              value={formData.password}
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
-            />
+            <div className="relative">
+              <Lock className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
+              <input
+                type="password"
+                required
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                className="w-full px-4 py-2.5 pl-10 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition text-sm"
+              />
+            </div>
           </div>
 
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1">Platform Role</label>
-            <select 
-              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition text-sm text-slate-700 font-medium"
-              value={formData.role}
-              onChange={(e) => setFormData({...formData, role: e.target.value})}
-            >
-              <option value="Admin">System Admin</option>
-              <option value="Recycling Facility">Recycling Facility</option>
-              <option value="Sustainability Manager">Sustainability Manager</option>
-              <option value="Manufacturer">Manufacturer</option>
-            </select>
+            <div className="relative">
+              <UserCheck className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
+              <select
+                value={formData.role}
+                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                className="w-full px-4 py-2.5 pl-10 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition text-sm text-slate-700 font-medium"
+              >
+                <option value="RECYCLING_OPERATOR">Recycling Facility Operator</option>
+                <option value="SUSTAINABILITY_MANAGER">Sustainability Manager</option>
+                <option value="MANUFACTURER">Textile Manufacturer</option>
+                <option value="ADMIN">Administrator</option>
+              </select>
+            </div>
           </div>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={loading}
             className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-md shadow-emerald-100 transition duration-200 text-sm mt-2 disabled:bg-emerald-400"
           >
-            {loading ? 'Creating Account...' : 'Register Account'}
+            {loading ? 'Registering Account...' : 'Complete Registration'}
           </button>
         </form>
 
-        <p className="text-center text-sm text-slate-600 mt-6">
+        <p className="text-center text-sm text-slate-600 mt-6 pt-2 border-t border-slate-100">
           Already have an account?{' '}
-          <button onClick={onSwitchToLogin} className="text-emerald-600 font-semibold hover:underline">
+          <button 
+            type="button"
+            onClick={() => onSwitchToLogin ? onSwitchToLogin() : (window.location.href = '/login')} 
+            className="text-emerald-600 font-semibold hover:underline"
+          >
             Sign In
           </button>
         </p>
+
       </div>
     </div>
   );
-}
+};
 
 export default Register;

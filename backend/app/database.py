@@ -3,24 +3,27 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 from dotenv import load_dotenv
 
-# Load configuration from .env file
 load_dotenv()
 
-DATABASE_URL = os.getenv(
-    "DATABASE_URL", 
-    "postgresql://postgres:postgres@localhost:5432/textile_waste_db"
-)
 
-# Set up the SQLAlchemy database engine
-engine = create_engine(DATABASE_URL)
+def _build_database_url():
+    configured_url = os.getenv("DATABASE_URL")
+    if configured_url:
+        return configured_url
+    return "sqlite:///./textile_waste.db"
 
-# Configure the local session factory
+
+DATABASE_URL = _build_database_url()
+
+engine_kwargs = {}
+if DATABASE_URL.startswith("sqlite"):
+    engine_kwargs["connect_args"] = {"check_same_thread": False}
+
+engine = create_engine(DATABASE_URL, **engine_kwargs)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-# Base class to inherit from when creating database models
 Base = declarative_base()
 
-# Dependency to get database session for API endpoints
+
 def get_db():
     db = SessionLocal()
     try:

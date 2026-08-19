@@ -1,136 +1,412 @@
-# AI Textile Waste Intelligence Platform
+# AI Textile Waste Management System
 
 ## Infosys Springboard Internship Project
 
-### Individual Contribution - Sreevarshini-140
+### Individual Contribution — Sreevarshini-140
 
 ![Python](https://img.shields.io/badge/Python-3.10-blue)
 ![React](https://img.shields.io/badge/Frontend-React.js-61DAFB)
-![FastAPI](https://img.shields.io/badge/API-FastAPI-green)
+![FastAPI](https://img.shields.io/badge/API-FastAPI-009688)
 ![TensorFlow](https://img.shields.io/badge/AI-TensorFlow-orange)
-![OpenCV](https://img.shields.io/badge/Vision-OpenCV-red)
-![License](https://img.shields.io/badge/Project-Infosys%20Springboard-purple)
+![OpenCV](https://img.shields.io/badge/Computer%20Vision-OpenCV-red)
+![MySQL](https://img.shields.io/badge/Database-MySQL-blue)
+![Docker](https://img.shields.io/badge/Container-Docker-2496ED)
+![Project](https://img.shields.io/badge/Project-Infosys%20Springboard-purple)
+
 ---
 
 # Project Overview
 
-The AI Textile Waste Intelligence Platform is a smart waste management system designed to analyze, classify, and manage textile waste using web technologies and AI-based solutions.
+The **AI Textile Waste Management System** is an AI and computer-vision-based sustainable waste analytics platform designed to analyze textile waste and support explainable circular recovery decisions.
 
-The platform enables textile industries, recyclers, NGOs, and administrators to manage textile inventory, upload waste information, and generate future AI-driven recommendations.
+Traditional textile classification systems mainly identify the visual fabric category. However, material recognition alone is not sufficient to determine whether textile waste should be reused, repaired, donated, recycled, or subjected to specialized treatment.
 
----
+This platform therefore combines:
 
-# Work Completed
+* AI-based textile recognition
+* Computer vision condition inspection
+* Material verification
+* Defect and contamination assessment
+* Explainable rule-based recovery decisions
+* Sustainability scoring
+* Environmental impact estimation
+* Role-based dashboards
+* Inventory management
+* Notifications
+* Analytics
+* PDF reporting
 
-# Frontend Development
-
-- Set up frontend development environment using React and Vite.
-- Created scalable application structure with reusable components.
-- Implemented:
-  - Navbar
-  - Sidebar
-  - Dashboard Cards
-  - Tables
-  - Layout components
-
-## Developed Frontend Pages
-
-- Login
-- Dashboard
-- Inventory
-- Upload Waste
-- Analytics
-- Recommendations
-- Profile
-- Settings
-
-## Frontend Features
-
-- Implemented React Router navigation.
-- Created protected routes.
-- Designed responsive dashboard layout.
-- Developed authentication workflow.
-- Integrated application navigation structure.
+The complete workflow converts an uploaded textile image and its associated information into an **explainable recovery recommendation**.
 
 ---
 
-# Backend Development
+# Problem Statement
 
-## FastAPI Backend Setup
+Textile waste management involves more than identifying fabric types.
 
-- Created backend architecture using Python FastAPI.
-- Configured backend dependencies and requirements.
-- Implemented SQLAlchemy ORM integration.
-- Connected backend with MySQL database.
+A textile item may visually belong to a particular fabric category, but its recovery pathway depends on several other factors including:
+
+* Material
+* Condition
+* Defect severity
+* Contamination
+* Reuse potential
+* Recovery feasibility
+
+A classification-only system cannot reliably decide whether textile waste should be:
+
+* Reused
+* Donated
+* Repaired
+* Upcycled
+* Mechanically recycled
+* Chemically recycled
+* Sent for fiber recovery
+* Treated as specialized waste
+
+Therefore, an intelligent waste-management platform needs to combine **AI evidence, computer vision inspection, verified textile information, sustainability assessment and explainable decision rules**.
 
 ---
 
-# Database Implementation
+# Project Objective
 
-Implemented database structure for:
+The objective of the project is to develop an intelligent textile waste management platform capable of:
 
-- Users
-- Textile Inventory
-- Waste Uploads
-- Recommendations
-
-Created SQLAlchemy models for managing application data.
+1. Recognizing textile samples using deep learning.
+2. Inspecting textile condition using computer vision.
+3. Detecting defects and contamination.
+4. Allowing material verification instead of blindly depending on AI predictions.
+5. Generating explainable circular recovery recommendations.
+6. Calculating sustainability, reuse and recovery scores.
+7. Estimating environmental benefits.
+8. Providing role-specific dashboards.
+9. Securing features using authentication and role-based access control.
+10. Providing analytics, inventory management, notifications and reports.
 
 ---
 
-# Authentication and Security
+# Proposed Solution
 
-Implemented secure JWT-based authentication system.
-
-## Features
-
-- User login authentication
-- Password hashing using bcrypt
-- Password verification
-- JWT token generation
-- OAuth2 password flow integration
-- Protected backend APIs using Bearer token authentication
-
-### Secured APIs
-
-- Inventory APIs
-- Waste Upload APIs
-- Recommendation APIs
-
-### Authentication Flow
+The system follows a hybrid AI + rule-based architecture.
 
 ```text
-React Login Page
-        |
-        ↓
-FastAPI Authentication API
-        |
-        ↓
-User Verification
-        |
-        ↓
-JWT Token Generation
-        |
-        ↓
-Protected API Access
+User
+  │
+  ▼
+React + Vite Frontend
+  │
+  ▼
+FastAPI REST API
+  │
+  ├── Authentication + JWT
+  │
+  ├── Role-Based Access Control
+  │
+  ├── Inventory Management
+  │
+  ├── Notifications
+  │
+  ├── Analytics
+  │
+  └── Textile Analysis
+  │
+  ▼
+AI / Intelligence Layer
+  │
+  ├── TensorFlow CNN
+  │
+  ├── OpenCV Condition Analysis
+  │
+  ├── Defect Detection
+  │
+  ├── Contamination Assessment
+  │
+  └── Material Verification
+  │
+  ▼
+21-Rule Circular Decision Engine
+  │
+  ▼
+Sustainability Assessment
+  │
+  ├── Sustainability Score
+  ├── Reuse Score
+  ├── Recovery Score
+  └── Circularity Level
+  │
+  ▼
+Environmental Impact Estimation
+  │
+  ├── CO₂ Saved
+  ├── Water Saved
+  ├── Energy Saved
+  └── Landfill Diverted
+  │
+  ▼
+Dashboard + Analytics + PDF Report
 ```
 
 ---
 
-# AI / Machine Learning Development
+# Key Design Principle
 
-# Milestone 1: Dataset Preparation and Exploratory Data Analysis
+The system does **not blindly use the CNN prediction as the final recovery decision**.
 
-The Ten Fabrics Dataset (TFD) was selected for textile material recognition and classification.
+The AI model provides visual classification evidence.
+
+The final recommendation is generated using additional verified and derived information such as:
+
+* Verified material
+* Condition
+* Defect severity
+* Contamination
+* Reuse potential
+* Recovery feasibility
+
+This makes the final recommendation more explainable and suitable for practical textile waste management.
+
+---
+
+# Technology Stack
+
+## Frontend
+
+* React.js
+* Vite
+* JavaScript
+* HTML5
+* CSS3
+* React Router
+* Axios
+
+## Backend
+
+* Python
+* FastAPI
+* SQLAlchemy
+* REST APIs
+* JWT Authentication
+* OAuth2
+* bcrypt
+
+## Database
+
+* MySQL
+* SQLAlchemy ORM
+
+## Artificial Intelligence
+
+* TensorFlow
+* Keras
+* Convolutional Neural Networks
+* NumPy
+* Pandas
+
+## Computer Vision
+
+* OpenCV
+
+## Testing
+
+* Python automated test scripts
+* REST API validation
+* Integration testing
+* RBAC testing
+* Model evaluation
+* Performance testing
+
+## Deployment / Containerization
+
+* Docker
+* Dockerfiles
+* Nginx frontend configuration
+
+## Development Tools
+
+* Git
+* GitHub
+* Git LFS
+* VS Code
+* Postman
+* Swagger UI
+
+---
+
+# Major System Modules
+
+The platform is divided into the following major functional areas.
+
+## 1. Authentication and User Management
+
+Provides:
+
+* Registration
+* Login
+* JWT authentication
+* Password hashing
+* Token-based API access
+* User profile management
+* Protected routes
+* Role-based authorization
+
+---
+
+## 2. Textile Analysis
+
+Provides:
+
+* Textile image upload
+* Weight input
+* CNN-based textile classification
+* Confidence information
+* Material verification
+* Upload history
+
+---
+
+## 3. Condition Intelligence
+
+Uses OpenCV-based inspection to analyze:
+
+* Textile condition
+* Defect regions
+* Visible damage
+* Damage severity
+* Contamination
+* Quality indicators
+
+---
+
+## 4. Circular Decision Engine
+
+Uses **21 verified decision rules** to generate explainable textile recovery pathways.
+
+Possible recommendations include:
+
+* Direct Reuse
+* Donation
+* Repair
+* Upcycling
+* Mechanical Recycling
+* Chemical Recycling
+* Fiber Recovery
+* Material Separation
+* Specialized Recycling
+* Cleaning and Reassessment
+* Manual Review
+* Hazardous Textile Waste Treatment
+
+---
+
+## 5. Sustainability Intelligence
+
+Calculates:
+
+* Sustainability Score
+* Reuse Score
+* Recovery Score
+* Circularity Level
+
+Circularity is classified into:
+
+* High Circularity
+* Medium Circularity
+* Low Circularity
+
+---
+
+## 6. Environmental Impact
+
+The system estimates:
+
+* CO₂ emissions saved
+* Water saved
+* Energy saved
+* Landfill waste diverted
+
+These values provide interpretable estimates of the environmental benefits of the recommended recovery pathway.
+
+---
+
+## 7. Analytics
+
+Provides visualization and summaries for:
+
+* Material distribution
+* Textile condition
+* Contamination
+* Circularity level
+* Recovery recommendations
+* Sustainability scores
+* Environmental impact
+* Assessment status
+* Textile analysis activity
+
+---
+
+## 8. Inventory Management
+
+Supports:
+
+* Inventory creation
+* Inventory viewing
+* Inventory updating
+* Inventory deletion
+* Batch information
+* Textile material details
+* Waste origin
+* Condition grade
+* Recovery potential
+* Processing status
+* Waste weight
+
+Access to inventory actions is controlled using RBAC.
+
+---
+
+## 9. Notifications
+
+Provides authenticated notification functionality for platform users.
+
+Features include:
+
+* User notifications
+* Platform announcements
+* Notification display
+* Severity information
+* Role-restricted announcement creation
+
+---
+
+## 10. Role-Based Dashboards
+
+Dashboard information changes depending on the authenticated user's role.
+
+Supported roles:
+
+* Admin
+* Industry
+* Recycler
+* NGO
+
+Each role receives dashboard information relevant to its responsibilities.
+
+---
+
+# Milestone 1 — Dataset Preparation and Exploratory Data Analysis
+
+The **Ten Fabrics Dataset (TFD)** was selected for textile material recognition.
 
 ## Dataset Details
 
-- Dataset Name: Ten Fabrics Dataset (TFD)
-- Dataset Type: Image Classification Dataset
-- Total Images: 2969
-- Number of Classes: 10
-- Image Format: PNG
-- Image Type: RGB Images
+| Property     | Value                |
+| ------------ | -------------------- |
+| Dataset      | Ten Fabrics Dataset  |
+| Dataset Type | Image Classification |
+| Total Images | 2,969                |
+| Classes      | 10                   |
+| Image Format | PNG                  |
+| Image Type   | RGB                  |
 
 ## Fabric Classes
 
@@ -147,40 +423,42 @@ The Ten Fabrics Dataset (TFD) was selected for textile material recognition and 
 010
 ```
 
-## Exploratory Data Analysis Completed
+## Exploratory Data Analysis
 
-- Verified dataset folder structure
-- Analyzed class distribution
-- Checked image dimensions
-- Verified missing values
-- Checked duplicate images
-- Prepared dataset for machine learning development
+Completed:
+
+* Dataset folder verification
+* Class distribution analysis
+* Image-dimension inspection
+* Missing-value checks
+* Duplicate-image checks
+* Dataset preparation
 
 ---
 
-# Milestone 2: Material Recognition and Waste Classification
+# Milestone 2 — Material Recognition and Waste Classification
 
-## Image Preprocessing Pipeline
+Milestone 2 introduced the deep-learning textile classification pipeline.
 
-Implemented an image preprocessing pipeline using TensorFlow.
+## Image Preprocessing
 
-### Completed Preprocessing Steps
+Implemented:
 
-- Loaded textile image dataset
-- Converted images into RGB format
-- Resized images to 224 × 224 pixels
-- Normalized pixel values between 0 and 1
-- Encoded fabric class labels
-- Split dataset into training, validation, and testing sets
-- Created TensorFlow data pipelines
+* Image loading
+* RGB conversion
+* Image resizing
+* Pixel normalization
+* Label encoding
+* Train-validation-test splitting
+* TensorFlow input pipelines
 
 ## Dataset Split
 
-| Dataset | Images |
-|---------|--------|
-| Training | 2078 |
-| Validation | 445 |
-| Testing | 446 |
+| Dataset    | Images |
+| ---------- | -----: |
+| Training   |  2,078 |
+| Validation |    445 |
+| Testing    |    446 |
 
 ## Preprocessing Configuration
 
@@ -194,514 +472,820 @@ Implemented an image preprocessing pipeline using TensorFlow.
 
 ---
 
-# CNN-Based Fabric Classification Model
+# CNN Fabric Classification Model
 
-Developed a Convolutional Neural Network (CNN) model for textile material recognition.
+A Convolutional Neural Network was developed for textile material recognition.
 
-## Model Architecture
+## Architecture
 
 ```text
 Input Image
-(224 × 224 × 3)
-
-        ↓
-
+224 × 224 × 3
+      │
+      ▼
 Conv2D Layers
-
-        ↓
-
-Max Pooling Layers
-
-        ↓
-
+      │
+      ▼
+Max Pooling
+      │
+      ▼
 Feature Extraction
-
-        ↓
-
-Dense Classification Layer
-
-        ↓
-
+      │
+      ▼
+Dense Layer
+      │
+      ▼
 Softmax Output
-
-        ↓
-
+      │
+      ▼
 10 Fabric Classes
 ```
 
 ## Model Configuration
 
-- Framework: TensorFlow / Keras
-- Input Size: 224 × 224 RGB Images
-- Number of Classes: 10
-- Total Parameters: 11.17 Million
-- Model Format: Keras (.keras)
+| Parameter    | Value                       |
+| ------------ | --------------------------- |
+| Framework    | TensorFlow / Keras          |
+| Input        | 224 × 224 RGB               |
+| Classes      | 10                          |
+| Parameters   | Approximately 11.17 Million |
+| Model Format | `.keras`                    |
 
 ---
 
-# Model Performance Evaluation
+# Model Evaluation
 
-The trained CNN model was evaluated using the unseen test dataset.
+The trained CNN model was evaluated using the held-out test dataset.
 
-## Performance Results
+## Recorded Evaluation
 
-| Metric | Score |
-|--------|-------|
-| Test Accuracy | 100% |
-| Precision | 1.00 |
-| Recall | 1.00 |
-| F1-Score | 1.00 |
-| Test Images Evaluated | 446 |
+| Metric        | Result |
+| ------------- | -----: |
+| Test Accuracy |   100% |
+| Precision     |   1.00 |
+| Recall        |   1.00 |
+| F1 Score      |   1.00 |
+| Test Images   |    446 |
 
-## Evaluation Methods
+Evaluation included:
 
-- Training accuracy and loss curves
-- Classification report
-- Confusion matrix analysis
+* Accuracy measurement
+* Classification report
+* Confusion matrix
+* Prediction analysis
 
-The confusion matrix showed no misclassification between the ten fabric categories.
+> The recorded evaluation corresponds to the prepared project dataset and test split and should not automatically be interpreted as general real-world performance.
 
 ---
 
 # Model Artifacts
 
-Generated AI model files:
-
 ```text
 models/
-
 ├── preprocessing_config.json
 ├── fabric_classifier.keras
 └── fabric_classifier_best.keras
 ```
 
-Large model files are managed using Git Large File Storage (Git LFS).
+Large model files can be managed separately using Git LFS where required.
 
 ---
 
-# AI Textile Intelligence Workflow
+# Milestone 3 — Explainable Sustainability Intelligence
 
-The platform follows an end-to-end AI-driven textile waste analysis pipeline.
+Milestone 3 extended the project beyond visual material recognition.
+
+It introduced:
+
+* Computer vision inspection
+* Explainable recovery recommendations
+* Sustainability assessment
+* Circularity analysis
+* Environmental impact estimation
+* Analytics
+* Batch analysis
+* PDF reporting
+
+---
+
+# Milestone 3 End-to-End Workflow
 
 ```text
-Textile Waste Image Upload
-
-            ↓
-
-CNN-Based Fabric Classification
-
-            ↓
-
-Material Identification
-
-            ↓
-
-Condition Assessment Layer
-
-            ↓
-
-Defect Detection + Contamination Analysis
-
-            ↓
-
-Circular Decision Engine
-
-            ↓
-
-Reuse / Repair / Recycling Recommendation
+Textile Image Upload
+        │
+        ▼
+CNN Fabric Classification
+        │
+        ▼
+Material Verification
+        │
+        ▼
+OpenCV Inspection
+        │
+        ▼
+Condition Assessment
+        │
+        ▼
+Defect Detection
+        │
+        ▼
+Contamination Analysis
+        │
+        ▼
+21-Rule Decision Engine
+        │
+        ▼
+Recovery Recommendation
+        │
+        ▼
+Sustainability Assessment
+        │
+        ▼
+Environmental Impact
+        │
+        ▼
+Analytics / Report
 ```
 
 ---
 
-# Textile Condition Assessment
+# Condition Assessment
 
-Material classification alone is not sufficient for deciding textile reuse or recycling.
+Material recognition alone cannot determine textile usability.
 
-The platform includes an additional inspection layer that evaluates textile quality using computer vision techniques.
+The computer vision layer evaluates:
 
-## Condition Analysis Features
+* Fabric condition
+* Visible damage
+* Defect regions
+* Damage severity
+* Contamination
+* Affected-area characteristics
 
-Implemented using OpenCV:
+Example:
 
-- Fabric damage detection
-- Visible defect identification
-- Contamination analysis
-- Textile quality assessment
-
-The inspection layer helps determine whether a textile sample should be:
-
-- Reused directly
-- Repaired / Upcycled
-- Sent for recycling
+| Parameter     | Example Result |
+| ------------- | -------------- |
+| Condition     | Poor           |
+| Defect        | Fabric Tear    |
+| Severity      | High           |
+| Contamination | Low            |
+| Recovery      | Recycle        |
 
 ---
 
-# Defect Detection and Contamination Analysis
+# Explainable Recommendation Engine
 
-The computer vision module analyzes uploaded textile images and extracts:
+The recommendation engine contains **21 verified decision rules**.
 
-- Defect regions
-- Damage severity
-- Contamination level
-- Affected area percentage
+The engine considers:
 
-### Example Output
+```text
+Material
+   +
+Condition
+   +
+Damage Severity
+   +
+Contamination
+   +
+Reuse Potential
+        │
+        ▼
+Explainable Recovery Recommendation
+```
 
-| Parameter | Result |
-|-----------|--------|
-| Condition | Poor |
-| Defect | Fabric Tear |
-| Severity | High |
-| Contamination | Low |
-| Decision | Recycle |
+Unlike a black-box recommendation, the selected recovery pathway can be associated with the matching decision logic.
+
+---
+
+# Sustainability Assessment
+
+Every analyzed textile can receive three main scores.
+
+## Sustainability Score
+
+Represents overall sustainability suitability based on factors such as:
+
+* Material
+* Condition
+* Damage
+* Contamination
+* Recovery feasibility
+
+## Reuse Score
+
+Represents the textile's direct reuse potential.
+
+## Recovery Score
+
+Represents suitability for recycling or material recovery.
+
+---
+
+# Synthetic Sustainability Dataset
+
+A synthetic dataset containing **10,000 textile sustainability assessment records** was generated to support large-scale analytics and visualization.
+
+The dataset includes fields such as:
+
+* Material
+* Condition
+* Damage level
+* Contamination
+* Recommendation
+* Sustainability score
+* Reuse score
+* Recovery score
+* Circularity
+* CO₂ saved
+* Water saved
+* Energy saved
+* Landfill diverted
+
+The synthetic records are used for analytics and visualization rather than being presented as real-world collected textile records.
+
+---
+
+# Analytics Dashboard
+
+The analytics module visualizes:
+
+* Sustainability score distribution
+* Material distribution
+* Condition distribution
+* Contamination distribution
+* Circularity levels
+* Recovery recommendation distribution
+* Environmental benefits
+* Textile portfolio statistics
+* Recent analyses
 
 ---
 
 # Batch Textile Analysis
 
-The platform supports multiple textile image processing through batch analysis.
+The project includes functionality designed for processing multiple textile samples.
 
-## Features
+The batch workflow supports:
 
-- Upload multiple textile samples
-- Perform AI classification on each sample
-- Generate condition reports
-- Recommend reuse or recycling strategies
+* Multiple textile inputs
+* Individual analysis
+* Recovery recommendations
+* Sustainability assessment
+* Environmental impact estimation
+* Individual reports
+* Batch-level summaries
 
-### Workflow
+---
+
+# PDF Reporting
+
+The textile analysis workflow can generate assessment reports containing information such as:
+
+* AI prediction
+* Verified material
+* Condition
+* Defect analysis
+* Contamination
+* Recovery recommendation
+* Sustainability scores
+* Environmental impact
+* Circular recovery pathway
+
+---
+
+# Milestone 3 Achievements
+
+* CNN-based fabric classification
+* OpenCV textile inspection
+* Condition assessment
+* Defect detection
+* Contamination analysis
+* 21-rule recovery engine
+* Explainable recommendations
+* Sustainability scoring
+* Reuse scoring
+* Recovery scoring
+* Circularity classification
+* Environmental impact estimation
+* 10,000-record synthetic analytics dataset
+* Analytics dashboard
+* Batch analysis workflow
+* PDF assessment reporting
+
+---
+
+# Milestone 4 — Final Integration, RBAC, Testing and Containerization
+
+Milestone 4 focused on transforming the individual AI modules into a more complete multi-user application.
+
+Major M4 work included:
+
+* User registration
+* Role-Based Access Control
+* Role-specific dashboards
+* Notifications
+* API protection
+* Frontend route protection
+* Backend authorization
+* Integration testing
+* RBAC validation
+* API testing
+* Model evaluation utilities
+* Performance-testing utilities
+* Docker configuration
+* Final frontend-backend integration
+
+---
+
+# User Registration
+
+A registration workflow was added to the frontend and authentication backend.
+
+The registration interface allows new application users to create accounts that can subsequently authenticate through the existing JWT-based authentication flow.
 
 ```text
-Multiple Textile Images
-
-        ↓
-
-Batch Processing Engine
-
-        ↓
-
-AI Classification
-
-        ↓
-
-Condition Assessment
-
-        ↓
-
-Reuse / Recycle Segregation
+Register
+   │
+   ▼
+Backend Validation
+   │
+   ▼
+User Creation
+   │
+   ▼
+Login
+   │
+   ▼
+JWT Token
+   │
+   ▼
+Protected Application
 ```
 
 ---
 
-# Circular Recommendation Engine
+# Role-Based Access Control
 
-The recommendation engine combines:
+The system implements role-specific authorization.
 
-- Predicted textile material
-- Condition assessment
-- Defect severity
-- Contamination level
-
-to generate sustainable waste management decisions.
-
-### Decision Examples
-
-| Condition | Defect | Recommendation |
-|-----------|---------|----------------|
-| Good | None Detected | Reuse |
-| Fair | Minor Damage | Repair / Upcycle |
-| Poor | Fabric Tear | Recycle |
-| Poor | Heavy Contamination | Specialized Recycling |
-
----
----
-
-# Milestone 3: Explainable Sustainability Intelligence
-
-Milestone 3 extends the AI Textile Waste Intelligence Platform beyond material recognition by introducing an explainable sustainability assessment pipeline. The platform combines AI-based fabric classification, computer vision, rule-based decision making, environmental impact estimation, and interactive analytics to support circular economy decisions.
-
-## End-to-End Analysis Pipeline
-
-The complete analysis workflow consists of the following stages:
+Supported roles:
 
 ```text
-Textile Image Upload
-        ↓
-CNN Fabric Classification
-        ↓
+Admin
+Industry
+Recycler
+NGO
+```
+
+Authentication answers:
+
+> **Who is the user?**
+
+RBAC answers:
+
+> **What is this user allowed to do?**
+
+---
+
+# RBAC Architecture
+
+```text
+User Login
+    │
+    ▼
+JWT Token
+    │
+    ▼
+Authentication Dependency
+    │
+    ▼
+Extract User + Role
+    │
+    ▼
+Role Dependency
+    │
+    ├── Allowed → Execute API
+    │
+    └── Blocked → HTTP 403
+```
+
+Authorization is enforced at both:
+
+* Frontend navigation / protected routes
+* Backend APIs
+
+Backend enforcement ensures that restricted operations cannot be bypassed simply by calling an API directly.
+
+---
+
+# RBAC Permission Examples
+
+## Inventory Viewing
+
+Authenticated users can access authorized inventory information.
+
+## Inventory Creation
+
+Configured access:
+
+| Role     | Create Inventory |
+| -------- | ---------------- |
+| Admin    | Allowed          |
+| Industry | Allowed          |
+| Recycler | Restricted       |
+| NGO      | Restricted       |
+
+## Inventory Update
+
+| Role     | Update Inventory |
+| -------- | ---------------- |
+| Admin    | Allowed          |
+| Industry | Allowed          |
+| Recycler | Restricted       |
+| NGO      | Restricted       |
+
+## Inventory Delete
+
+Deletion is restricted to authorized administrative operations.
+
+## Platform Announcements
+
+Administrative announcement creation is restricted to the Admin role.
+
+---
+
+# Role-Based Dashboards
+
+The backend provides dashboard information based on the authenticated user's role.
+
+## Admin
+
+Designed for overall platform monitoring and administrative visibility.
+
+Typical information includes:
+
+* Platform activity
+* User information
+* Textile analysis statistics
+* Inventory indicators
+* Sustainability information
+
+## Industry
+
+Designed around manufacturing / textile-waste generation activity.
+
+The dashboard can focus on information associated with the authenticated industry's textile analysis activity.
+
+## Recycler
+
+Designed to provide recycling and recovery-oriented operational intelligence.
+
+## NGO
+
+Designed to provide sustainability-oriented platform information and analytics.
+
+---
+
+# Notifications
+
+Milestone 4 introduced a notification subsystem.
+
+Backend components include:
+
+```text
+notification.py
+notifications.py
+notification_service.py
+```
+
+Frontend components include:
+
+```text
+Notifications.jsx
+Notifications.css
+notificationService.js
+```
+
+The notification workflow allows authenticated users to retrieve notifications, while privileged administrative actions such as platform announcements are authorization-controlled.
+
+---
+
+# M4 Testing Strategy
+
+Several dedicated validation scripts were created.
+
+```text
+backend/
+├── m4_api_tests.py
+├── m4_integration_tests.py
+├── m4_model_evaluation.py
+├── m4_performance_tests.py
+├── m4_role_tests.py
+├── test_rbac.py
+└── cleanup_performance_records.py
+```
+
+Testing was organized across multiple levels rather than relying on only manual browser testing.
+
+---
+
+# Role-Based Access Tests
+
+RBAC tests validate operations including:
+
+* Authentication for all supported roles
+* Inventory access
+* Inventory creation permissions
+* Inventory update permissions
+* Inventory delete permissions
+* Notification access
+* Administrative announcements
+* Restricted-route rejection
+
+The automated RBAC script compares actual HTTP responses against expected status codes.
+
+Examples:
+
+```text
+Allowed request       → HTTP 200
+Unauthorized role     → HTTP 403
+```
+
+Temporary records created during testing are cleaned up after validation.
+
+---
+
+# Integration Testing
+
+Integration testing checks communication between major application layers.
+
+```text
+Frontend / Client Request
+        │
+        ▼
+FastAPI Endpoint
+        │
+        ▼
+Authentication / RBAC
+        │
+        ▼
+Service Logic
+        │
+        ▼
+Database / AI Processing
+        │
+        ▼
+API Response
+```
+
+The objective is to verify that components work together as a complete system rather than only passing isolated unit-level checks.
+
+---
+
+# API Testing
+
+API-level testing covers core backend endpoints and verifies:
+
+* Expected HTTP responses
+* Authentication behavior
+* Request validation
+* Authorization restrictions
+* Integration between routes and backend services
+
+---
+
+# Model Evaluation Validation
+
+Milestone 4 includes dedicated model-evaluation utilities and generated validation artifacts.
+
+```text
+backend/validation/model_evaluation/
+├── classification_report.txt
+├── confusion_matrix.csv
+├── evaluation_sample_manifest.csv
+├── model_evaluation_summary.json
+└── prediction_results.csv
+```
+
+These artifacts provide structured evidence of model validation.
+
+---
+
+# Performance Testing
+
+Performance testing utilities were added to examine backend endpoint response behavior.
+
+The goal is to identify:
+
+* Unexpected latency
+* API bottlenecks
+* Slow database operations
+* Integration overhead
+
+Performance scripts can generate temporary application records when required and remove those records afterward using the cleanup utility.
+
+---
+
+# Docker Containerization
+
+Docker support was introduced to make the application environment more reproducible and easier to prepare for deployment.
+
+Project container files include:
+
+```text
+.dockerignore
+
+backend/
+├── Dockerfile
+└── requirements-docker.txt
+
+frontend/
+├── Dockerfile
+└── nginx.conf
+```
+
+---
+
+# Backend Docker Architecture
+
+The backend container uses a Python environment for FastAPI.
+
+Simplified workflow:
+
+```text
+Python Base Image
+      │
+      ▼
+Install System Dependencies
+      │
+      ▼
+Install Python Requirements
+      │
+      ▼
+Copy FastAPI Backend
+      │
+      ▼
+Load Application Components
+      │
+      ▼
+Run Uvicorn
+      │
+      ▼
+Port 8000
+```
+
+---
+
+# Frontend Container
+
+The frontend Docker configuration prepares the React application for container-based serving.
+
+Nginx configuration is included for serving the built frontend application.
+
+---
+
+# Docker Ignore Configuration
+
+The root `.dockerignore` excludes unnecessary or sensitive development files such as:
+
+```text
+.git
+Python virtual environments
+Python caches
+.env files
+node_modules
+build output
+temporary uploads
+pytest cache
+datasets
+notebooks
+IDE metadata
+```
+
+This keeps the Docker build context smaller and prevents local development artifacts from being unnecessarily copied into images.
+
+---
+
+# Milestone 4 Achievements
+
+* Registration workflow
+* JWT authentication integration
+* Role-Based Access Control
+* Admin role support
+* Industry role support
+* Recycler role support
+* NGO role support
+* Protected frontend routes
+* Backend role enforcement
+* Role-specific dashboards
+* Notification system
+* Administrative announcements
+* Inventory permission enforcement
+* API testing utilities
+* Integration testing
+* RBAC testing
+* Model-evaluation validation
+* Performance-test utilities
+* Docker backend configuration
+* Docker frontend configuration
+* Nginx configuration
+* Final frontend/backend integration
+
+---
+
+# Complete Project Workflow
+
+```text
+User Registration / Login
+          │
+          ▼
+JWT Authentication
+          │
+          ▼
+Role Identification
+          │
+          ▼
+Role-Based Dashboard
+          │
+          ▼
+Upload Textile Image + Weight
+          │
+          ▼
+CNN Material Recognition
+          │
+          ▼
 Material Verification
-        ↓
-Computer Vision Inspection
-        ↓
-Condition Assessment
-        ↓
-Defect Detection
-        ↓
-Contamination Analysis
-        ↓
-Explainable Recommendation Engine
-        ↓
+          │
+          ▼
+OpenCV Condition Inspection
+          │
+          ├── Defect Detection
+          ├── Damage Severity
+          └── Contamination
+          │
+          ▼
+21-Rule Decision Engine
+          │
+          ▼
+Recovery Recommendation
+          │
+          ▼
 Sustainability Assessment
-        ↓
-Environmental Impact Estimation
-        ↓
-Analytics Dashboard
+          │
+          ├── Sustainability Score
+          ├── Reuse Score
+          ├── Recovery Score
+          └── Circularity Level
+          │
+          ▼
+Environmental Impact
+          │
+          ├── CO₂ Saved
+          ├── Water Saved
+          ├── Energy Saved
+          └── Landfill Diverted
+          │
+          ▼
+Database Storage
+          │
+          ├───────────────┬───────────────┐
+          ▼               ▼               ▼
+      Dashboard       Analytics        Reports
+          │
+          ▼
+    Notifications
 ```
 
 ---
 
-## Textile Intelligence
-
-The platform performs two-stage textile analysis.
-
-### Stage 1 – AI Material Recognition
-
-The TensorFlow CNN model predicts:
-
-- Visual fabric category
-- Fabric class
-- Confidence score
-- Likely fibre families
-
-### Stage 2 – Computer Vision Inspection
-
-OpenCV is used to detect:
-
-- Fabric condition
-- Visible defects
-- Damage severity
-- Contamination level
-- Quality assessment
-
----
-
-## Explainable Recommendation Engine
-
-The recommendation engine contains **21 verified decision rules**.
-
-The engine evaluates:
-
-- Material
-- Condition
-- Damage severity
-- Contamination level
-- Reuse potential
-
-and generates one explainable recovery pathway.
-
-### Example Recommendations
-
-- Direct Reuse
-- Donation
-- Repair
-- Upcycling
-- Mechanical Recycling
-- Chemical Recycling
-- Fiber Recovery
-- Material Separation
-- Specialized Recycling
-- Hazardous Textile Waste Treatment
-- Cleaning and Reassessment
-- Manual Review
-
-Every recommendation is fully explainable and linked to a matching decision rule.
-
----
-
-## Sustainability Assessment Engine
-
-Each textile is assigned three explainable scores.
-
-### Sustainability Score
-
-Represents the overall environmental suitability of the textile.
-
-The score is calculated using:
-
-- Material properties
-- Fabric condition
-- Damage severity
-- Contamination level
-- Recovery feasibility
-
-### Reuse Score
-
-Measures the potential for direct reuse.
-
-### Recovery Score
-
-Measures how suitable the textile is for recycling or recovery.
-
-The platform also classifies every textile into:
-
-- High Circularity
-- Medium Circularity
-- Low Circularity
-
----
-
-## Environmental Impact Estimation
-
-For every recommendation, the platform estimates:
-
-- CO₂ emissions saved
-- Water saved
-- Energy saved
-- Landfill waste diverted
-
-These values provide an estimate of the environmental benefits of the recommended recovery pathway.
-
----
-
-## Synthetic Sustainability Dataset
-
-To evaluate sustainability trends at scale, a synthetic dataset containing **10,000 assessment records** was generated.
-
-The dataset contains:
-
-- Material
-- Condition
-- Damage level
-- Contamination level
-- Recommendation
-- Sustainability Score
-- Reuse Score
-- Recovery Score
-- Circularity Level
-- CO₂ Saved
-- Water Saved
-- Energy Saved
-- Landfill Diverted
-
-The synthetic dataset is used exclusively for analytics and visualization.
-
----
-
-## Analytics Dashboard
-
-Milestone 3 introduces an interactive analytics dashboard displaying:
-
-- Sustainability Score Distribution
-- Material Distribution
-- Condition Distribution
-- Contamination Distribution
-- Circularity Levels
-- Recovery Recommendation Distribution
-- Environmental Benefits
-- Live Textile Portfolio
-- Recent Textile Analyses
-
-The dashboard combines real application records with synthetic sustainability data to visualize circular economy trends.
-
----
-
-## Batch Textile Analysis
-
-Multiple textile samples can be processed simultaneously.
-
-Features include:
-
-- Batch image upload
-- AI analysis for each textile
-- Individual assessment reports
-- Batch summary report
-- Recommendation generation
-- Sustainability scoring
-- Environmental impact estimation
-
----
-
-## PDF Report Generation
-
-For every completed assessment the platform generates a downloadable PDF report containing:
-
-- AI prediction
-- Verified material
-- Condition assessment
-- Defect analysis
-- Recommendation
-- Sustainability scores
-- Environmental impact
-- Circular recovery pathway
-
----
-
-## Milestone 3 Achievements
-
-✔ End-to-end textile intelligence workflow
-
-✔ CNN-based fabric classification
-
-✔ Computer vision condition inspection
-
-✔ 21 explainable recommendation rules
-
-✔ Sustainability scoring engine
-
-✔ Circularity assessment
-
-✔ Environmental impact estimation
-
-✔ 10,000-record synthetic sustainability dataset
-
-✔ Interactive analytics dashboard
-
-✔ Batch textile analysis
-
-✔ PDF report generation
-
-✔ Explainable AI-based decision support
----
-# Platform Features
-
-## User Management
-
-- Secure Login
-- JWT Authentication
-- User Profiles
-- Protected Routes
-- Role-based Access
-
-## Textile Inventory
-
-- Add Inventory
-- Update Inventory
-- Delete Records
-- Inventory Dashboard
-
-## Waste Upload
-
-- Upload Textile Images
-- Material Classification
-- Store Upload History
-
-## AI Analysis
-
-- Fabric Classification
-- Defect Detection
-- Contamination Analysis
-- Condition Assessment
-
-## Analytics Dashboard
-
-- Waste Statistics
-- Fabric Distribution
-- Inventory Insights
-- AI Prediction Reports
-
-## Recommendation Engine
-
-- Circular Economy Suggestions
-- Reuse Recommendations
-- Recycling Recommendations
-- Repair Suggestions
+# Application Pages
+
+The frontend includes pages for:
+
+* Login
+* Registration
+* Dashboard
+* Inventory
+* Upload Waste
+* Batch Analysis
+* Analytics
+* Recommendations
+* Notifications
+* Profile
 
 ---
 
 # Application Screenshots
 
+Screenshots are stored inside the project screenshot directory where available.
+
+---
+
 ## Dashboard
 
-The main dashboard provides a consolidated overview of live textile analysis activity, sustainability assessments, circular recovery outcomes, AI confidence and platform operations.
+The dashboard provides a consolidated overview of textile-analysis activity, sustainability information, circular recovery outcomes and other role-relevant information.
 
 ```text
 Project-screenshots/dashboard.png
@@ -711,9 +1295,14 @@ Project-screenshots/dashboard.png
 
 ---
 
-## Upload Waste and Textile Analysis
+## Upload Waste
 
-The Upload Waste module allows users to upload a textile image, enter its measured weight and run the complete AI + computer vision assessment pipeline.
+The Upload Waste page allows the user to provide:
+
+* Textile image
+* Measured weight
+
+The request then enters the AI + computer vision assessment workflow.
 
 ```text
 Project-screenshots/upload_waste.png
@@ -723,9 +1312,7 @@ Project-screenshots/upload_waste.png
 
 ---
 
-## Batch Textile Analysis
-
-The Batch Analysis module supports processing multiple textile samples together. Each sample is analysed independently and can produce individual recovery outcomes and reports.
+## Batch Analysis
 
 ```text
 Project-screenshots/batch_analysis.png
@@ -735,30 +1322,17 @@ Project-screenshots/batch_analysis.png
 
 ---
 
-## Analytics Dashboard
-
-The analytics workspace combines live textile analyses with the 10,000-record synthetic sustainability dataset.
-
-It displays sustainability outcomes, environmental estimates, assessment status and circular economy intelligence.
+## Analytics
 
 ```text
 Project-screenshots/analytics.png
 ```
 
-![Analytics Dashboard](Project-screenshots/analytics.png)
+![Analytics](Project-screenshots/analytics.png)
 
 ---
 
-## Sustainability Analytics and Graphs
-
-The analytics visualization layer provides distribution analysis for:
-
-- Materials
-- Circularity levels
-- Recovery recommendations
-- Textile condition
-- Contamination levels
-- Environmental impact categories
+## Analytics Graphs
 
 ```text
 Project-screenshots/analytics_graphs.png
@@ -768,23 +1342,17 @@ Project-screenshots/analytics_graphs.png
 
 ---
 
-## Recommendation Intelligence
-
-The recommendation workspace displays circular recovery guidance produced by the explainable rule-based recommendation engine.
-
-The engine evaluates material, condition, contamination and damage information to generate suitable recovery pathways.
+## Recommendations
 
 ```text
 Project-screenshots/recommendations.png
 ```
 
-![Recommendation Intelligence](Project-screenshots/recommendations.png)
+![Recommendations](Project-screenshots/recommendations.png)
 
 ---
 
-## Textile Intelligence PDF Report
-
-The platform generates downloadable assessment reports containing textile prediction, condition analysis, sustainability information and recovery recommendations.
+## PDF Report
 
 ```text
 Project-screenshots/pdf_report.png
@@ -794,9 +1362,7 @@ Project-screenshots/pdf_report.png
 
 ---
 
-## FastAPI Documentation
-
-The backend APIs are documented and testable through Swagger UI.
+## API Documentation
 
 ```text
 Project-screenshots/api_docs.png
@@ -805,81 +1371,131 @@ Project-screenshots/api_docs.png
 ![API Documentation](Project-screenshots/api_docs.png)
 
 ---
-# Technology Stack
 
-## Frontend
+# Backend API Areas
 
-- React.js
-- Vite
-- JavaScript
-- HTML5
-- CSS3
-- React Router
+The application exposes APIs covering major functional areas such as:
 
-## Backend
+```text
+/auth
+/inventory
+/prediction
+/analytics
+/dashboard
+/notifications
+/users
+```
 
-- Python
-- FastAPI
-- SQLAlchemy
-- MySQL
-- JWT Authentication
-- OAuth2
+Exact operations are documented through the FastAPI Swagger interface.
 
-## AI / Machine Learning
+---
 
-- TensorFlow
-- Keras
-- OpenCV
-- NumPy
-- Pandas
+# Authentication Flow
 
-## Development Tools
-
-- Git
-- GitHub
-- Git LFS
-- VS Code
-- Postman
+```text
+React Login
+    │
+    ▼
+POST /auth/login
+    │
+    ▼
+Validate Credentials
+    │
+    ▼
+Password Verification
+    │
+    ▼
+Generate JWT
+    │
+    ▼
+Frontend Stores Token
+    │
+    ▼
+Authorization: Bearer <token>
+    │
+    ▼
+Protected FastAPI Endpoint
+```
 
 ---
 
 # Project Structure
 
 ```text
-AI-Textile-Waste-Intelligence-Platform
-
+AI-Textile-Waste-Intelligence-Platform/
 │
-├── frontend
-│   ├── components
-│   ├── pages
-│   ├── services
-│   ├── routes
-│   └── assets
-│
-├── backend
-│   ├── app
-│   │   ├── api
-│   │   ├── models
-│   │   ├── database
-│   │   ├── authentication
-│   │   ├── ai
-│   │   └── recommendation_engine
+├── backend/
 │   │
-│   └── main.py
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── analytics.py
+│   │   │   ├── dashboard.py
+│   │   │   └── prediction.py
+│   │   │
+│   │   ├── models/
+│   │   │   ├── user.py
+│   │   │   ├── notification.py
+│   │   │   └── ...
+│   │   │
+│   │   ├── routes/
+│   │   │   ├── auth.py
+│   │   │   ├── inventory.py
+│   │   │   ├── notifications.py
+│   │   │   ├── users.py
+│   │   │   └── ...
+│   │   │
+│   │   ├── schemas/
+│   │   ├── services/
+│   │   ├── utils/
+│   │   ├── database.py
+│   │   └── main.py
+│   │
+│   ├── validation/
+│   │   └── model_evaluation/
+│   │
+│   ├── m4_api_tests.py
+│   ├── m4_integration_tests.py
+│   ├── m4_model_evaluation.py
+│   ├── m4_performance_tests.py
+│   ├── m4_role_tests.py
+│   ├── test_rbac.py
+│   ├── cleanup_performance_records.py
+│   ├── requirements-docker.txt
+│   └── Dockerfile
 │
-├── models
+├── frontend/
+│   │
+│   ├── src/
+│   │   ├── api/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   │   ├── Analytics/
+│   │   │   ├── Dashboard/
+│   │   │   ├── Login/
+│   │   │   ├── Notifications/
+│   │   │   ├── Register/
+│   │   │   └── ...
+│   │   │
+│   │   ├── routes/
+│   │   ├── services/
+│   │   └── utils/
+│   │
+│   ├── Dockerfile
+│   └── nginx.conf
+│
+├── models/
 │   ├── preprocessing_config.json
 │   ├── fabric_classifier.keras
 │   └── fabric_classifier_best.keras
 │
-├── dataset
+├── datasets/
 │
-├── notebooks
+├── notebooks/
 │
-├── Project-screenshots
+├── Project-screenshots/
 │
+├── .dockerignore
 ├── requirements.txt
-│
 └── README.md
 ```
 
@@ -887,135 +1503,477 @@ AI-Textile-Waste-Intelligence-Platform
 
 # Installation Guide
 
-## Clone Repository
+## 1. Clone the Repository
 
 ```bash
 git clone https://github.com/springboardmentor802-dotcom/AI-Textile-Waste-Intelligence-Platform.git
 ```
 
+Enter the project directory:
+
 ```bash
 cd AI-Textile-Waste-Intelligence-Platform
 ```
 
+If working specifically with the project branch:
+
+```bash
+git checkout Sreevarshini-140
+```
+
 ---
 
-## Backend Setup
+# Backend Setup
+
+Move into the backend folder:
 
 ```bash
 cd backend
 ```
 
-Create virtual environment
+Create a virtual environment:
 
 ```bash
 python -m venv venv
 ```
 
-Activate environment
+## Windows
 
-### Windows
+Activate:
 
 ```bash
 venv\Scripts\activate
 ```
 
-### Linux / macOS
+## Linux / macOS
 
 ```bash
 source venv/bin/activate
 ```
 
-Install dependencies
+Install backend dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Run FastAPI
+If the repository uses the root requirements file instead, install from the appropriate path for the local project configuration.
+
+---
+
+# Environment Configuration
+
+Create the backend environment file required by the application.
+
+Example structure:
+
+```env
+DATABASE_URL=your_database_connection_string
+SECRET_KEY=your_secret_key
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+```
+
+Do **not** commit real passwords, database credentials or secret keys to GitHub.
+
+---
+
+# Run Backend
+
+From the backend directory:
 
 ```bash
 uvicorn app.main:app --reload
 ```
 
----
+The backend should then be available at:
 
-## Frontend Setup
-
-```bash
-cd frontend
-```
-
-Install packages
-
-```bash
-npm install
-```
-
-Run application
-
-```bash
-npm run dev
+```text
+http://127.0.0.1:8000
 ```
 
 ---
 
 # API Documentation
 
-After running the backend:
-
-Swagger UI
+Swagger UI:
 
 ```text
-http://localhost:8000/docs
+http://127.0.0.1:8000/docs
 ```
 
-ReDoc
+ReDoc:
 
 ```text
-http://localhost:8000/redoc
+http://127.0.0.1:8000/redoc
 ```
+
+---
+
+# Frontend Setup
+
+Open another terminal.
+
+Move into the frontend directory:
+
+```bash
+cd frontend
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start the Vite development server:
+
+```bash
+npm run dev
+```
+
+The frontend will display the local URL generated by Vite.
+
+---
+
+# Local Development Flow
+
+Recommended startup order:
+
+```text
+1. Start MySQL / Database
+          │
+          ▼
+2. Activate Python Environment
+          │
+          ▼
+3. Start FastAPI Backend
+          │
+          ▼
+4. Start React Frontend
+          │
+          ▼
+5. Open Application
+```
+
+---
+
+# Running M4 Validation Scripts
+
+Start the backend before executing API-based validation scripts.
+
+Examples:
+
+```bash
+python m4_api_tests.py
+```
+
+```bash
+python m4_role_tests.py
+```
+
+```bash
+python m4_integration_tests.py
+```
+
+```bash
+python m4_performance_tests.py
+```
+
+```bash
+python m4_model_evaluation.py
+```
+
+RBAC tests depend on the configured test accounts and application database state.
+
+---
+
+# Docker Setup
+
+Docker configuration has been added for the frontend and backend.
+
+## Backend
+
+```text
+backend/Dockerfile
+```
+
+## Frontend
+
+```text
+frontend/Dockerfile
+```
+
+## Frontend Server
+
+```text
+frontend/nginx.conf
+```
+
+## Docker Requirements
+
+```text
+backend/requirements-docker.txt
+```
+
+The current Docker configuration provides the foundation for containerized execution and production deployment preparation.
+
+---
+
+# Security Features
+
+The application includes:
+
+* JWT token authentication
+* Password hashing
+* Password verification
+* OAuth2 integration
+* Protected routes
+* Backend authorization
+* Role-based access control
+* Restricted administrative endpoints
+* Environment-variable configuration
+* `.env` exclusion from Docker context / Git workflows where configured
+
+---
+
+# Validation and Reliability
+
+The project uses several layers of validation.
+
+## Input Validation
+
+Examples include checking:
+
+* Image format
+* Image validity
+* Weight input
+* Upload identifiers
+* Material information
+
+## Authentication Validation
+
+Restricted APIs require valid authentication.
+
+## Authorization Validation
+
+RBAC verifies that the authenticated role is permitted to execute the requested action.
+
+## AI Validation
+
+Model-evaluation artifacts provide classification and prediction evidence.
+
+## Integration Validation
+
+Integration scripts evaluate interaction across multiple application components.
+
+## Performance Validation
+
+Performance utilities evaluate backend response behavior.
+
+---
+
+# Project Development Milestones
+
+| Milestone   | Main Focus                                                       |
+| ----------- | ---------------------------------------------------------------- |
+| Milestone 1 | Dataset Preparation and EDA                                      |
+| Milestone 2 | CNN Material Recognition                                         |
+| Milestone 3 | Condition Intelligence, Recommendation Engine and Sustainability |
+| Milestone 4 | RBAC, Dashboards, Notifications, Testing, Integration and Docker |
+
+---
+
+# Major Project Achievements
+
+The final project combines:
+
+* Full-stack web development
+* Deep learning
+* Computer vision
+* Database management
+* Authentication
+* RBAC
+* Explainable decision logic
+* Sustainability analytics
+* REST APIs
+* Automated validation
+* Performance testing
+* Containerization
+
+The platform demonstrates a complete flow from user authentication to textile analysis and explainable recovery guidance.
+
+---
+
+# Challenges and Solutions
+
+## 1. Material Classification Alone Was Insufficient
+
+### Challenge
+
+The AI model could recognize visual textile classes but could not independently determine the best recovery pathway.
+
+### Solution
+
+A condition-analysis layer and explainable rule-based recommendation engine were added.
+
+---
+
+## 2. Textile Condition Needed Separate Inspection
+
+### Challenge
+
+Two samples of similar material may require different treatment due to condition, defects or contamination.
+
+### Solution
+
+OpenCV-based textile inspection was integrated.
+
+---
+
+## 3. Limited Large-Scale Sustainability Data
+
+### Challenge
+
+A sufficiently large real textile sustainability dataset was not available for analytics development.
+
+### Solution
+
+A **10,000-record synthetic sustainability dataset** was generated for analytics and visualization.
+
+Synthetic data is kept conceptually separate from real user-generated textile records.
+
+---
+
+## 4. Different Users Required Different Permissions
+
+### Challenge
+
+Industry users, recyclers, NGOs and administrators should not have identical privileges.
+
+### Solution
+
+A role-based access control system was implemented at the frontend and backend.
+
+---
+
+## 5. Final System Required Cross-Module Validation
+
+### Challenge
+
+Individual features can work independently while integration errors still exist.
+
+### Solution
+
+Dedicated M4 API, integration, RBAC, model-evaluation and performance validation scripts were introduced.
+
+---
+
+## 6. Environment Reproducibility
+
+### Challenge
+
+Local setup can differ across development environments.
+
+### Solution
+
+Dockerfiles, Docker-specific requirements and Nginx configuration were added as a containerization foundation.
 
 ---
 
 # Future Enhancements
 
-- Deep learning based textile defect segmentation
-- Real-time camera-based textile inspection
-- Mobile application for field inspection
-- Advanced material composition detection
-- Explainable AI (XAI) for prediction interpretation
-- Cloud deployment using Docker and Kubernetes
-- IoT integration for smart textile waste monitoring
-- Large-scale recycling facility integration
+Possible future improvements include:
+
+* Deep-learning textile defect segmentation
+* Advanced fiber-composition recognition
+* Real-time camera inspection
+* Mobile application
+* Explainable AI visualization for CNN predictions
+* Improved batch-processing reliability and UX
+* More diverse real-world textile datasets
+* Production-grade cloud deployment
+* Kubernetes orchestration
+* CI/CD pipelines
+* Object-storage integration
+* Advanced monitoring and logging
+* IoT textile-waste collection integration
+* Recycling-facility integration
+* Real-time sustainability benchmarking
 
 ---
 
 # Learning Outcomes
 
-During the Infosys Springboard Internship, the following skills were gained:
+The project provided practical experience in:
 
-- React.js Frontend Development
-- FastAPI Backend Development
-- JWT Authentication
-- SQLAlchemy ORM
-- MySQL Database Design
-- TensorFlow CNN Model Development
-- OpenCV Image Processing
-- Machine Learning Pipeline Development
-- Computer Vision
-- Git & GitHub Collaboration
-- REST API Development
-- AI Model Deployment Fundamentals
+* React.js development
+* Vite
+* FastAPI
+* REST API development
+* SQLAlchemy ORM
+* MySQL
+* JWT authentication
+* OAuth2
+* Role-Based Access Control
+* TensorFlow
+* Keras
+* Convolutional Neural Networks
+* OpenCV
+* Computer vision
+* Dataset preprocessing
+* AI model evaluation
+* Explainable rule-based systems
+* Sustainability analytics
+* Automated API testing
+* Integration testing
+* Performance testing
+* Docker fundamentals
+* Git
+* GitHub
+* Full-stack AI application development
 
 ---
 
 # Conclusion
 
-The AI Textile Waste Intelligence Platform combines artificial intelligence, computer vision, and sustainable waste management practices to automate textile classification, quality assessment, and recycling decisions.
+The **AI Textile Waste Management System** demonstrates how artificial intelligence, computer vision, explainable decision logic and modern full-stack technologies can be combined to support sustainable textile waste management.
 
-The platform integrates modern web technologies with deep learning models to create a scalable and intelligent textile waste management solution capable of assisting industries, recycling facilities, NGOs, and research organizations in adopting circular economy practices.
+The project goes beyond simple image classification.
 
-By combining CNN-based fabric recognition, computer vision inspection, secure backend services, and AI-powered recommendation engines, the project demonstrates how artificial intelligence can contribute to more sustainable textile waste management and environmental conservation.
+It performs a complete textile intelligence workflow involving:
+
+```text
+Recognition
+     +
+Verification
+     +
+Condition Analysis
+     +
+Recovery Decision
+     +
+Sustainability Assessment
+     +
+Environmental Impact
+```
+
+The addition of JWT authentication, role-based access control, role-specific dashboards, notifications, automated testing and Docker configuration transforms the AI workflow into a more complete software platform.
+
+The final system demonstrates how AI-assisted textile analysis can support more transparent and sustainable circular-economy decisions for industries, recyclers, NGOs and administrators.
+
+---
+
+# Repository
+
+```text
+https://github.com/springboardmentor802-dotcom/AI-Textile-Waste-Intelligence-Platform
+```
+
+Project branch:
+
+```text
+Sreevarshini-140
+```
 
 ---
 
@@ -1025,6 +1983,22 @@ By combining CNN-based fabric recognition, computer vision inspection, secure ba
 
 Infosys Springboard Internship Project
 
-GitHub: https://github.com/Sreevarshini-140
+GitHub:
+
+```text
+https://github.com/Sreevarshini-140
+```
 
 ---
+
+## Project Status
+
+**Milestone 1 — Completed**
+
+**Milestone 2 — Completed**
+
+**Milestone 3 — Completed**
+
+**Milestone 4 — Completed**
+
+**Final Integration — Completed**

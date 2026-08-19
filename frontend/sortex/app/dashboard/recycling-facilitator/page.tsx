@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ThemeToggle } from "@/app/components/ThemeToggle";
+import NotificationIconToggle from "@/app/components/NotificationIconToggle";
 import {
   LogOut,
   UploadCloud,
@@ -623,9 +624,7 @@ export default function RecyclingFacilitatorDashboard() {
   }, []);
 
   useEffect(() => {
-    if (activeTab === "batch-management" || activeTab === "processing-analytics" || activeTab === "recovery-statistics") {
-      queueMicrotask(() => fetchBatches());
-    }
+    queueMicrotask(() => fetchBatches());
   }, [activeTab, fetchBatches]);
 
   const handleCreateBatch = async (e: React.FormEvent) => {
@@ -1234,11 +1233,11 @@ export default function RecyclingFacilitatorDashboard() {
 
   return (
     <div className="relative flex h-screen bg-neutral-950 font-sans overflow-hidden">
-      <div className="absolute top-0 left-0 w-96 h-96 bg-orange-600/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-amber-600/10 rounded-full blur-3xl pointer-events-none" />
+      {/* SOFT CENTER ORANGE GLOW ACCENT */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[650px] bg-orange-500/15 rounded-full blur-[160px] pointer-events-none flex items-center justify-center z-0" />
 
       {/* SIDEBAR */}
-      <div className="w-64 bg-black text-white flex flex-col shadow-xl z-10 border-r border-white/5">
+      <div className="w-64 bg-black text-white flex flex-col shadow-xl z-40 relative border-r border-white/5">
         <div className="p-6 flex items-center gap-3 border-b border-white/5">
           <div className="p-2 bg-orange-500 rounded-lg shadow-md shadow-orange-900/30">
             <Recycle className="w-6 h-6 text-white" />
@@ -1248,8 +1247,8 @@ export default function RecyclingFacilitatorDashboard() {
 
         <nav className="flex-1 px-4 py-6 space-y-2">
           {[
-            { id: "batch-management", label: "Waste Inventory", icon: Boxes },
             { id: "overview", label: "Recycling Opportunities", icon: BarChart3 },
+            { id: "batch-management", label: "Waste Inventory", icon: Boxes },
             { id: "processing-analytics", label: "Processing Analytics", icon: Activity },
             { id: "recovery-statistics", label: "Recovery Statistics", icon: TrendingUp },
           ].map((item) => {
@@ -1270,7 +1269,8 @@ export default function RecyclingFacilitatorDashboard() {
           })}
         </nav>
 
-        <div className="p-4 border-t border-white/5 space-y-2">
+        <div className="p-4 border-t border-white/5 space-y-2 relative z-50">
+          <NotificationIconToggle />
           <ThemeToggle variant="sidebar" />
           <button onClick={() => { localStorage.clear(); router.replace("/login"); }} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-all">
             <LogOut className="w-5 h-5" />

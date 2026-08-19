@@ -1,10 +1,11 @@
 import sys
 import os
+import httpx
 import time
 import uuid
 from datetime import date, datetime
 from typing import Optional, List
-
+import datetime as dt
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, Query
 from fastapi.responses import StreamingResponse
 from fastapi.security import OAuth2PasswordBearer
@@ -12,18 +13,20 @@ import jwt
 from bson import ObjectId
 from bson.errors import InvalidId
 from pydantic import BaseModel
-
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if PROJECT_ROOT not in sys.path:
-    sys.path.insert(0, PROJECT_ROOT)
-
-from ml_engine.serve import analyze_image, analyze_defects 
-from ml_engine.recyclability_engine import assess_recyclability
+ 
+from recyclability_engine import assess_recyclability
 from sustainability.impact_calculator import calculate_item_impact
 from sustainability.weight_estimation import estimate_item_weight_kg
 
 from database import ai_logs_collection, waste_batches_collection
 from security import decode_access_token
+from notifications_scheduler import (
+    trigger_analysis_completion_event,
+    trigger_report_generated_event,
+    trigger_inventory_created_event,
+    trigger_recycling_opportunity_event,
+    trigger_sustainability_milestone_event,
+)
 
 VALID_CONDITIONS = [
     "Recyclable",
@@ -47,7 +50,26 @@ from report_generator import (
 
 router = APIRouter(prefix="/api/ml", tags=["Machine Learning"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
+ML_ENGINE_URL = os.getenv("ML_ENGINE_URL", "http://ml_engine:8001")
 
+async def analyze_image(image_bytes: bytes, filename: str = "image.jpg", content_type: str = "image/jpeg") -> dict:
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        resp = await client.post(
+            f"{ML_ENGINE_URL}/analyze",
+            files={"file": (filename, image_bytes, content_type)},
+        )
+        resp.raise_for_status()
+        return resp.json()
+
+async def analyze_defects(image_bytes: bytes, filename: str = "image.jpg", content_type: str = "image/jpeg") -> dict:
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        resp = await client.post(
+            f"{ML_ENGINE_URL}/analyze-defects",
+            files={"file": (filename, image_bytes, content_type)},
+        )
+        resp.raise_for_status()
+        return resp.json()
+    
 ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/webp", "image/bmp"}
 MAX_FILE_SIZE_MB = 10
 
@@ -124,7 +146,7 @@ async def analyze_defects_endpoint(
     if not image_bytes:
         raise HTTPException(status_code=400, detail="Uploaded file is empty.")
     try:
-        return analyze_defects(image_bytes)
+        return await analyze_defects(image_bytes, file.filename, file.content_type)
     except Exception as exc:
         raise HTTPException(status_code=422, detail=f"Could not process image: {exc}")
 
@@ -151,11 +173,11 @@ async def analyze(
         )
 
     try:
-        analysis = analyze_image(image_bytes)
+        analysis = await analyze_image(image_bytes, file.filename, file.content_type)
     except Exception as exc:
         raise HTTPException(status_code=422, detail=f"Could not process image: {exc}")
 
-    recyclability = assess_recyclability(analysis)
+    recyclability = await assess_recyclability(analysis)
 
     scan_id = None
     try:
@@ -172,6 +194,39 @@ async def analyze(
         scan_id = str(insert_result.inserted_id)
     except Exception as exc:
         print(f"[ml_endpoints] warning: failed to log scan to ai_logs_collection: {exc}")
+
+    g_label = (analysis.get("garment_type") or {}).get("label")
+    m_label = (analysis.get("material_type") or {}).get("label")
+    est_weight = estimate_item_weight_kg(garment_label=g_label, material_label=m_label)
+
+    report_bytes = None
+    report_filename = None
+    try:
+        scan_doc = {
+            "filename": file.filename,
+            "analysis": analysis,
+            "recyclability": recyclability,
+            "created_at": time.time(),
+        }
+        report_buffer = generate_single_scan_pdf_report(scan_doc, current_user["email"])
+        report_bytes = report_buffer.getvalue()
+        report_filename = f"scan_report_{scan_id or int(time.time())}.pdf"
+    except Exception as exc:
+        print(f"[ml_endpoints] warning: failed to generate PDF report for email attachment: {exc}")
+
+    try:
+        await trigger_analysis_completion_event(
+            label=file.filename,
+            weight_kg=est_weight,
+            scan_count=1,
+            user_email=current_user["email"],
+            is_batch=False,
+            batch_id=scan_id,
+            report_bytes=report_bytes,
+            report_filename=report_filename,
+        )
+    except Exception as exc:
+        print(f"[ml_endpoints] warning: failed to trigger completion event notification: {exc}")
 
     return {
         "scan_id": scan_id,
@@ -212,7 +267,7 @@ async def analyze_batch(
             continue
 
         try:
-            analysis = analyze_image(image_bytes)
+            analysis = await analyze_image(image_bytes, file.filename, file.content_type)
             recyclability = assess_recyclability(analysis)
             g_label = (analysis.get("garment_type") or {}).get("label")
             m_label = (analysis.get("material_type") or {}).get("label")
@@ -271,6 +326,7 @@ async def analyze_batch(
 
     if should_create_new_batch:
         inventory_payload = {
+            "user_email": current_user["email"],  
             "fabric_type": dominant_material if dominant_material != "Unknown" else "Mixed/Unknown",
             "source": (source or "").strip() or "AI Scan Intake",
             "quantity_kg": resolved_quantity_kg,
@@ -279,18 +335,24 @@ async def analyze_batch(
             "collection_date": date.today().isoformat(),
             "notes": notes,
             "reference_label": clean_label,
-            "created_at": datetime.utcnow().isoformat(),
-            "updated_at": datetime.utcnow().isoformat(),
+            "created_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+            "updated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
         }
         try:
             insert_result = await waste_batches_collection.insert_one(inventory_payload)
             resolved_batch_id = str(insert_result.inserted_id)
+            await trigger_inventory_created_event(
+                item_name=clean_label,
+                weight_kg=resolved_quantity_kg,
+                material_type=dominant_material,
+                user_email=current_user.get("email"),
+                source="AI Scan Intake",
+            )
         except Exception as exc:
             print(f"[ml_endpoints] warning: failed to auto-register inventory batch: {exc}")
             resolved_batch_id = f"batch-{uuid.uuid4().hex[:10]}"
     if not resolved_batch_id:
         resolved_batch_label = None
-
 
     docs_to_insert = []
     for item in processed:
@@ -329,6 +391,47 @@ async def analyze_batch(
         material_breakdown=materials_count
     )
 
+    # Same combined PDF a user would get from GET /export/pdf/batch/{batch_id},
+    # generated from the docs just inserted for this batch.
+    batch_report_bytes = None
+    batch_report_filename = None
+    try:
+        report_buffer = generate_batch_pdf_report(
+            docs_to_insert, resolved_batch_id or "batch", current_user["email"]
+        )
+        batch_report_bytes = report_buffer.getvalue()
+        batch_report_filename = f"batch_report_{resolved_batch_id or int(time.time())}.pdf"
+    except Exception as exc:
+        print(f"[ml_endpoints] warning: failed to generate batch PDF report for email attachment: {exc}")
+
+    try:
+        await trigger_analysis_completion_event(
+            label=resolved_batch_label or "Waste Batch",
+            weight_kg=resolved_quantity_kg,
+            scan_count=len(docs_to_insert),
+            user_email=current_user["email"],
+            is_batch=True,
+            batch_id=resolved_batch_id,
+            report_bytes=batch_report_bytes,
+            report_filename=batch_report_filename,
+        )
+        avg_score = summary.average_circularity_score if summary else 75
+        dom_material = summary.dominant_material if summary else "Mixed Fabrics"
+        await trigger_recycling_opportunity_event(
+            material=dom_material,
+            quantity_kg=resolved_quantity_kg,
+            circularity_score=int(avg_score),
+            batch_id=resolved_batch_id
+        )
+        if resolved_quantity_kg >= 50.0 or avg_score >= 70:
+            await trigger_sustainability_milestone_event(
+                milestone_title=f"Batch Recycling Opportunity: {resolved_batch_label or 'Intake'}",
+                milestone_message=f"High circularity batch ({int(avg_score)} score, {resolved_quantity_kg}kg of {dom_material}) registered and ready for sustainability tracking.",
+                severity="success"
+            )
+    except Exception as exc:
+        print(f"[ml_endpoints] warning: failed to trigger batch completion or opportunity event notifications: {exc}")
+
     return BatchAnalyzeResponse(
         batch_id=resolved_batch_id,
         batch_label=resolved_batch_label,
@@ -339,11 +442,61 @@ async def analyze_batch(
 @router.post("/analyze/detailed")
 async def analyze_detailed(file: UploadFile = File(...), current_user=Depends(get_current_user)):
     image_bytes = await file.read()
-    analysis = analyze_image(image_bytes)
-    defect_analysis = analyze_defects(image_bytes)
+    analysis = await analyze_image(image_bytes)
+    defect_analysis = await analyze_defects(image_bytes)
     recyclability = assess_recyclability(analysis, defect_analysis)
     impact = calculate_item_impact({"analysis": analysis, "recyclability": recyclability})
+    impact_weight = impact.get("weight_kg", 0.0)
+
+    scan_id = None
+    try:
+        insert_result = await ai_logs_collection.insert_one(
+            {
+                "user_email": current_user["email"],
+                "filename": file.filename,
+                "content_type": file.content_type,
+                "analysis": analysis,
+                "defect_analysis": defect_analysis,
+                "recyclability": recyclability,
+                "impact": impact,
+                "created_at": time.time(),
+            }
+        )
+        scan_id = str(insert_result.inserted_id)
+    except Exception as exc:
+        print(f"[ml_endpoints] warning: failed to log detailed scan to ai_logs_collection: {exc}")
+
+    detailed_report_bytes = None
+    detailed_report_filename = None
+    try:
+        scan_doc = {
+            "filename": file.filename,
+            "analysis": analysis,
+            "recyclability": recyclability,
+            "created_at": time.time(),
+        }
+        report_buffer = generate_single_scan_pdf_report(scan_doc, current_user["email"])
+        detailed_report_bytes = report_buffer.getvalue()
+        detailed_report_filename = f"scan_report_{scan_id or int(time.time())}.pdf"
+    except Exception as exc:
+        print(f"[ml_endpoints] warning: failed to generate PDF report for email attachment: {exc}")
+
+    try:
+        await trigger_analysis_completion_event(
+            label=file.filename,
+            weight_kg=impact_weight,
+            scan_count=1,
+            user_email=current_user["email"],
+            is_batch=False,
+            batch_id=scan_id,
+            report_bytes=detailed_report_bytes,
+            report_filename=detailed_report_filename,
+        )
+    except Exception as exc:
+        print(f"[ml_endpoints] warning: failed to trigger detailed completion event notification: {exc}")
+
     return {
+        "scan_id": scan_id,
         "analysis": analysis,
         "defect_analysis": defect_analysis,
         "recyclability": recyclability,
@@ -498,6 +651,12 @@ async def export_pdf(
         raise HTTPException(status_code=404, detail="No scans to export yet.")
 
     buffer, filename = _generate_typed_pdf_report(docs, current_user.get("email") or "user", report_type=report_type)
+    await trigger_report_generated_event(
+        report_title=report_type or "Platform Scans PDF",
+        report_type="PDF Export",
+        user_email=current_user.get("email") or "User",
+        filename=filename,
+    )
     return StreamingResponse(
         buffer,
         media_type="application/pdf",
@@ -525,6 +684,12 @@ async def export_excel(
 
     buffer = generate_excel_report(docs)
     filename = f"waste_classification_report_{int(time.time())}.xlsx"
+    await trigger_report_generated_event(
+        report_title="Platform Scans Excel",
+        report_type="Excel Export",
+        user_email=current_user.get("email") or "User",
+        filename=filename,
+    )
     return StreamingResponse(
         buffer,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -619,6 +784,12 @@ async def export_batch_pdf(
         batch_id=batch_id,
         batch_meta=batch_meta,
     )
+    await trigger_report_generated_event(
+        report_title=f"Batch #{batch_id[:6]} PDF",
+        report_type="Batch PDF",
+        user_email=current_user.get("email") or "User",
+        filename=filename,
+    )
     return StreamingResponse(
         buffer,
         media_type="application/pdf",
@@ -637,6 +808,12 @@ async def export_single_pdf(
 
     buffer = generate_single_scan_pdf_report(doc, current_user.get("email") or "user")
     filename = f"waste_classification_report_{scan_id}.pdf"
+    await trigger_report_generated_event(
+        report_title=f"Scan #{scan_id[:6]} PDF",
+        report_type="Single Scan PDF",
+        user_email=current_user.get("email") or "User",
+        filename=filename,
+    )
     return StreamingResponse(
         buffer,
         media_type="application/pdf",
@@ -652,6 +829,12 @@ async def export_single_excel(
 
     buffer = generate_excel_report([doc])
     filename = f"waste_classification_report_{scan_id}.xlsx"
+    await trigger_report_generated_event(
+        report_title=f"Scan #{scan_id[:6]} Excel",
+        report_type="Single Scan Excel",
+        user_email=current_user.get("email") or "User",
+        filename=filename,
+    )
     return StreamingResponse(
         buffer,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -660,9 +843,10 @@ async def export_single_excel(
 
 @router.get("/health")
 async def health():
-    from ml_engine.serve import _loaded
-
-    return {
-        task: {"loaded": model is not None}
-        for task, (model, _labels) in _loaded.items()
-    }
+    async with httpx.AsyncClient(timeout=5.0) as client:
+        try:
+            resp = await client.get(f"{ML_ENGINE_URL}/health")
+            resp.raise_for_status()
+            return resp.json()
+        except Exception as exc:
+            return {"status": "unreachable", "error": str(exc)}

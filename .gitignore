@@ -216,3 +216,16 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+favicon.ico
+datasets/
+eda_outputs/
+frontend/sortex/AGENTS.md
+frontend/sortex/CLAUDE.md
+frontend/sortex/README.md
+frontend/sortex/eslint.config.mjs
+frontend/sortex/next.config.ts
+frontend/sortex/package-lock.json
+frontend/sortex/package.json
+frontend/sortex/postcss.config.mjs
+frontend/sortex/public/
+frontend/sortex/tsconfig.json

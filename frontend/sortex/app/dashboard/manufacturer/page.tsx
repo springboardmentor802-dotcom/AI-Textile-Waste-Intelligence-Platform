@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { ThemeToggle } from "@/app/components/ThemeToggle";
+import NotificationIconToggle from "@/app/components/NotificationIconToggle";
 import {
   Factory,
   LogOut,
@@ -21,9 +22,40 @@ import {
   Plus,
   X,
   FileSpreadsheet,
+  History,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 
 // ─── Types ─────────────────────────────────────────────────────────
+
+interface ScanHistoryItem {
+  _id: string;
+  filename: string;
+  created_at: number;
+  batch_id?: string | null;
+  analysis: AnalysisPayload;
+  recyclability: RecyclabilityPayload;
+}
+
+interface BatchMeta {
+  source?: string | null;
+  quantity_kg?: number | null;
+  notes?: string | null;
+  label?: string | null;
+}
+
+interface HistoryGroup {
+  batch_id: string | null;
+  batch_meta: BatchMeta | null;
+  is_batch: boolean;
+  count: number;
+  average_circularity_score: number;
+  dominant_material: string;
+  earliest_created_at: number | null;
+  latest_created_at: number | null;
+  scans: ScanHistoryItem[];
+}
 
 interface ClassificationResult {
   label: string | null;
@@ -368,6 +400,86 @@ export default function ManufacturerDashboard() {
   // Report Exporting State
   const [isExporting, setIsExporting] = useState(false);
 
+  // Scan History & Reports Modal State
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [historyItems, setHistoryItems] = useState<HistoryGroup[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [historyError, setHistoryError] = useState("");
+  const [downloadingHistoryId, setDownloadingHistoryId] = useState<string | null>(null);
+  const [downloadingBatchId, setDownloadingBatchId] = useState<string | null>(null);
+  const [expandedHistoryGroup, setExpandedHistoryGroup] = useState<string | null>(null);
+  const [expandedHistoryScanId, setExpandedHistoryScanId] = useState<string | null>(null);
+
+  const _downloadBlob = async (url: string, fallbackFilename: string) => {
+    const token = localStorage.getItem("access_token");
+    const res = await fetch(url, {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.detail || "Could not generate report.");
+    }
+    const blob = await res.blob();
+    const objectUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = objectUrl;
+    link.download = fallbackFilename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(objectUrl);
+  };
+
+  const fetchHistory = useCallback(async () => {
+    setIsLoadingHistory(true);
+    setHistoryError("");
+    try {
+      const token = localStorage.getItem("access_token");
+      const res = await fetch(`${API_BASE_URL}/api/ml/history/batches`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+      if (!res.ok) throw new Error("Could not load scan history.");
+      const data = await res.json();
+      setHistoryItems(data);
+    } catch (error: unknown) {
+      setHistoryError(error instanceof Error ? error.message : "Could not load history.");
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  }, []);
+
+  const handleOpenHistory = () => {
+    setShowHistoryModal(true);
+    setExpandedHistoryGroup(null);
+    setExpandedHistoryScanId(null);
+    fetchHistory();
+  };
+
+  const handleDownloadScanReport = async (scanId: string) => {
+    setDownloadingHistoryId(scanId);
+    try {
+      await _downloadBlob(`${API_BASE_URL}/api/ml/export/pdf/${scanId}`, `scan_report_${scanId}.pdf`);
+    } catch (error: unknown) {
+      setHistoryError(error instanceof Error ? error.message : "Could not download report.");
+    } finally {
+      setDownloadingHistoryId(null);
+    }
+  };
+
+  const handleDownloadBatchReport = async (batchId: string, reportTitle: string = "factory_inventory_batch_report") => {
+    setDownloadingBatchId(batchId);
+    try {
+      await _downloadBlob(
+        `${API_BASE_URL}/api/ml/export/pdf/batch/${batchId}?report_type=${reportTitle}`,
+        `${reportTitle}_${batchId}.pdf`
+      );
+    } catch (error: unknown) {
+      setHistoryError(error instanceof Error ? error.message : "Could not download batch report.");
+    } finally {
+      setDownloadingBatchId(null);
+    }
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     const role = localStorage.getItem("user_role");
@@ -601,12 +713,26 @@ const downloadReport = async (type: "pdf" | "excel", reportTitle: string = "manu
     "Industrial Recovery": "#ef4444",
   };
 
-  const factorySourceMap = inventoryBatches
-    .filter((b) => b.source && b.source.toLowerCase().includes("factory"))
-    .reduce((acc, batch) => {
+  const factoryBatches = inventoryBatches.filter((b) => {
+    if (!b.source) return true;
+    const s = b.source.toLowerCase();
+    return (
+      s.includes("factory") ||
+      s.includes("cutting") ||
+      s.includes("line") ||
+      s.includes("plant") ||
+      s.includes("mill") ||
+      s.includes("production") ||
+      !s.includes("collection")
+    );
+  });
+
+  const factorySourceMap = factoryBatches.reduce((acc, batch) => {
+    if (batch.source) {
       acc[batch.source] = (acc[batch.source] || 0) + batch.quantity_kg;
-      return acc;
-    }, {} as Record<string, number>);
+    }
+    return acc;
+  }, {} as Record<string, number>);
 
   const SOURCE_COLORS = ["#10b981", "#38bdf8", "#f59e0b", "#a855f7", "#ec4899", "#f97316", "#84cc16"];
 
@@ -646,25 +772,22 @@ const downloadReport = async (type: "pdf" | "excel", reportTitle: string = "manu
     { label: "Non-Diverted (Hazardous)", value: summaryData.waste_diversion.non_diverted_count, color: "#ef4444" },
   ] : [];
 
-  const filteredBatches = inventoryBatches.filter((b) => {
+  const filteredBatches = factoryBatches.filter((b) => {
     const q = batchSearchQuery.toLowerCase();
-    const isFactorySource = b.source && b.source.toLowerCase().includes("factory");
     return (
-      isFactorySource &&
-      (b.fabric_type.toLowerCase().includes(q) ||
+      b.fabric_type.toLowerCase().includes(q) ||
       b.condition.toLowerCase().includes(q) ||
-      b.source.toLowerCase().includes(q))
+      (b.source && b.source.toLowerCase().includes(q))
     );
   });
 
   return (
     <div className="relative flex h-screen bg-neutral-950 font-sans overflow-hidden text-neutral-200">
-      {/* GLOW ACCENTS */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-amber-600/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-orange-600/10 rounded-full blur-3xl pointer-events-none" />
+      {/* SOFT CENTER ORANGE GLOW ACCENT */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[650px] bg-orange-500/15 rounded-full blur-[160px] pointer-events-none flex items-center justify-center z-0" />
 
       {/* SIDEBAR */}
-      <div className="w-64 bg-black text-white flex flex-col shadow-xl z-10 border-r border-white/5 flex-shrink-0">
+      <div className="w-64 bg-black text-white flex flex-col shadow-xl z-40 relative border-r border-white/5 flex-shrink-0">
         <div className="p-6 flex items-center gap-3 border-b border-white/5">
           <div className="p-2 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg shadow-md">
             <Factory className="w-6 h-6 text-white" />
@@ -696,7 +819,7 @@ const downloadReport = async (type: "pdf" | "excel", reportTitle: string = "manu
           })}
         </nav>
 
-        <div className="p-4 border-t border-white/5 space-y-2">
+        <div className="p-4 border-t border-white/5 space-y-2 relative z-50">
           <button
             onClick={() => downloadReport("pdf", `${activeTab}_report`)}
             disabled={isExporting}
@@ -705,6 +828,7 @@ const downloadReport = async (type: "pdf" | "excel", reportTitle: string = "manu
             <FileDown className="w-4 h-4 text-amber-400" />
             <span>Export Active Report (PDF)</span>
           </button>
+          <NotificationIconToggle />
           <ThemeToggle variant="sidebar" />
           <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-all">
             <LogOut className="w-5 h-5" />
@@ -745,6 +869,14 @@ const downloadReport = async (type: "pdf" | "excel", reportTitle: string = "manu
               title="Refresh All Data"
             >
               <RefreshCw className={`w-4 h-4 ${isSummaryLoading || isBatchesLoading ? "animate-spin" : ""}`} />
+            </button>
+
+            <button
+              onClick={handleOpenHistory}
+              className="px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-neutral-200 font-bold text-xs rounded-xl border border-white/10 shadow-sm flex items-center gap-2 transition-all"
+            >
+              <History className="w-4 h-4 text-amber-400" />
+              <span>Scan History & Reports</span>
             </button>
 
             <button
@@ -810,7 +942,7 @@ const downloadReport = async (type: "pdf" | "excel", reportTitle: string = "manu
                 </div>
                 <div className="bg-neutral-900 p-6 rounded-3xl border border-white/5 shadow-sm">
                   <p className="text-xs font-bold text-neutral-500 uppercase">Active Factory Batches</p>
-                  <h3 className="text-3xl font-extrabold text-amber-400 mt-1">{inventoryBatches.length}</h3>
+                  <h3 className="text-3xl font-extrabold text-amber-400 mt-1">{factoryBatches.length}</h3>
                 </div>
               </div>
 
@@ -956,19 +1088,40 @@ const downloadReport = async (type: "pdf" | "excel", reportTitle: string = "manu
 
               {/* Registered Factory Inventory Batches Browser */}
               <div className="bg-neutral-900 rounded-3xl border border-white/5 p-6 space-y-4">
-                <div className="flex justify-between items-center">
-                  <h4 className="text-base font-bold text-white flex items-center gap-2">
-                    <Boxes className="w-5 h-5 text-amber-400" /> Factory Waste Inventory ({filteredBatches.length})
-                  </h4>
-                  <div className="relative">
-                    <Search className="w-4 h-4 text-neutral-500 absolute left-3 top-2.5" />
-                    <input
-                      type="text"
-                      value={batchSearchQuery}
-                      onChange={(e) => setBatchSearchQuery(e.target.value)}
-                      placeholder="Search fabric or source..."
-                      className="bg-neutral-950 border border-white/10 rounded-xl pl-9 pr-4 py-1.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-500/50 w-64"
-                    />
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div>
+                    <h4 className="text-base font-bold text-white flex items-center gap-2">
+                      <Boxes className="w-5 h-5 text-amber-400" /> Factory Waste Inventory ({filteredBatches.length})
+                    </h4>
+                    <p className="text-xs text-neutral-400">Exclusive inventory batches registered from factory production cutting lines.</p>
+                  </div>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <div className="relative">
+                      <Search className="w-4 h-4 text-neutral-500 absolute left-3 top-2.5" />
+                      <input
+                        type="text"
+                        value={batchSearchQuery}
+                        onChange={(e) => setBatchSearchQuery(e.target.value)}
+                        placeholder="Search fabric or source..."
+                        className="bg-neutral-950 border border-white/10 rounded-xl pl-9 pr-4 py-1.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-500/50 w-56"
+                      />
+                    </div>
+                    <button
+                      onClick={() => downloadReport("pdf", "factory_inventory_report")}
+                      disabled={isExporting}
+                      className="inline-flex items-center gap-1.5 bg-amber-600/20 border border-amber-500/30 text-amber-400 hover:bg-amber-600/30 text-xs font-bold px-3 py-1.5 rounded-xl transition-all"
+                    >
+                      {isExporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileDown className="w-3.5 h-3.5" />}
+                      PDF Report
+                    </button>
+                    <button
+                      onClick={() => downloadReport("excel", "factory_inventory_report")}
+                      disabled={isExporting}
+                      className="inline-flex items-center gap-1.5 bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-600/30 text-xs font-bold px-3 py-1.5 rounded-xl transition-all"
+                    >
+                      {isExporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileSpreadsheet className="w-3.5 h-3.5" />}
+                      Excel Report
+                    </button>
                   </div>
                 </div>
 
@@ -980,13 +1133,14 @@ const downloadReport = async (type: "pdf" | "excel", reportTitle: string = "manu
                         <th className="px-4 py-3">Factory Source</th>
                         <th className="px-4 py-3">Quantity (kg)</th>
                         <th className="px-4 py-3">Condition</th>
-                        <th className="px-4 py-3 text-right">Date Registered</th>
+                        <th className="px-4 py-3">Date Registered</th>
+                        <th className="px-4 py-3 text-right">Batch Report Export</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
                       {filteredBatches.length === 0 ? (
                         <tr>
-                          <td colSpan={5} className="px-4 py-8 text-center text-neutral-500">No factory inventory batches found.</td>
+                          <td colSpan={6} className="px-4 py-8 text-center text-neutral-500">No factory inventory batches found.</td>
                         </tr>
                       ) : (
                         filteredBatches.map((b) => (
@@ -999,8 +1153,18 @@ const downloadReport = async (type: "pdf" | "excel", reportTitle: string = "manu
                                 {b.condition}
                               </span>
                             </td>
-                            <td className="px-4 py-3 text-right text-neutral-500">
+                            <td className="px-4 py-3 text-neutral-500">
                               {b.collection_date ? new Date(b.collection_date).toLocaleDateString() : "Recent"}
+                            </td>
+                            <td className="px-4 py-3 text-right">
+                              <button
+                                onClick={() => handleDownloadBatchReport(b.batch_id || (b._id as string))}
+                                disabled={downloadingBatchId === (b.batch_id || b._id)}
+                                className="inline-flex items-center gap-1.5 text-amber-400 hover:text-amber-300 text-xs font-bold bg-neutral-950 border border-white/10 px-2.5 py-1 rounded-lg disabled:opacity-50 transition-all"
+                              >
+                                {downloadingBatchId === (b.batch_id || b._id) ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileDown className="w-3.5 h-3.5" />}
+                                Batch PDF
+                              </button>
                             </td>
                           </tr>
                         ))
@@ -1287,6 +1451,156 @@ const downloadReport = async (type: "pdf" | "excel", reportTitle: string = "manu
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* SCAN HISTORY & REPORTS MODAL */}
+      {showHistoryModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-neutral-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] overflow-hidden flex flex-col border border-white/10">
+            <div className="flex items-center justify-between p-6 border-b border-white/5 bg-neutral-950">
+              <div>
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  <History className="w-5 h-5 text-amber-400" /> Factory Scan History & Reports
+                </h3>
+                <p className="text-sm text-neutral-400">Review past factory scrap AI analyses, grouped by batch, and download reports.</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => downloadReport("pdf", "factory_scrap_analysis_report")}
+                  disabled={isExporting || historyItems.length === 0}
+                  className="flex items-center gap-1.5 text-xs font-bold text-white bg-amber-600 hover:bg-amber-500 px-3 py-1.5 rounded-xl transition-colors disabled:opacity-50 shadow-sm"
+                >
+                  {isExporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileDown className="w-3.5 h-3.5" />}
+                  Waste Report (PDF)
+                </button>
+                <button
+                  onClick={() => downloadReport("excel", "factory_scrap_analysis_report")}
+                  disabled={isExporting || historyItems.length === 0}
+                  className="flex items-center gap-1.5 text-xs font-bold text-emerald-400 bg-neutral-900 border border-white/10 hover:bg-neutral-800 px-3 py-1.5 rounded-xl transition-colors disabled:opacity-50 shadow-sm"
+                >
+                  {isExporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />}
+                  Excel Summary
+                </button>
+                <button onClick={() => setShowHistoryModal(false)} className="text-neutral-400 hover:text-white p-1 rounded-lg">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-y-auto p-6 space-y-3">
+              {isLoadingHistory ? (
+                <div className="py-16 text-center text-neutral-400 font-bold">
+                  <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-amber-400" />
+                  Loading scan history...
+                </div>
+              ) : historyError ? (
+                <div className="py-16 text-center text-red-400 font-bold">{historyError}</div>
+              ) : historyItems.length === 0 ? (
+                <div className="py-16 text-center text-neutral-500 font-semibold">No scan history found. Run an AI analysis to see it recorded here.</div>
+              ) : (
+                historyItems.map((group) => {
+                  const groupKey = group.batch_id ?? `single-${group.scans[0]?._id}`;
+                  const isGroupExpanded = expandedHistoryGroup === groupKey;
+
+                  return (
+                    <div key={groupKey} className="border border-white/5 rounded-2xl overflow-hidden bg-neutral-950/40">
+                      <div
+                        onClick={() => setExpandedHistoryGroup(isGroupExpanded ? null : groupKey)}
+                        className={`p-4 flex flex-col sm:flex-row sm:items-center gap-3 cursor-pointer transition-colors ${isGroupExpanded ? "bg-white/5" : "hover:bg-white/5"}`}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-white text-sm truncate">
+                            {group.is_batch
+                              ? `Batch: ${group.batch_meta?.label || group.batch_id}`
+                              : (group.scans[0]?.filename ?? "Factory Scan")}
+                          </p>
+                          <p className="text-xs font-medium text-neutral-400 mt-1">
+                            {group.count} scan{group.count !== 1 ? "s" : ""} &middot; {group.dominant_material} &middot;{" "}
+                            {group.latest_created_at ? new Date(group.latest_created_at * 1000).toLocaleString() : "—"}
+                          </p>
+                        </div>
+                        <div className="flex-shrink-0 flex items-center gap-3">
+                          <span className="text-xs font-bold px-2.5 py-1 rounded-full border border-amber-500/20 bg-amber-500/10 text-amber-400">
+                            Avg {group.average_circularity_score}
+                          </span>
+                          {group.is_batch && group.batch_id && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleDownloadBatchReport(group.batch_id as string); }}
+                              disabled={downloadingBatchId === group.batch_id}
+                              className="inline-flex items-center gap-1.5 text-xs font-bold text-neutral-200 bg-neutral-800 hover:bg-neutral-700 px-3 py-1.5 rounded-lg border border-white/5 disabled:opacity-50"
+                            >
+                              {downloadingBatchId === group.batch_id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileDown className="w-3.5 h-3.5 text-amber-400" />}
+                              Batch Report (PDF)
+                            </button>
+                          )}
+                          {isGroupExpanded ? <ChevronUp className="w-5 h-5 text-neutral-500" /> : <ChevronDown className="w-5 h-5 text-neutral-500" />}
+                        </div>
+                      </div>
+
+                      {isGroupExpanded && (
+                        <div className="divide-y divide-white/5 bg-black/30 border-t border-white/5">
+                          {group.scans.map((scan) => {
+                            const isScanExpanded = expandedHistoryScanId === scan._id;
+                            return (
+                              <div key={scan._id}>
+                                <div
+                                  onClick={() => setExpandedHistoryScanId(isScanExpanded ? null : scan._id)}
+                                  className={`px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3 cursor-pointer transition-colors ${isScanExpanded ? "bg-white/5" : "hover:bg-white/5"}`}
+                                >
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-semibold text-white text-sm truncate">{scan.filename}</p>
+                                    <p className="text-xs text-neutral-400 mt-0.5">
+                                      {scan.analysis.material_type?.label ?? "—"} &middot; {scan.analysis.waste_status?.label ?? "—"} &middot;{" "}
+                                      {new Date(scan.created_at * 1000).toLocaleString()}
+                                    </p>
+                                  </div>
+                                  <div className="flex-shrink-0 flex items-center gap-3">
+                                    <span className="text-xs font-bold px-2 py-0.5 bg-amber-500/10 text-amber-400 rounded border border-amber-500/20">
+                                      {scan.recyclability.circularity_score}/100
+                                    </span>
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); handleDownloadScanReport(scan._id); }}
+                                      disabled={downloadingHistoryId === scan._id}
+                                      className="inline-flex items-center gap-1 text-xs font-bold text-neutral-200 bg-neutral-800 hover:bg-neutral-700 px-3 py-1.5 rounded-lg border border-white/5 disabled:opacity-50"
+                                    >
+                                      {downloadingHistoryId === scan._id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileDown className="w-3.5 h-3.5 text-amber-400" />}
+                                      PDF
+                                    </button>
+                                    {isScanExpanded ? <ChevronUp className="w-4 h-4 text-neutral-500" /> : <ChevronDown className="w-4 h-4 text-neutral-500" />}
+                                  </div>
+                                </div>
+
+                                {isScanExpanded && (
+                                  <div className="p-5 bg-black/40 border-t border-white/5 text-xs space-y-3">
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                      <div className="p-3 bg-neutral-900 rounded-xl border border-white/5">
+                                        <span className="text-neutral-500 block text-[10px]">Garment / Type</span>
+                                        <span className="font-bold text-white text-sm">{scan.analysis.garment_type?.label || "Scrap / Fabric"}</span>
+                                      </div>
+                                      <div className="p-3 bg-neutral-900 rounded-xl border border-white/5">
+                                        <span className="text-neutral-500 block text-[10px]">Material Composition</span>
+                                        <span className="font-bold text-amber-400 text-sm">{scan.analysis.material_type?.label || "Mixed"}</span>
+                                      </div>
+                                      <div className="p-3 bg-neutral-900 rounded-xl border border-white/5">
+                                        <span className="text-neutral-500 block text-[10px]">Condition Grade</span>
+                                        <span className="font-bold text-emerald-400 text-sm">{scan.analysis.waste_status?.label || "Recyclable"}</span>
+                                      </div>
+                                    </div>
+                                    <p className="text-neutral-400 text-xs">{scan.recyclability.recommended_recycling_option}</p>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
           </div>
         </div>
       )}

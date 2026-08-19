@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useState } from "react";
 
 export type Theme = "dark" | "light";
 
@@ -12,34 +12,38 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+const applyThemeToDOM = (t: Theme) => {
+  if (typeof document === "undefined") return;
+  document.documentElement.setAttribute("data-theme", t);
+  document.body.setAttribute("data-theme", t);
+  if (t === "light") {
+    document.documentElement.classList.add("light");
+    document.documentElement.classList.remove("dark");
+    document.body.classList.add("light");
+    document.body.classList.remove("dark");
+  } else {
+    document.documentElement.classList.add("dark");
+    document.documentElement.classList.remove("light");
+    document.body.classList.add("dark");
+    document.body.classList.remove("light");
+  }
+};
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("dark");
-
-  const applyThemeToDOM = (t: Theme) => {
-    document.documentElement.setAttribute("data-theme", t);
-    document.body.setAttribute("data-theme", t);
-    if (t === "light") {
-      document.documentElement.classList.add("light");
-      document.documentElement.classList.remove("dark");
-      document.body.classList.add("light");
-      document.body.classList.remove("dark");
-    } else {
-      document.documentElement.classList.add("dark");
-      document.documentElement.classList.remove("light");
-      document.body.classList.add("dark");
-      document.body.classList.remove("light");
+  const [theme, setThemeState] = useState<Theme>(() => {
+    if (typeof window !== "undefined") {
+      const saved = (localStorage.getItem("theme") as Theme) || "dark";
+      applyThemeToDOM(saved);
+      return saved;
     }
-  };
-
-  useEffect(() => {
-    const savedTheme = (localStorage.getItem("theme") as Theme) || "dark";
-    setThemeState(savedTheme);
-    applyThemeToDOM(savedTheme);
-  }, []);
+    return "dark";
+  });
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
-    localStorage.setItem("theme", newTheme);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("theme", newTheme);
+    }
     applyThemeToDOM(newTheme);
   };
 

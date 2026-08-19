@@ -24,6 +24,7 @@ export default function LoginPage() {
   const router = useRouter();
 
   const [isLoginMode, setIsLoginMode] = useState(true);
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("Recycling Facilitator");
@@ -40,7 +41,7 @@ export default function LoginPage() {
         const regResponse = await fetch(`${API_BASE_URL}/api/auth/register`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password, role }),
+          body: JSON.stringify({ name, email, password, role }),
         });
 
         if (!regResponse.ok) {
@@ -173,6 +174,22 @@ export default function LoginPage() {
           </p>
 
           <form onSubmit={handleAuth} className="space-y-5">
+	    <div className="space-y-2">
+    	      <label className="text-sm font-medium text-neutral-300" htmlFor="name">
+      	        Full name
+              </label>
+              <div className="relative">
+                <input
+        	  id="name"
+        	  type="text"
+        	  required
+        	  value={name}
+        	  onChange={(e) => setName(e.target.value)}
+        	  className="block w-full pl-3 pr-3 py-2.5 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500/50 transition-all"
+        	  placeholder="Jane Doe"
+      		/>
+    	      </div>
+  	    </div>	
             <div className="space-y-2">
               <label className="text-sm font-medium text-neutral-300" htmlFor="email">
                 Email address

@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from typing import Optional
 
 from bson import ObjectId
@@ -7,6 +7,11 @@ from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from database import inventory_collection, waste_batches_collection
+from notifications_scheduler import (
+    trigger_waste_collection_event,
+    trigger_inventory_warning_event,
+    trigger_inventory_created_event,
+)
 
 router = APIRouter(prefix="/api/inventory", tags=["Inventory"])
 
@@ -22,6 +27,13 @@ async def add_item(item: InventoryItem):
     try:
         new_item = item.dict()
         result = await inventory_collection.insert_one(new_item)
+        
+        await trigger_inventory_created_event(
+            item_name=item.item_name,
+            weight_kg=item.weight_kg,
+            material_type=item.material_type,
+        )
+        
         return {"message": "Item added successfully", "id": str(result.inserted_id)}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -81,11 +93,29 @@ def _resolve_batch_id(batch_id: str):
 @router.post("/batches")
 async def create_batch(batch: WasteBatch):
     try:
-        payload = batch.dict()
+        payload = batch.model_dump()  
         payload["condition"] = batch.validated_condition()
-        payload["created_at"] = datetime.utcnow().isoformat()
+        payload["created_at"] = datetime.now(timezone.utc).isoformat()
         payload["updated_at"] = payload["created_at"]
+        
         result = await waste_batches_collection.insert_one(payload)
+        
+        await trigger_waste_collection_event(
+            fabric_type=payload["fabric_type"],
+            quantity_kg=payload["quantity_kg"],
+            source=payload["source"]
+        )
+        await trigger_inventory_warning_event(
+            item_name=payload["fabric_type"],
+            weight_kg=payload["quantity_kg"]
+        )
+        await trigger_inventory_created_event(
+            item_name=payload["fabric_type"],
+            weight_kg=payload["quantity_kg"],
+            material_type=payload["fabric_type"],
+            source=payload.get("source")
+        )
+        
         return {"message": "Batch registered successfully", "batch_id": str(result.inserted_id)}
     except HTTPException:
         raise

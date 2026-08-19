@@ -15,3 +15,6 @@ users_collection=db.get_collection("users")
 inventory_collection=db.get_collection("inventory")
 waste_batches_collection=db.get_collection("waste_batches")
 ai_logs_collection=db.get_collection("ai_logs")
+
+async def ensure_indexes():
+    await users_collection.create_index("email", unique=True)

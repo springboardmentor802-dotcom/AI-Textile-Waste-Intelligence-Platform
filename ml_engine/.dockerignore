@@ -1,0 +1,10 @@
+venv_dml
+venv
+__pycache__
+*.pyc
+.git
+datasets
+eda_outputs
+models
+training_log.txt
+*.ipynb_checkpoints

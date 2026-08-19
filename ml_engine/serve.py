@@ -1,15 +1,20 @@
 import io
 import json
+import sys
 from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent
+if str(BASE_DIR) not in sys.path:
+    sys.path.insert(0, str(BASE_DIR))
+
 import torch
 from torchvision import transforms
 from PIL import Image
 
-from .vision_model_colab import build_classifier, DEVICE, IMAGE_SIZE
-from .color_analyzer import analyze_colors
-from .texture_pattern_analyzer import analyze_texture_and_pattern
+from vision_model_colab import build_classifier, DEVICE, IMAGE_SIZE
+from color_analyzer import analyze_colors
+from texture_pattern_analyzer import analyze_texture_and_pattern
 
-BASE_DIR = Path(__file__).resolve().parent
 MODELS_DIR = BASE_DIR / "models"
 
 INFER_TRANSFORM = transforms.Compose([
@@ -99,11 +104,41 @@ def analyze_image_full(image_bytes: bytes) -> dict:
     result.update(analyze_defects(image_bytes))
     return result
 
+from fastapi import FastAPI, File, UploadFile
+import uvicorn
+
+app = FastAPI(title="ML Engine Microservice", version="1.0.0")
+
+@app.get("/health")
+def health_check():
+    return {
+        "status": "ok",
+        "loaded_models": {
+            task: {"loaded": model is not None}
+            for task, (model, _labels) in _loaded.items()
+        },
+    }
+
+@app.post("/analyze")
+async def api_analyze(file: UploadFile = File(...)):
+    contents = await file.read()
+    return analyze_image(contents)
+
+@app.post("/analyze-defects")
+async def api_analyze_defects(file: UploadFile = File(...)):
+    contents = await file.read()
+    return analyze_defects(contents)
+
+@app.post("/analyze-full")
+async def api_analyze_full(file: UploadFile = File(...)):
+    contents = await file.read()
+    return analyze_image_full(contents)
+
 if __name__ == "__main__":
     import sys
-    if len(sys.argv) < 2:
-        print("Usage: python serve.py <image_path>")
-    else:
+    if len(sys.argv) > 1:
         with open(sys.argv[1], "rb") as f:
             image_bytes = f.read()
         print(json.dumps(analyze_image_full(image_bytes), indent=2))
+    else:
+        uvicorn.run(app, host="0.0.0.0", port=5001)

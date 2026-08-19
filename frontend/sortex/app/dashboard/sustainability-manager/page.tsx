@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { ThemeToggle } from "@/app/components/ThemeToggle";
+import NotificationIconToggle from "@/app/components/NotificationIconToggle";
 import {
   LogOut,
   UploadCloud,
@@ -34,9 +35,39 @@ import {
   TrendingUp,
   Layers,
   FileSpreadsheet,
+  History,
+  X,
 } from "lucide-react";
 
 // ─── Types ─────────────────────────────────────────────────────────
+
+interface ScanHistoryItem {
+  _id: string;
+  filename: string;
+  created_at: number;
+  batch_id?: string | null;
+  analysis: AnalysisPayload;
+  recyclability: RecyclabilityPayload;
+}
+
+interface BatchMeta {
+  source?: string | null;
+  quantity_kg?: number | null;
+  notes?: string | null;
+  label?: string | null;
+}
+
+interface HistoryGroup {
+  batch_id: string | null;
+  batch_meta: BatchMeta | null;
+  is_batch: boolean;
+  count: number;
+  average_circularity_score: number;
+  dominant_material: string;
+  earliest_created_at: number | null;
+  latest_created_at: number | null;
+  scans: ScanHistoryItem[];
+}
 
 interface ClassificationResult {
   label: string | null;
@@ -438,6 +469,86 @@ export default function SustainabilityManagerDashboard() {
   const [isExporting, setIsExporting] = useState(false);
   const [expandedScanIdx, setExpandedScanIdx] = useState<number | null>(null);
 
+  // Scan History & Reports Modal State
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [historyItems, setHistoryItems] = useState<HistoryGroup[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [historyError, setHistoryError] = useState("");
+  const [downloadingHistoryId, setDownloadingHistoryId] = useState<string | null>(null);
+  const [downloadingBatchId, setDownloadingBatchId] = useState<string | null>(null);
+  const [expandedHistoryGroup, setExpandedHistoryGroup] = useState<string | null>(null);
+  const [expandedHistoryScanId, setExpandedHistoryScanId] = useState<string | null>(null);
+
+  const _downloadBlob = async (url: string, fallbackFilename: string) => {
+    const token = localStorage.getItem("access_token");
+    const res = await fetch(url, {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.detail || "Could not generate report.");
+    }
+    const blob = await res.blob();
+    const objectUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = objectUrl;
+    link.download = fallbackFilename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(objectUrl);
+  };
+
+  const fetchHistory = useCallback(async () => {
+    setIsLoadingHistory(true);
+    setHistoryError("");
+    try {
+      const token = localStorage.getItem("access_token");
+      const res = await fetch(`${API_BASE_URL}/api/ml/history/batches`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+      if (!res.ok) throw new Error("Could not load scan history.");
+      const data = await res.json();
+      setHistoryItems(data);
+    } catch (error: unknown) {
+      setHistoryError(error instanceof Error ? error.message : "Could not load history.");
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  }, []);
+
+  const handleOpenHistory = () => {
+    setShowHistoryModal(true);
+    setExpandedHistoryGroup(null);
+    setExpandedHistoryScanId(null);
+    fetchHistory();
+  };
+
+  const handleDownloadScanReport = async (scanId: string) => {
+    setDownloadingHistoryId(scanId);
+    try {
+      await _downloadBlob(`${API_BASE_URL}/api/ml/export/pdf/${scanId}`, `scan_report_${scanId}.pdf`);
+    } catch (error: unknown) {
+      setHistoryError(error instanceof Error ? error.message : "Could not download report.");
+    } finally {
+      setDownloadingHistoryId(null);
+    }
+  };
+
+  const handleDownloadBatchReport = async (batchId: string, reportTitle: string = "batch_sustainability_report") => {
+    setDownloadingBatchId(batchId);
+    try {
+      await _downloadBlob(
+        `${API_BASE_URL}/api/ml/export/pdf/batch/${batchId}?report_type=${reportTitle}`,
+        `${reportTitle}_${batchId}.pdf`
+      );
+    } catch (error: unknown) {
+      setHistoryError(error instanceof Error ? error.message : "Could not download batch report.");
+    } finally {
+      setDownloadingBatchId(null);
+    }
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     const role = localStorage.getItem("user_role");
@@ -791,12 +902,11 @@ export default function SustainabilityManagerDashboard() {
 
   return (
     <div className="relative flex h-screen bg-neutral-950 font-sans overflow-hidden text-neutral-200">
-      {/* GLOWING ORBS FOR DARK THEME AESTHETIC */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-orange-600/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-amber-600/10 rounded-full blur-3xl pointer-events-none" />
+      {/* SOFT CENTER ORANGE GLOW ACCENT */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[650px] bg-orange-500/15 rounded-full blur-[160px] pointer-events-none flex items-center justify-center z-0" />
 
       {/* SIDEBAR */}
-      <div className="w-64 bg-black text-white flex flex-col shadow-xl z-10 border-r border-white/5 flex-shrink-0">
+      <div className="w-64 bg-black text-white flex flex-col shadow-xl z-40 relative border-r border-white/5 flex-shrink-0">
         <div className="p-6 flex items-center gap-3 border-b border-white/5">
           <div className="p-2 bg-orange-500 rounded-lg shadow-md shadow-orange-900/30">
             <Recycle className="w-6 h-6 text-white" />
@@ -830,7 +940,7 @@ export default function SustainabilityManagerDashboard() {
           })}
         </nav>
 
-        <div className="p-4 border-t border-white/5 space-y-2">
+        <div className="p-4 border-t border-white/5 space-y-2 relative z-50">
           <button
             onClick={() => downloadReport("pdf")}
             disabled={isExporting}
@@ -839,6 +949,7 @@ export default function SustainabilityManagerDashboard() {
             <FileDown className="w-4 h-4 text-orange-400" />
             <span>Export ESG Report (PDF)</span>
           </button>
+          <NotificationIconToggle />
           <ThemeToggle variant="sidebar" />
           <button
             onClick={handleLogout}
@@ -903,36 +1014,42 @@ export default function SustainabilityManagerDashboard() {
           {activeTab === "sustainability-metrics" && (
             <div className="space-y-6 animate-in fade-in duration-300">
               
-              {/* Top Navigation Mode Switcher: AI Upload vs Platform Batch Linking */}
-              <div className="flex items-center justify-between bg-neutral-900 border border-white/5 p-2 rounded-2xl">
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setTab1Mode("upload")}
-                    className={`px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${
-                      tab1Mode === "upload"
-                        ? "bg-orange-600 text-white shadow-sm shadow-orange-900/20"
-                        : "text-neutral-400 hover:text-neutral-200"
-                    }`}
-                  >
-                    <UploadCloud className="w-4 h-4" /> AI Upload & Intelligence Engine
-                  </button>
-                  <button
-                    onClick={() => {
-                      setTab1Mode("browse-batches");
-                      fetchPlatformBatches();
-                    }}
-                    className={`px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${
-                      tab1Mode === "browse-batches"
-                        ? "bg-orange-600 text-white shadow-sm shadow-orange-900/20"
-                        : "text-neutral-400 hover:text-neutral-200"
-                    }`}
-                  >
-                    <Boxes className="w-4 h-4" /> Platform Inventory Batches ({platformBatches.length})
-                  </button>
-                </div>
-                <div className="text-xs text-neutral-500 font-medium px-4">
-                  Linked across Recycling Facilitators & Platform Operations
-                </div>
+              {/* TAB 1 SUB-NAVIGATION BAND */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2 bg-neutral-900 border border-white/5 rounded-2xl p-2">
+                <button
+                  onClick={() => setTab1Mode("upload")}
+                  className={`w-full justify-center px-4 py-3 rounded-xl text-xs font-bold flex items-center gap-2 transition-all ${
+                    tab1Mode === "upload"
+                      ? "bg-orange-600 text-white shadow-md shadow-orange-900/30"
+                      : "text-neutral-400 hover:bg-white/5 hover:text-white"
+                  }`}
+                >
+                  <UploadCloud className={`w-4 h-4 ${tab1Mode === "upload" ? "text-white" : "text-orange-400"}`} />
+                  <span>AI Upload & Intelligence Engine</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setTab1Mode("browse-batches");
+                    fetchPlatformBatches();
+                  }}
+                  className={`w-full justify-center px-4 py-3 rounded-xl text-xs font-bold flex items-center gap-2 transition-all ${
+                    tab1Mode === "browse-batches"
+                      ? "bg-orange-600 text-white shadow-md shadow-orange-900/30"
+                      : "text-neutral-400 hover:bg-white/5 hover:text-white"
+                  }`}
+                >
+                  <Boxes className={`w-4 h-4 ${tab1Mode === "browse-batches" ? "text-white" : "text-orange-400"}`} />
+                  <span>Platform Inventory Batches ({platformBatches.length})</span>
+                </button>
+
+                <button
+                  onClick={handleOpenHistory}
+                  className="w-full justify-center px-4 py-3 rounded-xl text-xs font-bold text-neutral-400 hover:text-white hover:bg-white/5 flex items-center gap-2 transition-all"
+                >
+                  <History className="w-4 h-4 text-orange-400" />
+                  <span>Scan History & Reports</span>
+                </button>
               </div>
 
               {/* Circular Economy Overview Pie Charts */}
@@ -1096,7 +1213,7 @@ export default function SustainabilityManagerDashboard() {
                   {/* POST-ANALYSIS RESULTS */}
                   {analysisComplete && (
                     <div className="mt-8 space-y-8 animate-in slide-in-from-bottom-4 duration-500">
-                      <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
                         <div>
                           <h4 className="text-xl font-bold text-white">
                             {batchResult ? "Batch Intelligence Report" : "Sustainability Intelligence Report"}
@@ -1108,9 +1225,39 @@ export default function SustainabilityManagerDashboard() {
                             <p className="text-xs text-neutral-500 font-mono mt-0.5">ID: {batchResult.batch_id}</p>
                           )}
                         </div>
-                        <button onClick={clearUpload} className="text-sm font-bold text-orange-400 bg-orange-500/10 px-4 py-2 rounded-lg hover:bg-orange-500/20">
-                          Analyze New Batch
-                        </button>
+                        <div className="flex items-center gap-3 flex-wrap">
+                          {batchResult?.batch_id && (
+                            <button
+                              onClick={() => handleDownloadBatchReport(batchResult.batch_id!)}
+                              disabled={downloadingBatchId === batchResult.batch_id}
+                              className="flex items-center gap-2 bg-orange-600 hover:bg-orange-500 text-white px-4 py-2 rounded-xl font-bold text-xs shadow-sm transition-all border border-orange-500/20 disabled:opacity-50"
+                            >
+                              {downloadingBatchId === batchResult.batch_id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileDown className="w-3.5 h-3.5" />}
+                              Download Full Batch Report (PDF)
+                            </button>
+                          )}
+                          {singleResult?.scan_id && (
+                            <button
+                              onClick={() => downloadSingleScanReport(singleResult.scan_id!)}
+                              disabled={isExporting}
+                              className="flex items-center gap-2 bg-orange-600 hover:bg-orange-500 text-white px-4 py-2 rounded-xl font-bold text-xs shadow-sm transition-all border border-orange-500/20 disabled:opacity-50"
+                            >
+                              {isExporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileDown className="w-3.5 h-3.5" />}
+                              Download Scan Report (PDF)
+                            </button>
+                          )}
+                          <button
+                            onClick={() => downloadReport("excel", "analysis_summary_report")}
+                            disabled={isExporting}
+                            className="flex items-center gap-2 bg-neutral-900 border border-white/10 text-emerald-400 hover:bg-neutral-800 px-4 py-2 rounded-xl font-bold text-xs shadow-sm transition-all"
+                          >
+                            {isExporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />}
+                            Export Excel
+                          </button>
+                          <button onClick={clearUpload} className="text-xs font-bold text-neutral-300 bg-neutral-900 border border-white/10 px-4 py-2 rounded-xl hover:bg-neutral-800">
+                            Analyze New Batch
+                          </button>
+                        </div>
                       </div>
 
                       {batchResult && batchResult.summary && (
@@ -1149,6 +1296,7 @@ export default function SustainabilityManagerDashboard() {
                           const scores = r.component_scores || { recyclability_score: 0, reuse_score: 0, sustainability_score: 0, material_recovery_score: 0 };
                           const tips = r.waste_reduction_tips || [];
                           const isExpanded = batchResult ? expandedBatchItems.has(idx) : true;
+                          const targetScanId = result.scan_id || (result as { _id?: string })._id;
 
                           return (
                             <div key={idx} className="bg-neutral-950 rounded-2xl border border-white/5 p-6 space-y-5">
@@ -1159,13 +1307,26 @@ export default function SustainabilityManagerDashboard() {
                                   </div>
                                   <div>
                                     <p className="text-sm font-bold text-white">{result.filename}</p>
-                                    {result.scan_id && <p className="text-xs text-neutral-500 font-mono">{result.scan_id}</p>}
+                                    {targetScanId && <p className="text-xs text-neutral-500 font-mono">{targetScanId}</p>}
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-3">
                                   <span className={getCategoryBadge(r.circularity_category)}>
                                     <CheckCircle2 className="w-3.5 h-3.5" /> {r.circularity_category}
                                   </span>
+                                  {targetScanId && (
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        downloadSingleScanReport(targetScanId);
+                                      }}
+                                      disabled={isExporting}
+                                      className="inline-flex items-center gap-1.5 text-xs font-bold text-neutral-300 bg-neutral-900 border border-white/10 hover:bg-neutral-800 px-3 py-1.5 rounded-xl transition-all disabled:opacity-50"
+                                    >
+                                      <FileDown className="w-3.5 h-3.5 text-orange-400" />
+                                      <span>PDF Report</span>
+                                    </button>
+                                  )}
                                   {batchResult && (
                                     <button onClick={() => toggleBatchItem(idx)} className="p-1.5 hover:bg-white/5 rounded-lg transition-colors">
                                       {isExpanded ? <ChevronUp className="w-4 h-4 text-neutral-400"/> : <ChevronDown className="w-4 h-4 text-neutral-400"/>}
@@ -2029,6 +2190,156 @@ export default function SustainabilityManagerDashboard() {
 
         </main>
       </div>
+
+      {/* SCAN HISTORY & REPORTS MODAL */}
+      {showHistoryModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-neutral-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] overflow-hidden flex flex-col border border-white/10">
+            <div className="flex items-center justify-between p-6 border-b border-white/5 bg-neutral-950">
+              <div>
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  <History className="w-5 h-5 text-orange-400" /> Scan History & Reports
+                </h3>
+                <p className="text-sm text-neutral-400">Review past sustainability AI analyses, grouped by batch, and download reports.</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => downloadReport("pdf", "sustainability_waste_classification_report")}
+                  disabled={isExporting || historyItems.length === 0}
+                  className="flex items-center gap-1.5 text-xs font-bold text-white bg-orange-600 hover:bg-orange-500 px-3 py-1.5 rounded-xl transition-colors disabled:opacity-50 shadow-sm"
+                >
+                  {isExporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileDown className="w-3.5 h-3.5" />}
+                  Waste Report (PDF)
+                </button>
+                <button
+                  onClick={() => downloadReport("excel", "sustainability_waste_classification_report")}
+                  disabled={isExporting || historyItems.length === 0}
+                  className="flex items-center gap-1.5 text-xs font-bold text-emerald-400 bg-neutral-900 border border-white/10 hover:bg-neutral-800 px-3 py-1.5 rounded-xl transition-colors disabled:opacity-50 shadow-sm"
+                >
+                  {isExporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />}
+                  Excel Summary
+                </button>
+                <button onClick={() => setShowHistoryModal(false)} className="text-neutral-400 hover:text-white p-1 rounded-lg">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-y-auto p-6 space-y-3">
+              {isLoadingHistory ? (
+                <div className="py-16 text-center text-neutral-400 font-bold">
+                  <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-orange-400" />
+                  Loading scan history...
+                </div>
+              ) : historyError ? (
+                <div className="py-16 text-center text-red-400 font-bold">{historyError}</div>
+              ) : historyItems.length === 0 ? (
+                <div className="py-16 text-center text-neutral-500 font-semibold">No scan history found. Run an AI analysis to see it recorded here.</div>
+              ) : (
+                historyItems.map((group) => {
+                  const groupKey = group.batch_id ?? `single-${group.scans[0]?._id}`;
+                  const isGroupExpanded = expandedHistoryGroup === groupKey;
+
+                  return (
+                    <div key={groupKey} className="border border-white/5 rounded-2xl overflow-hidden bg-neutral-950/40">
+                      <div
+                        onClick={() => setExpandedHistoryGroup(isGroupExpanded ? null : groupKey)}
+                        className={`p-4 flex flex-col sm:flex-row sm:items-center gap-3 cursor-pointer transition-colors ${isGroupExpanded ? "bg-white/5" : "hover:bg-white/5"}`}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-white text-sm truncate">
+                            {group.is_batch
+                              ? `Batch: ${group.batch_meta?.label || group.batch_id}`
+                              : (group.scans[0]?.filename ?? "Sustainability Scan")}
+                          </p>
+                          <p className="text-xs font-medium text-neutral-400 mt-1">
+                            {group.count} scan{group.count !== 1 ? "s" : ""} &middot; {group.dominant_material} &middot;{" "}
+                            {group.latest_created_at ? new Date(group.latest_created_at * 1000).toLocaleString() : "—"}
+                          </p>
+                        </div>
+                        <div className="flex-shrink-0 flex items-center gap-3">
+                          <span className="text-xs font-bold px-2.5 py-1 rounded-full border border-orange-500/20 bg-orange-500/10 text-orange-400">
+                            Avg {group.average_circularity_score}
+                          </span>
+                          {group.is_batch && group.batch_id && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleDownloadBatchReport(group.batch_id as string); }}
+                              disabled={downloadingBatchId === group.batch_id}
+                              className="inline-flex items-center gap-1.5 text-xs font-bold text-neutral-200 bg-neutral-800 hover:bg-neutral-700 px-3 py-1.5 rounded-lg border border-white/5 disabled:opacity-50"
+                            >
+                              {downloadingBatchId === group.batch_id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileDown className="w-3.5 h-3.5 text-orange-400" />}
+                              Batch Report (PDF)
+                            </button>
+                          )}
+                          {isGroupExpanded ? <ChevronUp className="w-5 h-5 text-neutral-500" /> : <ChevronDown className="w-5 h-5 text-neutral-500" />}
+                        </div>
+                      </div>
+
+                      {isGroupExpanded && (
+                        <div className="divide-y divide-white/5 bg-black/30 border-t border-white/5">
+                          {group.scans.map((scan) => {
+                            const isScanExpanded = expandedHistoryScanId === scan._id;
+                            return (
+                              <div key={scan._id}>
+                                <div
+                                  onClick={() => setExpandedHistoryScanId(isScanExpanded ? null : scan._id)}
+                                  className={`px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3 cursor-pointer transition-colors ${isScanExpanded ? "bg-white/5" : "hover:bg-white/5"}`}
+                                >
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-semibold text-white text-sm truncate">{scan.filename}</p>
+                                    <p className="text-xs text-neutral-400 mt-0.5">
+                                      {scan.analysis.material_type?.label ?? "—"} &middot; {scan.analysis.waste_status?.label ?? "—"} &middot;{" "}
+                                      {new Date(scan.created_at * 1000).toLocaleString()}
+                                    </p>
+                                  </div>
+                                  <div className="flex-shrink-0 flex items-center gap-3">
+                                    <span className="text-xs font-bold px-2 py-0.5 bg-orange-500/10 text-orange-400 rounded border border-orange-500/20">
+                                      {scan.recyclability.circularity_score}/100
+                                    </span>
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); handleDownloadScanReport(scan._id); }}
+                                      disabled={downloadingHistoryId === scan._id}
+                                      className="inline-flex items-center gap-1 text-xs font-bold text-neutral-200 bg-neutral-800 hover:bg-neutral-700 px-3 py-1.5 rounded-lg border border-white/5 disabled:opacity-50"
+                                    >
+                                      {downloadingHistoryId === scan._id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileDown className="w-3.5 h-3.5 text-orange-400" />}
+                                      PDF
+                                    </button>
+                                    {isScanExpanded ? <ChevronUp className="w-4 h-4 text-neutral-500" /> : <ChevronDown className="w-4 h-4 text-neutral-500" />}
+                                  </div>
+                                </div>
+
+                                {isScanExpanded && (
+                                  <div className="p-5 bg-black/40 border-t border-white/5 text-xs space-y-3">
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                      <div className="p-3 bg-neutral-900 rounded-xl border border-white/5">
+                                        <span className="text-neutral-500 block text-[10px]">Garment / Type</span>
+                                        <span className="font-bold text-white text-sm">{scan.analysis.garment_type?.label || "Scrap / Fabric"}</span>
+                                      </div>
+                                      <div className="p-3 bg-neutral-900 rounded-xl border border-white/5">
+                                        <span className="text-neutral-500 block text-[10px]">Material Composition</span>
+                                        <span className="font-bold text-orange-400 text-sm">{scan.analysis.material_type?.label || "Mixed"}</span>
+                                      </div>
+                                      <div className="p-3 bg-neutral-900 rounded-xl border border-white/5">
+                                        <span className="text-neutral-500 block text-[10px]">Condition Grade</span>
+                                        <span className="font-bold text-emerald-400 text-sm">{scan.analysis.waste_status?.label || "Recyclable"}</span>
+                                      </div>
+                                    </div>
+                                    <p className="text-neutral-400 text-xs">{scan.recyclability.recommended_recycling_option}</p>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

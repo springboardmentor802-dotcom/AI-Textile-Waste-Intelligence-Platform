@@ -49,7 +49,7 @@ async def _fetch_scans_with_batch_weight(
     all_batches = [b async for b in waste_batches_collection.find(batch_query)]
     scanned_batch_ids = {str(doc.get("batch_id")) for doc in docs if doc.get("batch_id")}
 
-    from ml_engine.recyclability_engine import assess_recyclability
+    from recyclability_engine import assess_recyclability
 
     for bdoc in all_batches:
         b_id_str = str(bdoc["_id"])
@@ -98,7 +98,7 @@ async def get_batch_sustainability_assessment(
     from bson import ObjectId
     from bson.errors import InvalidId
     from fastapi import HTTPException
-    from ml_engine.recyclability_engine import assess_recyclability, _category_for_score
+    from recyclability_engine import assess_recyclability, _category_for_score
     from sustainability.impact_calculator import calculate_item_impact
 
     resolved_id = None

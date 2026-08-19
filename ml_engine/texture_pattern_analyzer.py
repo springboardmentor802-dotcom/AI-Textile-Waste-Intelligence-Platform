@@ -13,6 +13,8 @@ N_ORIENTATION_BINS = 18
 def _to_gray(image_bytes: bytes) -> np.ndarray:
     image_np = np.frombuffer(image_bytes, np.uint8)
     img = cv2.imdecode(image_np, cv2.IMREAD_COLOR)
+    if img is None:
+        return np.zeros((256, 256), dtype=np.uint8)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     return cv2.resize(gray, (256, 256), interpolation=cv2.INTER_AREA)
 

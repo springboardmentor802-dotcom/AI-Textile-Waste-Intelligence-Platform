@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import API from "../services/api";
 import "./Dashboard.css";
 
@@ -7,16 +6,6 @@ const MATERIAL_CHOICES = ["Cotton", "Polyester", "Silk", "Wool", "Denim"];
 const CONDITION_CHOICES = [
     "New Surplus", "Lightly Used", "Worn", "Damaged", "Contaminated",
 ];
-
-// Maps the dashboard's inventory condition labels to the simple
-// keywords the backend's scoring/categorization logic understands.
-const CONDITION_TO_BACKEND = {
-    "New Surplus": "excellent",
-    "Lightly Used": "good",
-    "Worn": "fair",
-    "Damaged": "damaged",
-    "Contaminated": "damaged",
-};
 const STATUS_CHOICES = [
     "Registered", "Collected", "In Processing", "Processed",
 ];
@@ -27,13 +16,14 @@ function Dashboard() {
     const [prediction, setPrediction] = useState(null);
     const [predicting, setPredicting] = useState(false);
     const [downloadingReport, setDownloadingReport] = useState(false);
-    const [predictCondition, setPredictCondition] = useState("Good");
     const [batchFiles, setBatchFiles] = useState([]);
     const [batchProcessing, setBatchProcessing] = useState(false);
-    const [batchResults, setBatchResults] = useState([]);
     const [textiles, setTextiles] = useState([]);
     const [summary, setSummary] = useState(null);
     const [role, setRole] = useState(null);
+    const [notifications, setNotifications] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const [showNotifDropdown, setShowNotifDropdown] = useState(false);
     const [form, setForm] = useState({
         material_type: MATERIAL_CHOICES[0],
         quantity: "",
@@ -68,13 +58,34 @@ function Dashboard() {
             .catch((error) => console.error("Error fetching summary:", error));
     };
 
+    const loadNotifications = () => {
+        API.get("notifications/")
+            .then((response) => {
+                setNotifications(response.data);
+                setUnreadCount(response.data.filter((n) => !n.is_read).length);
+            })
+            .catch((error) => console.error("Error fetching notifications:", error));
+    };
+
     useEffect(() => {
         loadTextiles();
         loadSummary();
+        loadNotifications();
         API.get("me/")
             .then((response) => setRole(response.data.role))
             .catch((error) => console.error("Error fetching profile:", error));
     }, []);
+
+    const markNotificationRead = (id) => {
+        API.patch(`notifications/${id}/`)
+            .then(() => {
+                setNotifications((prev) =>
+                    prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
+                );
+                setUnreadCount((prev) => Math.max(0, prev - 1));
+            })
+            .catch((error) => console.error("Error marking notification read:", error));
+    };
 
     const handleImage = (e) => {
         const file = e.target.files[0];
@@ -89,31 +100,34 @@ function Dashboard() {
             alert("Please choose an image first.");
             return;
         }
+        const condition = prompt(
+            "Enter condition (e.g. good, fair, damaged):",
+            "good"
+        );
+        if (!condition) return;
 
         setPredicting(true);
         setPrediction(null);
 
-        const formData = new FormData();
-        formData.append("image", imageFile);
-        formData.append("condition", CONDITION_TO_BACKEND[predictCondition]);
-
         try {
-            // waste-report/ runs all four engines together: image analysis,
-            // material classification, waste categorization, and
-            // recyclability assessment -- so Predict now shows everything
-            // in one go, including the recycle/reuse recommendation.
+            const formData = new FormData();
+            formData.append("image", imageFile);
+            formData.append("condition", condition);
+
             const response = await API.post("waste-report/", formData, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
 
+            const data = response.data;
+
             setPrediction({
-                fabric_type: response.data.material_classification.predicted_fiber_type,
-                confidence: response.data.material_classification.confidence,
-                waste_category: response.data.waste_categorization.waste_category,
-                waste_reason: response.data.waste_categorization.reason,
-                circularity_score: response.data.recyclability_assessment.circularity_score,
-                circularity_category: response.data.recyclability_assessment.circularity_category,
-                image_analysis: response.data.image_analysis,
+                fabric_type: data.material_classification?.predicted_fiber_type,
+                confidence: data.material_classification?.confidence,
+                image_analysis: data.image_analysis,
+                waste_category: data.waste_category,
+                waste_reason: data.waste_reason,
+                recyclability_score: data.recyclability_score,
+                circularity_category: data.circularity_category,
             });
         } catch (error) {
             console.error("Prediction failed:", error);
@@ -128,11 +142,16 @@ function Dashboard() {
             alert("Please choose an image first.");
             return;
         }
+        const condition = prompt(
+            "Enter condition (e.g. good, fair, damaged):",
+            "good"
+        );
+        if (!condition) return;
 
         setDownloadingReport(true);
         const formData = new FormData();
         formData.append("image", imageFile);
-        formData.append("condition", CONDITION_TO_BACKEND[predictCondition]);
+        formData.append("condition", condition);
 
         try {
             const response = await API.post("waste-report-pdf/", formData, {
@@ -166,47 +185,24 @@ function Dashboard() {
             alert("Please choose one or more images first.");
             return;
         }
+        const condition = prompt(
+            "Enter condition to apply to ALL images (e.g. good, fair, damaged):",
+            "good"
+        );
+        if (!condition) return;
 
         setBatchProcessing(true);
-        setBatchResults([]);
+        const formData = new FormData();
+        batchFiles.forEach((file) => formData.append("images", file));
+        formData.append("condition", condition);
 
         try {
-            // Fetch per-item results so we can show a live table in the UI,
-            // matching the same data the PDF download will contain.
-            const perItemResults = await Promise.all(
-                batchFiles.map(async (file) => {
-                    const singleFormData = new FormData();
-                    singleFormData.append("image", file);
-                    singleFormData.append("condition", CONDITION_TO_BACKEND[predictCondition]);
-
-                    const response = await API.post("waste-report/", singleFormData, {
-                        headers: { "Content-Type": "multipart/form-data" },
-                    });
-
-                    return {
-                        filename: file.name,
-                        preview: URL.createObjectURL(file),
-                        fabric_type: response.data.material_classification.predicted_fiber_type,
-                        confidence: response.data.material_classification.confidence,
-                        waste_category: response.data.waste_categorization.waste_category,
-                        waste_reason: response.data.waste_categorization.reason,
-                        circularity_score: response.data.recyclability_assessment.circularity_score,
-                    };
-                })
-            );
-            setBatchResults(perItemResults);
-
-            // Now request the combined, downloadable PDF for all images.
-            const pdfFormData = new FormData();
-            batchFiles.forEach((file) => pdfFormData.append("images", file));
-            pdfFormData.append("condition", CONDITION_TO_BACKEND[predictCondition]);
-
-            const pdfResponse = await API.post("batch-waste-report-pdf/", pdfFormData, {
+            const response = await API.post("batch-waste-report-pdf/", formData, {
                 headers: { "Content-Type": "multipart/form-data" },
                 responseType: "blob",
             });
 
-            const url = window.URL.createObjectURL(new Blob([pdfResponse.data]));
+            const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement("a");
             link.href = url;
             link.setAttribute("download", "batch_waste_report.pdf");
@@ -220,15 +216,6 @@ function Dashboard() {
         } finally {
             setBatchProcessing(false);
         }
-    };
-
-    const recommendationTone = (category) => {
-        if (!category) return "neutral";
-        const lower = category.toLowerCase();
-        if (lower.includes("hazardous")) return "danger";
-        if (lower.includes("reusable") || lower.includes("recyclable")) return "good";
-        if (lower.includes("compostable") || lower.includes("upcyclable")) return "warn";
-        return "neutral";
     };
 
     const canManageWaste =
@@ -298,17 +285,51 @@ function Dashboard() {
     return (
         <div className="dash-page">
             <div className="dash-container">
-                <div className="dash-header-row">
-                    <div>
-                        <h1 className="dash-title">Textile waste dashboard</h1>
-                        <p className="dash-subtitle">
-                            Classify incoming waste and manage your inventory.
-                        </p>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <h1 className="dash-title">Textile waste dashboard</h1>
+
+                    <div className="notif-bell-wrapper" style={{ position: "relative", display: "inline-block" }}>
+                        <button
+                            className="btn-primary"
+                            onClick={() => setShowNotifDropdown(!showNotifDropdown)}
+                        >
+                            Notifications {unreadCount > 0 && <span className="notif-badge">({unreadCount})</span>}
+                        </button>
+                        {showNotifDropdown && (
+                            <div style={{
+                                position: "absolute", top: "100%", right: 0, background: "#fff",
+                                border: "1px solid #ddd", borderRadius: "8px", width: "320px",
+                                maxHeight: "360px", overflowY: "auto", zIndex: 10, padding: "0.5rem",
+                                boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+                            }}>
+                                {notifications.length === 0 && (
+                                    <div style={{ padding: "0.75rem", color: "#888" }}>No notifications yet.</div>
+                                )}
+                                {notifications.map((n) => (
+                                    <div
+                                        key={n.id}
+                                        onClick={() => markNotificationRead(n.id)}
+                                        style={{
+                                            padding: "0.6rem", borderBottom: "1px solid #eee",
+                                            cursor: "pointer", background: n.is_read ? "#fff" : "#f0f7ff",
+                                        }}
+                                    >
+                                        <div style={{ fontWeight: n.is_read ? "normal" : "bold", fontSize: "0.9rem" }}>
+                                            {n.message}
+                                        </div>
+                                        <div style={{ fontSize: "0.75rem", color: "#888" }}>
+                                            {new Date(n.created_at).toLocaleString()}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
-                    <Link to="/sustainability" className="btn-primary">
-                        View Sustainability Dashboard
-                    </Link>
                 </div>
+
+                <p className="dash-subtitle">
+                    Classify incoming waste and manage your inventory.
+                </p>
 
                 <div className="dash-card">
                     <h3>Image analysis</h3>
@@ -325,114 +346,53 @@ function Dashboard() {
                         {image && (
                             <img src={image} alt="Preview" className="preview-img" />
                         )}
-                        <select
-                            className="condition-select"
-                            value={predictCondition}
-                            onChange={(e) => setPredictCondition(e.target.value)}
-                        >
-                            {CONDITION_CHOICES.map((c) => (
-                                <option key={c} value={c}>{c}</option>
-                            ))}
-                        </select>
                         <button
                             className="btn-primary"
                             onClick={handlePredict}
                             disabled={predicting}
                         >
-                            {predicting ? "Analyzing…" : "Predict"}
+                            {predicting ? "Analyzing..." : "Predict"}
                         </button>
                         <button
                             className="btn-primary"
                             onClick={handleDownloadReport}
                             disabled={downloadingReport}
                         >
-                            {downloadingReport ? "Generating…" : "Download Report (PDF)"}
+                            {downloadingReport ? "Generating..." : "Download Report (PDF)"}
                         </button>
                     </div>
 
                     {prediction && (
-                        <div className="report-panel">
-                            <div className="report-panel-header">
-                                <h4>AI Analysis Report</h4>
-                                <span className="status-pill status-pill-done">Completed</span>
-                            </div>
-
-                            <div className="report-hero">
-                                {image && (
-                                    <img src={image} alt="Analyzed fabric" className="report-hero-img" />
-                                )}
-                                <div className="report-hero-info">
-                                    <span className="report-hero-label">Detected Material</span>
-                                    <span className="report-hero-value">
-                                        {prediction.fabric_type}
-                                    </span>
-                                    <span className="report-hero-sub">
-                                        Confidence {prediction.confidence}%
-                                    </span>
-                                </div>
-                            </div>
-
-                            <h4 className="report-section-title">Material Intelligence</h4>
-                            <div className="report-card-grid">
-                                <div className="report-mini-card">
-                                    <span className="report-mini-label">Fabric Type</span>
-                                    <span className="report-mini-value">{prediction.fabric_type}</span>
-                                </div>
-                                <div className="report-mini-card">
-                                    <span className="report-mini-label">Confidence</span>
-                                    <span className="report-mini-value">{prediction.confidence}%</span>
-                                </div>
-                                <div className="report-mini-card">
-                                    <span className="report-mini-label">Texture</span>
-                                    <span className="report-mini-value">
-                                        {prediction.image_analysis?.texture_analysis?.texture_complexity}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <h4 className="report-section-title">Textile Condition Assessment</h4>
-                            <div className="report-card-grid">
-                                <div className="report-mini-card">
-                                    <span className="report-mini-label">Contamination</span>
-                                    <span className="report-mini-value">
-                                        {prediction.image_analysis?.damage_contamination_check?.contamination_suspected
-                                            ? "Suspected"
-                                            : "None Detected"}
-                                    </span>
-                                </div>
-                                <div className="report-mini-card">
-                                    <span className="report-mini-label">Brightness</span>
-                                    <span className="report-mini-value">
-                                        {prediction.image_analysis?.brightness_analysis?.brightness_level}
-                                    </span>
-                                </div>
-                                <div className="report-mini-card">
-                                    <span className="report-mini-label">Condition Used</span>
-                                    <span className="report-mini-value">{predictCondition}</span>
-                                </div>
-                            </div>
-
-                            <div className={`report-recommendation report-rec-${recommendationTone(prediction.waste_category)}`}>
-                                <span className="report-hero-label">Circularity Recommendation</span>
-                                <span className="report-recommendation-value">
-                                    {prediction.waste_category}
+                        <div className="prediction-result">
+                            <div className="fabric-name-banner">
+                                <span className="fabric-name-label">Predicted Fabric</span>
+                                <span className="fabric-name-value">
+                                    {prediction.fabric_type}
                                 </span>
-                                <span className="report-hero-sub">{prediction.waste_reason}</span>
+                                <span className="fabric-name-confidence">
+                                    {prediction.confidence}% confidence
+                                </span>
                             </div>
 
-                            <h4 className="report-section-title">Recyclability</h4>
-                            <div className="report-card-grid">
-                                <div className="report-mini-card">
-                                    <span className="report-mini-label">Circularity Index</span>
-                                    <span className="report-mini-value report-mini-value-accent">
-                                        {prediction.circularity_score}%
-                                    </span>
-                                </div>
-                                <div className="report-mini-card">
-                                    <span className="report-mini-label">Category</span>
-                                    <span className="report-mini-value">{prediction.circularity_category}</span>
-                                </div>
-                            </div>
+                            {Object.entries(prediction)
+                                .filter(([key]) => key !== "fabric_type" && key !== "confidence")
+                                .map(([key, value]) => (
+                                    <div key={key} style={{ marginBottom: "0.75rem" }}>
+                                        <h4 style={{ marginBottom: "0.25rem" }}>{key}</h4>
+                                        {typeof value === "object" && value !== null ? (
+                                            Object.entries(value).map(([subKey, subValue]) => (
+                                                <div className="breakdown-row" key={subKey}>
+                                                    <span>{subKey}</span>
+                                                    <span>{String(subValue)}</span>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="breakdown-row">
+                                                <span>{String(value)}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
                         </div>
                     )}
                 </div>
@@ -465,64 +425,10 @@ function Dashboard() {
                             disabled={batchProcessing}
                         >
                             {batchProcessing
-                                ? "Processing batch…"
+                                ? "Processing batch..."
                                 : "Analyze Batch & Download PDF"}
                         </button>
                     </div>
-
-                    {batchResults.length > 0 && (
-                        <div className="batch-results">
-                            <div className="batch-stats-row">
-                                <div className="report-mini-card">
-                                    <span className="report-mini-label">Total Samples</span>
-                                    <span className="report-mini-value">{batchResults.length}</span>
-                                </div>
-                                <div className="report-mini-card">
-                                    <span className="report-mini-label">Reusable Items</span>
-                                    <span className="report-mini-value">
-                                        {batchResults.filter((r) => r.waste_category === "Reusable").length}
-                                    </span>
-                                </div>
-                                <div className="report-mini-card">
-                                    <span className="report-mini-label">Recyclable Items</span>
-                                    <span className="report-mini-value">
-                                        {batchResults.filter((r) => r.waste_category === "Recyclable").length}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <table className="batch-table">
-                                <thead>
-                                    <tr>
-                                        <th>Image</th>
-                                        <th>Material</th>
-                                        <th>Confidence</th>
-                                        <th>Score</th>
-                                        <th>Decision</th>
-                                        <th>Reason</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {batchResults.map((row, i) => (
-                                        <tr key={i}>
-                                            <td>
-                                                <img src={row.preview} alt={row.filename} className="batch-table-thumb" />
-                                            </td>
-                                            <td style={{ textTransform: "capitalize" }}>{row.fabric_type}</td>
-                                            <td>{row.confidence}%</td>
-                                            <td>{row.circularity_score}</td>
-                                            <td>
-                                                <span className={`decision-pill decision-${recommendationTone(row.waste_category)}`}>
-                                                    {row.waste_category}
-                                                </span>
-                                            </td>
-                                            <td className="batch-table-reason">{row.waste_reason}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
                 </div>
 
                 {summary && (
@@ -620,7 +526,7 @@ function Dashboard() {
                                 />
                             </div>
                             <button className="btn-primary" type="submit" disabled={submitting}>
-                                {submitting ? "Saving…" : "Add waste batch"}
+                                {submitting ? "Saving..." : "Add waste batch"}
                             </button>
                         </form>
                     </div>
@@ -644,7 +550,7 @@ function Dashboard() {
                         </select>
                         <input
                             type="text"
-                            placeholder="Filter by source…"
+                            placeholder="Filter by source..."
                             value={filters.source}
                             onChange={updateFilter("source")}
                         />

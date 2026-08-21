@@ -11,8 +11,13 @@ from .views import (
     RecyclabilityAssessmentView,
     WasteReportView,
     WasteReportPDFView,
+    WasteReportExcelView,
+    InventoryExcelExportView,
     BatchWasteReportPDFView,
     AnalyzeAndLinkToBatchView,
+    NotificationListView,
+    NotificationMarkReadView,
+    NotificationUnreadCountView,
 )
 
 router = DefaultRouter()
@@ -55,6 +60,14 @@ urlpatterns = [
     path('waste-report-pdf/', WasteReportPDFView.as_view(),
          name='waste-report-pdf'),
 
+    # Downloadable Excel version of the combined report
+    path('waste-report-excel/', WasteReportExcelView.as_view(),
+         name='waste-report-excel'),
+
+    # Full inventory export as Excel
+    path('inventory-export-excel/', InventoryExcelExportView.as_view(),
+         name='inventory-export-excel'),
+
     # Batch analysis: multiple images -> one combined PDF
     path('batch-waste-report-pdf/', BatchWasteReportPDFView.as_view(),
          name='batch-waste-report-pdf'),
@@ -62,4 +75,12 @@ urlpatterns = [
     # Milestone 3 link: analyze an image and save results onto a specific batch
     path('analyze-and-link/<str:batch_id>/', AnalyzeAndLinkToBatchView.as_view(),
          name='analyze-and-link'),
+
+    # Notifications (Milestone 3/4)
+    path('notifications/', NotificationListView.as_view(),
+         name='notification-list'),
+    path('notifications/<int:pk>/', NotificationMarkReadView.as_view(),
+         name='notification-mark-read'),
+    path('notifications/unread-count/', NotificationUnreadCountView.as_view(),
+         name='notification-unread-count'),
 ]

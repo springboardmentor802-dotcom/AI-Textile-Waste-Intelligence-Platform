@@ -148,3 +148,52 @@ def material_recovery(request):
         })
 
     return Response({"material_recovery": result})
+import openpyxl
+from openpyxl.utils import get_column_letter
+from django.http import HttpResponse
+
+
+@api_view(['GET'])
+def export_sustainability_excel(request):
+    """
+    Exports the full sustainability impact data (per-batch) as a
+    downloadable Excel file. Fulfills the README's Excel export
+    requirement under Reports & Export System.
+    """
+    records = ImpactRecord.objects.select_related('waste_batch').all()
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Sustainability Report"
+
+    headers = [
+        "Batch ID", "Material", "Quantity (kg)", "Status",
+        "Circularity Score", "CO2 Saved (kg)", "Water Saved (L)",
+        "Recommended Strategy", "Calculated At",
+    ]
+    ws.append(headers)
+
+    for record in records:
+        batch = record.waste_batch
+        ws.append([
+            batch.batch_id,
+            batch.material_type,
+            batch.quantity,
+            batch.status,
+            record.circularity_score,
+            record.co2_saved_kg,
+            record.water_saved_liters,
+            record.recommended_strategy,
+            record.calculated_at.strftime("%Y-%m-%d %H:%M"),
+        ])
+
+    # Auto-width columns for readability
+    for i, header in enumerate(headers, start=1):
+        ws.column_dimensions[get_column_letter(i)].width = max(len(header) + 2, 15)
+
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response['Content-Disposition'] = 'attachment; filename="sustainability_report.xlsx"'
+    wb.save(response)
+    return response

@@ -1,4 +1,4 @@
-from django.db.models.signals import post_save
+﻿from django.db.models.signals import post_save
 from django.dispatch import receiver
 from inventory.models import TextileWaste
 from .models import ImpactRecord
@@ -8,7 +8,6 @@ from .services import calculate_environmental_impact, recommend_strategy
 @receiver(post_save, sender=TextileWaste)
 def update_impact_record(sender, instance, **kwargs):
     contamination = instance.condition == 'Contaminated'
-
     if instance.circularity_score is not None:
         circularity_score = instance.circularity_score
     else:
@@ -17,7 +16,6 @@ def update_impact_record(sender, instance, **kwargs):
     impact = calculate_environmental_impact(
         instance.material_type, instance.quantity, circularity_score
     )
-
     strategy = recommend_strategy(
         circularity_score, instance.condition, contamination)
 

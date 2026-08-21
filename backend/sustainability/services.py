@@ -1,62 +1,56 @@
+﻿"""
+Environmental impact calculation + recommendation logic used by the
+post_save signal on TextileWaste, to automatically populate an
+ImpactRecord whenever a batch is created or updated.
+"""
 from .constants import EMISSION_FACTORS_KG_CO2_PER_KG, WATER_SAVINGS_LITERS_PER_KG
 
-CONDITION_SCORES = {
-    "New Surplus": 1.0,
-    "Lightly Used": 0.85,
-    "Worn": 0.6,
-    "Damaged": 0.35,
-    "Contaminated": 0.1,
-}
+DEFAULT_CO2_FACTOR = 3.0
+DEFAULT_WATER_FACTOR = 500
 
 
-def calculate_circularity_score(material, condition, recyclability_score, reuse_potential, contamination):
+def calculate_environmental_impact(material_type, quantity, circularity_score):
     """
-    Computes an overall circularity score (0-100) for a waste batch.
-    recyclability_score and reuse_potential are expected on a 0-1 scale.
+    Estimates CO2 and water savings for a batch, scaled by its
+    circularity score (higher score = more of the theoretical
+    max savings is actually realized).
     """
-    material_recyclability = recyclability_score
-    material_condition = CONDITION_SCORES.get(condition, 0.5)
-    environmental_benefit = 1 - (0.5 if contamination else 0)
-    processing_feasibility = 0.8 if not contamination else 0.4
-
-    score = (
-        material_recyclability * 0.35 +
-        material_condition * 0.20 +
-        reuse_potential * 0.20 +
-        environmental_benefit * 0.15 +
-        processing_feasibility * 0.10
-    )
-    return round(score * 100, 2)
-
-
-def calculate_environmental_impact(material, quantity_kg, circularity_score):
-    """
-    Computes CO2 and water savings for a single waste batch.
-    circularity_score is 0-100.
-    """
-    factor_scale = circularity_score / 100
-
-    co2_saved = quantity_kg * EMISSION_FACTORS_KG_CO2_PER_KG.get(material, 3.0) * factor_scale
-    water_saved = quantity_kg * WATER_SAVINGS_LITERS_PER_KG.get(material, 500) * factor_scale
-
+    quantity = float(quantity or 0)
+    co2_factor = EMISSION_FACTORS_KG_CO2_PER_KG.get(material_type, DEFAULT_CO2_FACTOR)
+    water_factor = WATER_SAVINGS_LITERS_PER_KG.get(material_type, DEFAULT_WATER_FACTOR)
+    scale = max(0.0, min(float(circularity_score or 0), 100.0)) / 100.0
+    co2_saved_kg = round(quantity * co2_factor * scale, 2)
+    water_saved_liters = round(quantity * water_factor * scale, 2)
     return {
-        "co2_saved_kg": round(co2_saved, 2),
-        "water_saved_liters": round(water_saved, 2),
+        "co2_saved_kg": co2_saved_kg,
+        "water_saved_liters": water_saved_liters,
     }
 
 
 def recommend_strategy(circularity_score, condition, contamination):
     """
-    Rule-based recommendation engine.
+    Threshold-based strategy recommendation driven off the circularity
+    score, with contamination as an override.
+
+    Contamination always wins: contaminated textiles are routed to
+    Chemical Recycling, which can process contaminated material that
+    mechanical recycling or reuse cannot handle.
+
+    Otherwise, thresholds bucket the item by circularity score:
+      >= 70  -> Fabric Reuse / Donation (high enough quality to reuse as-is)
+      >= 50  -> Upcycling
+      >= 30  -> Donation
+      < 30   -> Industrial Recovery
     """
     if contamination:
-        return "Chemical Recycling (requires decontamination)"
-    if circularity_score >= 80:
+        return "Chemical Recycling"
+
+    score = circularity_score or 0
+
+    if score >= 70:
         return "Fabric Reuse / Donation"
-    if circularity_score >= 60:
-        return "Mechanical Recycling"
-    if circularity_score >= 40:
+    if score >= 50:
         return "Upcycling"
-    if condition == "Damaged":
-        return "Fiber Recycling"
+    if score >= 30:
+        return "Donation"
     return "Industrial Recovery"

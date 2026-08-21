@@ -1,33 +1,49 @@
+AI-Textile Waste Intelligence Platform
 # AI Textile Waste Management System
 
 ## Project Overview
 
-The AI Textile Waste Management System is a web-based application developed to manage textile waste efficiently using Artificial Intelligence. The system helps organizations register textile waste, manage inventory, classify textile materials, and support sustainable recycling practices.
+The AI Textile Waste Management System is a web-based application developed to manage textile waste efficiently using Artificial Intelligence. The system helps organizations register textile waste, manage inventory, classify textile materials, assess recyclability, quantify environmental impact, and support sustainable recycling practices.
 
 This project is being developed using Django REST Framework for the backend and React (Vite) for the frontend.
 
-## Technologies Used
+---
 
-### Frontend
+# Technologies Used
+
+## Frontend
 - React.js
 - Vite
 - Axios
 - React Router DOM
-- Bootstrap (UI Framework)
 - Recharts (data visualization)
+- Bootstrap (UI Framework)
 
-### Backend
+## Backend
 - Django
 - Django REST Framework (DRF)
 - Simple JWT Authentication
 - CORS Headers
-- ReportLab (PDF generation)
-- PyTorch / OpenCV (AI engines)
 
-### Database
+## AI / Machine Learning
+- PyTorch (CNN for fiber/material classification)
+- OpenCV (image analysis, texture and contamination detection)
+- Pillow (image handling)
+
+## Reports & Export
+- ReportLab (PDF report generation)
+- openpyxl (Excel report generation)
+
+## Database
 - SQLite
 
-## Project Structure
+## Testing & Deployment
+- Django's built-in test framework (unittest-based)
+- Docker & Docker Compose
+
+---
+
+# Project Structure
 
 ```
 AI-TextileWaste/
@@ -35,22 +51,49 @@ AI-TextileWaste/
 ├── backend/
 │   ├── config/
 │   ├── inventory/
+│   │   ├── services/
+│   │   │   ├── image_analysis_service.py
+│   │   │   ├── material_classification_service.py
+│   │   │   ├── waste_categorization_service.py
+│   │   │   ├── recyclability_scoring_service.py
+│   │   │   ├── pdf_report_service.py
+│   │   │   ├── excel_report_service.py
+│   │   │   └── fabric_model.pth
+│   │   ├── signals.py
+│   │   ├── permissions.py
+│   │   └── tests.py
 │   ├── sustainability/
+│   │   ├── services.py
+│   │   ├── signals.py
+│   │   ├── models.py
+│   │   └── tests.py
+│   ├── Dockerfile
+│   ├── requirements.txt
 │   ├── db.sqlite3
 │   └── manage.py
 │
-└── frontend/
-    ├── src/
-    │   ├── pages/
-    │   ├── components/
-    │   ├── services/
-    │   └── App.jsx
-    └── package.json
+├── frontend/
+│   ├── src/
+│   │   ├── pages/
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── SustainabilityDashboard.jsx
+│   │   │   ├── Login.jsx
+│   │   │   └── Register.jsx
+│   │   ├── components/
+│   │   ├── services/
+│   │   └── App.jsx
+│   ├── Dockerfile
+│   └── package.json
+│
+└── docs/
+    └── QA_Test_Sheet_Milestone4.xlsx
 ```
 
-## Features Implemented
+---
 
-### Backend Configuration
+# Features Implemented
+
+## Backend Configuration
 - Django project setup
 - Django REST Framework configuration
 - SQLite database configuration
@@ -58,7 +101,7 @@ AI-TextileWaste/
 - JWT Authentication setup
 - REST API development
 
-### Frontend Configuration
+## Frontend Configuration
 - React + Vite setup
 - React Router configuration
 - Axios API integration
@@ -66,10 +109,16 @@ AI-TextileWaste/
 - Registration page
 - Dashboard page
 - Sustainability Dashboard page
+- Image upload and prediction UI
+- Batch image upload UI
+- Downloadable PDF and Excel report buttons
+- In-app notification bell with unread count
 
-### User Authentication
+---
 
-**Completed Features**
+## User Authentication
+
+Completed Features
 - User Registration
 - User Login
 - JWT Authentication
@@ -77,49 +126,244 @@ AI-TextileWaste/
 - Token Generation
 - Token Refresh
 - Password Encryption
+- Role-based access control (Recycling Facility Operator, Sustainability Manager, Textile Manufacturer Administrator)
 
-### Textile Inventory Management
+---
 
-**Implemented**
+## Textile Inventory Management
+
+Implemented
 - TextileWaste Model
 - Textile Inventory REST API
 - Inventory Serializer
 - Inventory ViewSet
 - Dashboard Inventory Display
 - SQLite Database Storage
+- Filtering by material, source, status, and condition
 
-**Current Fields**
+Current Fields
+- Batch ID
 - Material Type
 - Quantity
 - Color
 - Source
+- Condition
+- Status
+- Detected Material (AI-populated)
+- Circularity Score (AI-populated)
+- Waste Category (AI-populated)
+- Collection Date
 - Date Added
+
+---
+
+## AI Textile Image Analysis Engine
+
+Implemented
+- Image upload and processing pipeline
+- Basic image info extraction (dimensions, channels)
+- Color analysis (average RGB values)
+- Brightness analysis (dark / normal / bright classification)
+- Texture analysis using Canny edge detection
+- Contamination / damage detection heuristic
+
+---
+
+## Material Classification Engine
+
+Implemented
+- Custom PyTorch CNN (3 convolutional layers + fully connected layers)
+- Trained on the Annotated Textile Fabric Image Dataset (fiber composition metadata: cotton, polyester, polyamide, elastane, acrylic percentages)
+- Dominant fiber label derived from fiber percentage columns
+- Train/test split performed on available fabric samples
+- **84.94% test accuracy** on held-out images
+- Trained model (`fabric_model.pth`) integrated into the Django backend for live prediction via API
+
+---
+
+## Textile Waste Classification Engine
+
+Implemented
+- Rule-based waste categorization logic
+- Classifies items into 6 categories:
+  - Recyclable
+  - Reusable
+  - Repairable
+  - Upcyclable
+  - Compostable
+  - Hazardous Textile Waste
+- Considers fabric type, condition, and contamination status
+- Returns a human-readable reason alongside each classification
+
+---
+
+## Recyclability Assessment Engine
+
+Implemented
+- Weighted Circularity Score formula:
+  - Material Recyclability — 35%
+  - Material Condition — 20%
+  - Reuse Potential — 20%
+  - Environmental Benefit — 15%
+  - Processing Feasibility — 10%
+- Maps final score to a Circularity Category:
+  - Excellent / High / Moderate / Limited Recovery Potential
+  - Disposal Recommended
+
+---
+
+## Combined Waste Classification Report
+
+Implemented
+- Single endpoint chaining all four engines together (image analysis → material classification → waste categorization → recyclability scoring)
+- JSON report output
+- Downloadable, formatted PDF report output
+- Downloadable Excel report output
+- **Batch analysis**: upload multiple images at once and receive one combined, shareable PDF (summary table + detailed page per item)
+
+---
+
+## Sustainability Intelligence Engine
+
+Implemented
+- Carbon footprint (CO₂) savings estimation per batch and in aggregate
+- Water savings estimation
+- Waste diversion rate calculation (based on processed vs. registered batches)
+- Circular economy analytics (average circularity score across inventory)
+- Sustainability Dashboard with live metric cards, trend charts, and category breakdowns
+
+## Recommendation Engine
+
+Implemented
+- Recycling/reuse strategy recommendations derived from waste category and recyclability score
+- Material recovery suggestions per fabric type
+
+## Environmental Impact Assessment Engine
+
+Implemented
+- CO₂ savings estimation by material type and over time
+- Water savings estimation
+- Landfill/waste diversion analysis
+- Monthly sustainability trend tracking (`/api/sustainability/trends/`)
+
+---
+
+## Notification & Alert System
+
+Implemented
+- `Notification` model with type, message, related batch, read status, and timestamp
+- Automatic notification creation via Django signals when:
+  - A new waste batch is registered
+  - A batch is marked as Processed
+  - A batch achieves a high circularity score
+  - A batch is flagged as Hazardous Textile Waste
+- REST API endpoints:
+  - List notifications for the logged-in user
+  - Mark a notification as read
+  - Get unread notification count
+- Frontend notification bell with dropdown, unread badge, and mark-as-read interaction
+
+---
+
+## Reports & Export System
+
+Implemented
+- Waste classification report — JSON
+- Waste classification report — downloadable PDF
+- Waste classification report — downloadable Excel
+- Batch analysis — combined PDF across multiple images
+- Full inventory export — Excel
+- Sustainability report — downloadable Excel
+
+---
+
+## Testing & QA
+
+Implemented
+- 29 automated tests (Django test framework), covering:
+  - Authentication and registration
+  - Inventory CRUD and filtering
+  - Image analysis, material classification, waste categorization, and recyclability assessment endpoints
+  - Combined report generation (JSON, PDF)
+  - Batch analysis
+  - Notification endpoints
+  - Permission/authorization checks
+- File upload validation (image type and size limits) added after QA bug review:
+  - **TC_IMG_002** — invalid file type previously caused an unhandled server error; now returns a clean 400 validation error
+  - **TC_IMG_003** — oversized file previously caused an unhandled server error; now returns a clean 400 validation error with a 10MB limit
+- Full QA Test Sheet documented as a submitted deliverable: `docs/QA_Test_Sheet_Milestone4.xlsx`
+
+---
+
+## Deployment
+
+Implemented
+- `Dockerfile` for the Django backend
+- `Dockerfile` for the React frontend
+- Local Docker build confirmed working end-to-end
+
+Not yet completed
+- Production deployment to a cloud platform (AWS / Azure)
+- Migration from SQLite to PostgreSQL for production use
+
+---
 
 ## Database
 
-**SQLite Database**
+SQLite Database
 
-Reason for Choosing SQLite:
+Reason for Choosing SQLite
 - Lightweight
 - Easy configuration
 - Built-in Django support
 - No separate database server required
 - Suitable for development and testing
 
-## REST APIs
+---
 
-### Authentication APIs
-- POST `/api/register/`
-- POST `/api/token/`
-- POST `/api/token/refresh/`
+# REST APIs
 
-### Inventory APIs
-- GET `/api/textiles/`
-- POST `/api/textiles/`
-- PUT `/api/textiles/{id}/`
-- DELETE `/api/textiles/{id}/`
+## Authentication APIs
+POST `/api/register/`
+POST `/api/token/`
+POST `/api/token/refresh/`
+GET `/api/me/`
 
-## Project Workflow
+## Inventory APIs
+GET `/api/textiles/`
+POST `/api/textiles/`
+PUT `/api/textiles/{id}/`
+PATCH `/api/textiles/{id}/`
+DELETE `/api/textiles/{id}/`
+GET `/api/inventory-summary/`
+GET `/api/inventory-export-excel/`
+
+## AI / Textile Intelligence APIs
+POST `/api/analyze-image/`
+POST `/api/classify-material/`
+POST `/api/categorize-waste/`
+POST `/api/assess-recyclability/`
+POST `/api/waste-report/`
+POST `/api/waste-report-pdf/`
+POST `/api/waste-report-excel/`
+POST `/api/batch-waste-report-pdf/`
+POST `/api/analyze-and-link/{batch_id}/`
+
+## Sustainability APIs
+GET `/api/sustainability/summary/`
+GET `/api/sustainability/trends/`
+GET `/api/sustainability/category-breakdown/`
+GET `/api/sustainability/material-recovery/`
+GET `/api/sustainability/export-excel/`
+
+## Notification APIs
+GET `/api/notifications/`
+PATCH `/api/notifications/{id}/`
+GET `/api/notifications/unread-count/`
+
+---
+
+# Project Workflow
 
 ```
 User Registration
@@ -134,26 +378,38 @@ JWT Authentication
 Protected Dashboard
         │
         ▼
-Textile Inventory API
+Textile Inventory API ──► SQLite Database
         │
         ▼
-SQLite Database
+Image Upload
         │
         ▼
-AI Analysis & Classification
+Image Analysis Engine (OpenCV)
         │
         ▼
-Sustainability Intelligence Engine
+Material Classification Engine (PyTorch CNN)
         │
         ▼
-Circular Economy Analytics Dashboard
+Waste Categorization Engine (rule-based)
+        │
+        ▼
+Recyclability Assessment Engine (weighted scoring)
+        │
+        ▼
+Combined Report (JSON / PDF / Excel / Batch PDF)
+        │
+        ▼
+Sustainability Engine (CO₂, water, circularity trends)
+        │
+        ▼
+Notification Alerts + Sustainability Dashboard
 ```
 
 ---
 
-## Milestone 1 Progress
+# Milestone Progress
 
-**Completed**
+## Milestone 1 — Completed
 - Project Initialization
 - Frontend Setup
 - Backend Setup
@@ -166,263 +422,121 @@ Circular Economy Analytics Dashboard
 - Textile Inventory APIs
 - Dashboard Integration
 
-**In Progress**
-- Role-Based Access Control
-- Bootstrap UI Framework
-- UI Wireframes
-- Inventory Enhancement
+## Milestone 2 — Completed
+- Textile Image Analysis Engine (color, brightness, texture, contamination)
+- Material Classification Engine (PyTorch CNN, 84.94% test accuracy)
+- Waste Categorization Engine (6-category rule-based classification)
+- Recyclability Assessment Engine (weighted circularity scoring)
+- Combined Waste Classification Report (JSON + PDF)
+- Batch Analysis (multiple images → one combined PDF report)
 
-**Pending**
-- OAuth Login
-- User Profile Management
-- AI Image Analysis
-- Material Classification
-- Waste Classification
-- Recommendation Engine
-- Sustainability Analytics
-- Reports
-- Deployment
+## Milestone 3 — Completed
+- Sustainability Intelligence Engine (CO₂, water, circular economy analytics)
+- Recycling Recommendation Engine
+- Environmental Impact Assessment Engine
+- Sustainability Dashboard with live metric cards and trend charts
+- Aggregation/Summary API
 
----
+## Milestone 4 — Completed
+- Automated testing — 29 tests passing
+- QA bugs found (TC_IMG_002, TC_IMG_003) → fixed → retested → confirmed via automated regression tests
+- QA Test Sheet documented (`docs/QA_Test_Sheet_Milestone4.xlsx`)
+- Excel export — waste reports, full inventory, and sustainability reports
+- Notification & Alert System — backend (model, signals, API) and frontend (bell UI, unread count, mark-as-read)
+- Docker containerization — backend and frontend Dockerfiles, local build confirmed
 
-## Milestone 2 Progress
-
-Milestone 2 focused on turning the Milestone 1 groundwork into a working AI-driven waste intelligence workflow — image-based material detection, waste categorization, recyclability scoring, batch processing, PDF reporting, and a fully functional inventory management dashboard with role-based controls.
-
-**Completed**
-- Role-Based Access Control (Recycling Facility Operator, Sustainability Manager, Textile Manufacturer Administrator)
-- AI Image Analysis Engine
-- Material Classification Engine
-- Waste Categorization Engine
-- Recyclability / Circularity Scoring Engine
-- Single-Image "Predict" Workflow with Full AI Report
-- Downloadable PDF Report (Single Image)
-- Batch Image Analysis (Multiple Images at Once)
-- Combined Batch PDF Report Generation
-- Inventory Summary / Monitoring Dashboard (By Material, By Status)
-- Register New Waste Batch Form (with auto-generated Batch ID)
-- Textile Inventory Table View (filterable by material, status, source)
-- Status Update per Batch (Registered → Collected → In Processing → Processed)
-- Delete Waste Batch
-- status field added to TextileWaste model + migration
-- Updated Serializer, Views, and URLs to support new inventory workflow
-
-**New / Updated Fields on TextileWaste**
-- Material Type
-- Quantity (kg)
-- Color
-- Source
-- Condition (New Surplus, Lightly Used, Worn, Damaged, Contaminated)
-- Status (Registered, Collected, In Processing, Processed)
-- Collection Date
-- Batch ID (auto-generated, e.g. WB-9CC3D5B1)
-- Created By (linked to authenticated user)
-- Date Added
-
-**In Progress**
-- OAuth Login
-- User Profile Management
-- Notification System
-
-**Pending**
-- Deployment
-- Docker Containerization
-- Advanced Reporting
-
-### Milestone 2 — Results & Screenshots
-
-**1. Single Image Analysis — AI Report**
-
-An uploaded fabric image is classified by material type, with confidence score, texture assessment, contamination/brightness checks, and a circularity recommendation — all generated in one "Predict" action.
-
-Example result:
-- Detected Material: Acrylic
-- Confidence: 99.37%
-- Texture: Medium
-- Contamination: Suspected
-- Brightness: Normal
-- Condition Used: Good
-
-**2. Material Intelligence & Recyclability Assessment**
-
-Based on the detected material and condition, the system generates a circularity recommendation along with a recyclability score and category.
-
-Example result:
-- Circularity Recommendation: Hazardous Textile Waste (contamination detected — requires special handling before further processing)
-- Circularity Index: 51.25%
-- Category: Moderate Recovery Potential
-
-**3. Batch Analysis & Inventory Monitoring**
-
-Multiple images can be analyzed together, producing a combined downloadable PDF report. The Inventory Monitoring panel summarizes total batches and quantity, broken down by material type and status.
-
-Example result:
-- Total Batches: 3
-- Total Quantity: 120 kg
-- By Material: Cotton — 100 kg (2), Wool — 20 kg (1)
-- By Status: 100 kg (2), 20 kg (1)
-
-**4. Register New Waste Batch & Textile Inventory Table**
-
-Authorized roles can register new waste batches through a form, and view/manage all registered batches in a filterable inventory table with inline status updates and delete actions.
-
-Example inventory entries:
-
-| Batch ID | Material | Quantity | Color | Source | Condition | Collected | Status |
-|---|---|---|---|---|---|---|---|
-| WB-9CC3D5B1 | Wool | 20 kg | Red | Factory 1 | Damaged | 2026-01-23 | Registered |
-| WB-3937F338 | Cotton | 50 kg | Green | Factory B | Worn | 2026-07-26 | Registered |
+### Milestone 4 — Remaining / Not Yet Completed
+- Production deployment to a cloud platform (AWS / Azure) — currently local Docker build only
+- Migration from SQLite to PostgreSQL for production
+- OAuth2 login (JWT username/password login is implemented; OAuth2 is not)
+- Fully separate role-specific dashboards for all four roles (Recycling Facility Operator, Sustainability Manager, Textile Manufacturer, Administrator) — currently one main Dashboard and one Sustainability Dashboard shared across applicable roles
+- Dedicated security and performance testing phase
 
 ---
 
-## Milestone 3 Progress
+# Installation
 
-Milestone 3 focused on turning Milestone 2's per-batch AI classification into facility-wide sustainability intelligence — environmental impact quantification, rule-based recycling recommendations, and circular economy analytics with a live dashboard.
+## Backend
 
-**Completed**
-- Sustainability Intelligence Engine (CO₂ savings estimation, water savings estimation)
-- Recycling Recommendation Engine (rule-based: Fabric Reuse/Donation, Mechanical Recycling, Chemical Recycling, Upcycling, Industrial Recovery)
-- Environmental Impact Assessment per waste batch
-- Circular Economy Analytics:
-  - Material-wise CO₂/water breakdown
-  - Monthly CO₂ trend analysis
-  - Waste category breakdown (Recyclable, Reusable, Hazardous, etc.)
-  - Material-level recovery rate (Processed vs. total quantity)
-- Auto-calculation via Django signals — every waste batch automatically gets an `ImpactRecord` on save/update
-- Link between Milestone 2's AI pipeline and the database — new `analyze-and-link/<batch_id>/` endpoint saves real material classification, circularity score, and waste category onto each batch
-- Sustainability Dashboard (React + Recharts) — 4 live charts pulling real data
-- Waste diversion rate calculation, validated against real batch status data
-- `STATUS_CHOICES` alignment fix between frontend and backend (Registered, Collected, In Processing, Processed)
-
-**New Backend Components**
-
-`sustainability` Django app:
-- `constants.py` — emission factor (kg CO₂/kg) and water savings (L/kg) reference tables per material type
-- `services.py` — core calculation functions: `calculate_environmental_impact()`, `recommend_strategy()`
-- `models.py` — `ImpactRecord` model (one-to-one with `TextileWaste`)
-- `signals.py` — auto-creates/updates `ImpactRecord` on every `TextileWaste` save
-- `views.py` — aggregation views: `sustainability_summary`, `sustainability_trends`, `category_breakdown`, `material_recovery`
-
-**New / Updated Fields on TextileWaste**
-- `detected_material` (from Milestone 2 AI classification)
-- `circularity_score` (from Milestone 2 recyclability assessment)
-- `waste_category` (from Milestone 2 waste categorization)
-
-**New REST APIs**
-
-Sustainability Analytics:
-- GET `/api/sustainability/summary/`
-- GET `/api/sustainability/trends/`
-- GET `/api/sustainability/category-breakdown/`
-- GET `/api/sustainability/material-recovery/`
-
-AI-to-Inventory Link:
-- POST `/api/analyze-and-link/{batch_id}/`
-
-**Example Result — Sustainability Summary**
-
-```json
-{
-  "total_co2_saved_kg": 213.5,
-  "total_water_saved_liters": 164700.0,
-  "average_circularity_score": 61.0,
-  "total_batches": 4,
-  "processed_batches": 1,
-  "waste_diversion_rate_percent": 25.0
-}
-```
-
-**Example Result — Material Recovery**
-
-```json
-{
-  "material_recovery": [
-    {
-      "material": "Cotton",
-      "total_quantity_kg": 150.0,
-      "processed_quantity_kg": 50.0,
-      "recovery_rate_percent": 33.33
-    },
-    {
-      "material": "Wool",
-      "total_quantity_kg": 20.0,
-      "processed_quantity_kg": 0,
-      "recovery_rate_percent": 0.0
-    }
-  ]
-}
-```
-
-### Sustainability Dashboard
-
-New React page at `/sustainability`, accessible directly from the main dashboard via a "View Sustainability Dashboard" link. Displays:
-
-- **Metric cards**: Total CO₂ Saved, Total Water Saved, Avg. Circularity Score, Waste Diversion Rate, Total Batches, Processed Batches
-- **Bar chart**: CO₂ & Water Saved by Material
-- **Line chart**: CO₂ Saved Over Time
-- **Pie chart**: Waste Category Breakdown
-- **Bar chart**: Material Recovery Rate
-
-### Known Limitation
-
-The current Milestone 2 material classification model is trained on only two fiber classes (acrylic, polyamide), which causes most uploaded images to be classified similarly regardless of actual fabric type, and circularity scores to cluster around the "Moderate Recovery Potential" range. This is a Milestone 2 model scope limitation, not a Milestone 3 logic issue — the sustainability engine, recommendation engine, and analytics pipeline all function correctly on whatever classification input they receive. Expanding the training dataset to more fiber classes is a candidate future enhancement.
-
-**In Progress**
-- OAuth Login
-- User Profile Management
-- Notification System
-
-**Pending**
-- Deployment
-- Docker Containerization
-- Advanced Reporting
-- Excel Export
-
----
-
-## Installation
-
-### Backend
-```
+```bash
 cd backend
+
 pip install -r requirements.txt
+
 python manage.py makemigrations
+
 python manage.py migrate
+
 python manage.py runserver
 ```
 
-### Frontend
-```
+## Frontend
+
+```bash
 cd frontend
+
 npm install
+
 npm run dev
 ```
 
-## Database
+## Docker (backend + frontend)
 
-**SQLite**
-
-Database File: `db.sqlite3`
-
-## Authentication
-
-**Authentication Method**: JWT (JSON Web Token)
-- Access Token
-- Refresh Token
-- Protected APIs
-- Bearer Authentication
-
-## Future Enhancements
-
-- OAuth Login
-- User Profile Management
-- Environmental Impact Analysis refinement (cited emission/water reference sources)
-- Expanded material classification model (more than 2 fiber classes)
-- Notification System
-- Advanced Report Generation
-- Excel Export
-- Docker Deployment
+```bash
+docker-compose up --build
+```
 
 ---
 
-**AI Textile Waste Management Project**
+# Database
+
+SQLite
+
+Database File
+```
+db.sqlite3
+```
+
+---
+
+# Authentication
+
+Authentication Method
+JWT (JSON Web Token)
+
+Access Token
+Refresh Token
+
+Protected APIs
+Bearer Authentication
+
+---
+
+# Testing
+
+Run the full automated test suite:
+
+```bash
+cd backend
+python manage.py test
+```
+
+Expected result: **29 tests passing.**
+
+---
+
+# Future Enhancements
+
+- OAuth2 Login
+- User Profile Management (self-service editing)
+- Full role-specific dashboards for all four user roles
+- PostgreSQL migration for production
+- Cloud deployment (AWS / Azure)
+- MongoDB as a secondary database for unstructured/analytics data
+- Expanded material classification training dataset (more fiber types)
+- Security and performance testing phase
+- CI/CD via GitHub Actions
+
+---
+
+AI Textile Waste Management Project

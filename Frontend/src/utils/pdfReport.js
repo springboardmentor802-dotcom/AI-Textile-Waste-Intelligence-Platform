@@ -1,546 +1,837 @@
 import { jsPDF } from "jspdf";
 
-// --- Palette (kept in the same green/white family used across the app) ---
 // ============================================================================
-// UNCHANGED FROM ORIGINAL FILE (down to the "NEW HELPERS" marker below)
+// AI FABRIC INTELLIGENCE PLATFORM
+// SIMPLE TABLE-BASED PDF REPORT
+//
+// PAGE 1
+// - Green top bar
+// - Prediction
+// - Prediction Details
+// - Material Information
+//
+// PAGE 2
+// - NO "Sustainability Report" heading
+// - NO subtitle
+// - NO "Environmental and Circular Economy Analysis"
+// - Top 3 Predictions
+// - Environmental Impact
+// - Recovery Recommendation
+// - Circular Economy Score
+// - Circularity Score Breakdown
+//
+// PAGE 3, ONLY IF REQUIRED
+// - NO "Circularity Analysis" heading
+// - Circularity Score Breakdown starts directly
+//
+// Removed:
+// - Overall Sustainability
+// - Environmental Status
+// - Recommendation Status
+// - Scoring Status
+//
+// Important:
+// - Uses "CO2" instead of Unicode "CO₂" for jsPDF Helvetica.
+// - Full-width tables only.
+// - Long values wrap correctly.
+// - A section is never cut at the bottom of a page.
 // ============================================================================
+
+
+// ============================================================================
+// COLORS
+// ============================================================================
+
 const COLORS = {
-  green: [46, 125, 50], // #2e7d32
-  greenDark: [37, 100, 40], // #256428
-  greenLight: [232, 245, 233], // #e8f5e9
-  gray: [107, 114, 128], // #6b7280
-  grayMuted: [156, 163, 175], // #9ca3af
-  grayLight: [243, 244, 246], // #f3f4f6
-  dark: [26, 26, 26], // #1a1a1a
-  border: [238, 241, 238], // #eef1ee
-  amber: [180, 83, 9], // #b45309
-  amberLight: [255, 247, 230], // #fff7e6
-  red: [185, 28, 28], // #b91c1c
-  redLight: [254, 242, 242], // #fef2f2
+  green: [46, 125, 50],
+  greenDark: [35, 95, 40],
+
+  dark: [35, 35, 35],
+  gray: [90, 90, 90],
+  grayLight: [245, 245, 245],
+
+  border: [205, 205, 205],
   white: [255, 255, 255],
 };
 
-const PAGE_MARGIN = 48;
-const BRAND_NAME = "AI Fabric Intelligence Platform";
 
-/**
- * Reads a File/Blob as a base64 data URL (needed to embed images via
- * jsPDF's addImage).
- */
+// ============================================================================
+// PAGE SETTINGS
+// ============================================================================
+
+const PAGE_MARGIN = 42;
+
+const PAGE_WIDTH = 595;
+const PAGE_HEIGHT = 842;
+
+const FOOTER_HEIGHT = 42;
+
+const CONTENT_WIDTH =
+  PAGE_WIDTH - PAGE_MARGIN * 2;
+
+const CONTENT_BOTTOM =
+  PAGE_HEIGHT - FOOTER_HEIGHT;
+
+
+// ============================================================================
+// BASIC HELPERS
+// ============================================================================
+
+function safeString(value, fallback = "-") {
+  if (
+    value === null ||
+    value === undefined ||
+    value === ""
+  ) {
+    return fallback;
+  }
+
+  if (Array.isArray(value)) {
+    if (value.length === 0) {
+      return fallback;
+    }
+
+    return value
+      .map((item) => {
+        if (
+          item &&
+          typeof item === "object"
+        ) {
+          return Object.values(item)
+            .filter(
+              (v) =>
+                v !== null &&
+                v !== undefined
+            )
+            .join(" - ");
+        }
+
+        return String(item);
+      })
+      .join(", ");
+  }
+
+  if (
+    typeof value === "object"
+  ) {
+    return Object.values(value)
+      .filter(
+        (v) =>
+          v !== null &&
+          v !== undefined
+      )
+      .join(", ");
+  }
+
+  return String(value);
+}
+
+
+function formatNumber(
+  value,
+  decimals = 2
+) {
+  if (
+    value === null ||
+    value === undefined ||
+    value === ""
+  ) {
+    return "-";
+  }
+
+  const number = Number(value);
+
+  if (!Number.isFinite(number)) {
+    return String(value);
+  }
+
+  return number.toFixed(decimals);
+}
+
+
+function setTextColor(doc, color) {
+  doc.setTextColor(
+    color[0],
+    color[1],
+    color[2]
+  );
+}
+
+
+function setFillColor(doc, color) {
+  doc.setFillColor(
+    color[0],
+    color[1],
+    color[2]
+  );
+}
+
+
+function setDrawColor(doc, color) {
+  doc.setDrawColor(
+    color[0],
+    color[1],
+    color[2]
+  );
+}
+
+
+// ============================================================================
+// IMAGE TO DATA URL
+// ============================================================================
+
 function fileToDataUrl(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
+  return new Promise(
+    (resolve, reject) => {
+      if (!file) {
+        resolve(null);
+        return;
+      }
+
+      const reader =
+        new FileReader();
+
+      reader.onload = () =>
+        resolve(reader.result);
+
+      reader.onerror = reject;
+
+      reader.readAsDataURL(file);
+    }
+  );
 }
 
-function setFill(doc, rgb) {
-  doc.setFillColor(rgb[0], rgb[1], rgb[2]);
-}
 
-function setTextColor(doc, rgb) {
-  doc.setTextColor(rgb[0], rgb[1], rgb[2]);
-}
+// ============================================================================
+// PAGE 1 HEADER
+// ============================================================================
 
-function setDraw(doc, rgb) {
-  doc.setDrawColor(rgb[0], rgb[1], rgb[2]);
-}
+function drawFirstPageHeader(
+  doc,
+  title,
+  subtitle = ""
+) {
+  setFillColor(
+    doc,
+    COLORS.green
+  );
 
-/** Maps a recyclability string to a pill color tone. Unknown values fall
- * back to a neutral gray rather than guessing. */
-function recyclabilityTone(value) {
-  const normalized = String(value || "").toLowerCase();
-  if (normalized === "high") return { fill: COLORS.greenLight, text: COLORS.green };
-  if (normalized === "medium") return { fill: COLORS.amberLight, text: COLORS.amber };
-  if (normalized === "low") return { fill: COLORS.redLight, text: COLORS.red };
-  return { fill: COLORS.grayLight, text: COLORS.gray };
-}
+  doc.rect(
+    0,
+    0,
+    PAGE_WIDTH,
+    72,
+    "F"
+  );
 
-/** Small rounded "pill" badge, e.g. for the Recyclability value. */
-function drawPill(doc, text, x, y, tone) {
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "bold");
-  const textWidth = doc.getTextWidth(text);
-  const paddingX = 10;
-  const height = 18;
-  const width = textWidth + paddingX * 2;
+  setFillColor(
+    doc,
+    COLORS.greenDark
+  );
 
-  setFill(doc, tone.fill);
-  doc.roundedRect(x, y - height + 5, width, height, height / 2, height / 2, "F");
-  setTextColor(doc, tone.text);
-  doc.text(text, x + paddingX, y);
-  return width;
-}
+  doc.rect(
+    0,
+    69,
+    PAGE_WIDTH,
+    3,
+    "F"
+  );
 
-/** Horizontal progress/confidence bar with rounded ends. */
-function drawProgressBar(doc, x, y, width, height, percent, fillColor) {
-  const clamped = Math.max(0, Math.min(100, percent || 0));
-  setFill(doc, COLORS.grayLight);
-  doc.roundedRect(x, y, width, height, height / 2, height / 2, "F");
+  setTextColor(
+    doc,
+    COLORS.white
+  );
 
-  const filledWidth = Math.max(height, (clamped / 100) * width);
-  setFill(doc, fillColor);
-  doc.roundedRect(x, y, filledWidth, height, height / 2, height / 2, "F");
-}
+  doc.setFont(
+    "helvetica",
+    "bold"
+  );
 
-/** A soft rounded card container used to visually group each section. */
-function drawCard(doc, x, y, width, height) {
-  setDraw(doc, COLORS.border);
-  setFill(doc, COLORS.white);
-  doc.roundedRect(x, y, width, height, 8, 8, "FD");
-}
-
-/**
- * Page header band: brand mark, report title, and a subtitle line
- * (timestamp, or "Item X of Y" for batch report pages).
- */
-function drawHeader(doc, { title, subtitle }) {
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const bandHeight = 78;
-
-  setFill(doc, COLORS.green);
-  doc.rect(0, 0, pageWidth, bandHeight, "F");
-  // Subtle darker accent line along the bottom edge of the header band
-  setFill(doc, COLORS.greenDark);
-  doc.rect(0, bandHeight - 3, pageWidth, 3, "F");
-
-  // Simple circular brand mark
-  setFill(doc, COLORS.white);
-  doc.circle(PAGE_MARGIN + 10, 30, 11, "F");
-  setFill(doc, COLORS.green);
-  doc.circle(PAGE_MARGIN + 10, 30, 6, "F");
-
-  setTextColor(doc, COLORS.white);
   doc.setFontSize(17);
-  doc.setFont("helvetica", "bold");
-  doc.text(title, PAGE_MARGIN + 32, 34);
 
-  doc.setFontSize(9.5);
-  doc.setFont("helvetica", "normal");
-  doc.text(BRAND_NAME, PAGE_MARGIN + 32, 48);
+  doc.text(
+    title,
+    PAGE_MARGIN,
+    30
+  );
 
-  doc.setFontSize(9.5);
-  doc.text(subtitle || new Date().toLocaleString(), pageWidth - PAGE_MARGIN, 34, { align: "right" });
+  doc.setFont(
+    "helvetica",
+    "normal"
+  );
 
-  return bandHeight + 28;
-}
+  doc.setFontSize(9);
 
-/** Section heading with a small green accent bar, used inside each card. */
-function drawSectionHeading(doc, title, x, y) {
-  setFill(doc, COLORS.green);
-  doc.rect(x, y - 9, 3, 12, "F");
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "bold");
-  setTextColor(doc, COLORS.dark);
-  doc.text(title, x + 10, y);
-  return y + 16;
-}
+  doc.text(
+    "AI Fabric Intelligence Platform",
+    PAGE_MARGIN,
+    48
+  );
 
-/** Label/value row. Label is small-caps gray, value is dark and can wrap. */
-function drawKeyValue(doc, label, value, x, y, wrapWidth) {
-  doc.setFontSize(8.5);
-  doc.setFont("helvetica", "bold");
-  setTextColor(doc, COLORS.grayMuted);
-  doc.text(label.toUpperCase(), x, y);
-
-  doc.setFontSize(10.5);
-  doc.setFont("helvetica", "normal");
-  setTextColor(doc, COLORS.dark);
-
-  const valueText = String(value ?? "-");
-  const valueY = y + 13;
-  if (wrapWidth) {
-    const lines = doc.splitTextToSize(valueText, wrapWidth);
-    doc.text(lines, x, valueY);
-    return valueY + lines.length * 13 + 10;
+  if (subtitle) {
+    doc.text(
+      subtitle,
+      PAGE_WIDTH - PAGE_MARGIN,
+      30,
+      {
+        align: "right",
+      }
+    );
   }
 
-  doc.text(valueText, x, valueY);
-  return valueY + 18;
+  return 94;
 }
 
-/**
- * Draws one full prediction "page" of content (header, image + confidence
- * bar, waste/recycling card, fabric info card, top-3 card) onto whatever
- * page in `doc` is currently active. Shared by both the single-result
- * report and each detail page of the batch report.
- *
- * NOTE: left fully intact. `downloadBatchPredictionsReport` still depends
- * on this exact function, so it is not touched by the redesign below.
- */
-async function drawPredictionPage(doc, params) {
-  const {
-    imageFile,
-    material,
-    confidence,
-    wasteCategory,
-    recyclability,
-    recommendation,
-    top3Predictions = [],
-    materialTypeInfo,
-    processingTimeSeconds,
-    headerSubtitle,
-  } = params;
 
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const contentWidth = pageWidth - PAGE_MARGIN * 2;
-  let y = drawHeader(doc, { title: "Fabric Prediction Report", subtitle: headerSubtitle });
+// ============================================================================
+// PAGE 2 START
+//
+// IMPORTANT:
+// There is intentionally NO title here.
+// No "Sustainability Report"
+// No subtitle
+// No divider
+// ============================================================================
 
-  // --- Overview card: image + material + confidence bar ---
-  const overviewHeight = 172;
-  drawCard(doc, PAGE_MARGIN, y, contentWidth, overviewHeight);
-  const cardPadding = 18;
-  const imageSize = overviewHeight - cardPadding * 2;
+function drawPageTwoTitle(doc) {
+  return 42;
+}
 
-  if (imageFile) {
-    try {
-      const dataUrl = await fileToDataUrl(imageFile);
-      const imageFormat = imageFile.type.includes("png") ? "PNG" : "JPEG";
-      setDraw(doc, COLORS.border);
-      doc.roundedRect(PAGE_MARGIN + cardPadding - 2, y + cardPadding - 2, imageSize + 4, imageSize + 4, 6, 6, "S");
-      doc.addImage(
-        dataUrl,
-        imageFormat,
-        PAGE_MARGIN + cardPadding,
-        y + cardPadding,
-        imageSize,
-        imageSize,
-        undefined,
-        "FAST"
+
+// ============================================================================
+// SECTION TITLE
+// ============================================================================
+
+function drawSectionTitle(
+  doc,
+  title,
+  y
+) {
+  setFillColor(
+    doc,
+    COLORS.green
+  );
+
+  doc.rect(
+    PAGE_MARGIN,
+    y - 9,
+    4,
+    16,
+    "F"
+  );
+
+  setTextColor(
+    doc,
+    COLORS.dark
+  );
+
+  doc.setFont(
+    "helvetica",
+    "bold"
+  );
+
+  doc.setFontSize(11);
+
+  doc.text(
+    title,
+    PAGE_MARGIN + 11,
+    y + 2
+  );
+
+  return y + 19;
+}
+
+
+// ============================================================================
+// TABLE ROW HEIGHT
+// ============================================================================
+
+function calculateRowHeight(
+  doc,
+  label,
+  value,
+  labelWidth,
+  valueWidth
+) {
+  const fontSize = 8.5;
+
+  doc.setFontSize(fontSize);
+
+  const labelLines =
+    doc.splitTextToSize(
+      safeString(label),
+      labelWidth - 12
+    );
+
+  const valueLines =
+    doc.splitTextToSize(
+      safeString(value),
+      valueWidth - 12
+    );
+
+  const lineCount =
+    Math.max(
+      labelLines.length,
+      valueLines.length
+    );
+
+  return Math.max(
+    27,
+    lineCount * 11 + 12
+  );
+}
+
+
+// ============================================================================
+// FULL WIDTH TWO-COLUMN TABLE
+// ============================================================================
+
+function drawTwoColumnTable(
+  doc,
+  rows,
+  startY,
+  options = {}
+) {
+  const x =
+    options.x ??
+    PAGE_MARGIN;
+
+  const width =
+    options.width ??
+    CONTENT_WIDTH;
+
+  const labelWidth =
+    options.labelWidth ??
+    165;
+
+  const valueWidth =
+    width - labelWidth;
+
+  let y = startY;
+
+  rows.forEach(
+    (row, index) => {
+      const label =
+        safeString(
+          row.label,
+          ""
+        );
+
+      const value =
+        safeString(
+          row.value,
+          "-"
+        );
+
+      const rowHeight =
+        calculateRowHeight(
+          doc,
+          label,
+          value,
+          labelWidth,
+          valueWidth
+        );
+
+      // Alternating background
+      if (index % 2 === 0) {
+        setFillColor(
+          doc,
+          COLORS.grayLight
+        );
+
+        doc.rect(
+          x,
+          y,
+          width,
+          rowHeight,
+          "F"
+        );
+      }
+
+      // Border
+      setDrawColor(
+        doc,
+        COLORS.border
       );
-    } catch {
-      // Continue without the image rather than failing the whole report.
+
+      doc.setLineWidth(0.45);
+
+      doc.rect(
+        x,
+        y,
+        width,
+        rowHeight
+      );
+
+      // Column divider
+      doc.line(
+        x + labelWidth,
+        y,
+        x + labelWidth,
+        y + rowHeight
+      );
+
+      // Label
+      setTextColor(
+        doc,
+        COLORS.gray
+      );
+
+      doc.setFont(
+        "helvetica",
+        "bold"
+      );
+
+      doc.setFontSize(8.5);
+
+      const labelLines =
+        doc.splitTextToSize(
+          label,
+          labelWidth - 12
+        );
+
+      doc.text(
+        labelLines,
+        x + 6,
+        y + 15
+      );
+
+      // Value
+      setTextColor(
+        doc,
+        COLORS.dark
+      );
+
+      doc.setFont(
+        "helvetica",
+        "normal"
+      );
+
+      doc.setFontSize(8.5);
+
+      const valueLines =
+        doc.splitTextToSize(
+          value,
+          valueWidth - 12
+        );
+
+      doc.text(
+        valueLines,
+        x + labelWidth + 6,
+        y + 15
+      );
+
+      y += rowHeight;
     }
-  }
+  );
 
-  const textX = PAGE_MARGIN + cardPadding + imageSize + 20;
-  const textWidth = contentWidth - cardPadding * 2 - imageSize - 20;
-  let textY = y + cardPadding + 16;
-
-  doc.setFontSize(20);
-  doc.setFont("helvetica", "bold");
-  setTextColor(doc, COLORS.dark);
-  doc.text(material, textX, textY);
-  textY += 26;
-
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "bold");
-  setTextColor(doc, COLORS.grayMuted);
-  doc.text("CONFIDENCE", textX, textY);
-  doc.setFont("helvetica", "bold");
-  setTextColor(doc, COLORS.green);
-  doc.text(`${confidence}%`, textX + textWidth, textY, { align: "right" });
-  textY += 8;
-  drawProgressBar(doc, textX, textY, textWidth, 8, confidence, COLORS.green);
-  textY += 26;
-
-  if (typeof processingTimeSeconds === "number") {
-    doc.setFontSize(9.5);
-    doc.setFont("helvetica", "normal");
-    setTextColor(doc, COLORS.gray);
-    doc.text(`AI Processing Time: ${processingTimeSeconds.toFixed(2)} sec`, textX, textY);
-    textY += 16;
-  }
-
-  const recTone = recyclabilityTone(recyclability);
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "bold");
-  setTextColor(doc, COLORS.grayMuted);
-  doc.text("RECYCLABILITY", textX, textY + 12);
-  drawPill(doc, String(recyclability ?? "Unknown"), textX, textY + 30, recTone);
-
-  y += overviewHeight + 20;
-
-  // --- Waste & Recycling card ---
-  const wasteLines = doc.splitTextToSize(String(recommendation ?? "-"), contentWidth - 36);
-  const wasteHeight = 66 + wasteLines.length * 13;
-  drawCard(doc, PAGE_MARGIN, y, contentWidth, wasteHeight);
-  let innerY = drawSectionHeading(doc, "Waste & Recycling", PAGE_MARGIN + 16, y + 24);
-  const halfWidth = (contentWidth - 32) / 2;
-  drawKeyValue(doc, "Waste Category", wasteCategory, PAGE_MARGIN + 16, innerY);
-  drawKeyValue(doc, "Recyclability", recyclability, PAGE_MARGIN + 16 + halfWidth, innerY);
-  innerY += 34;
-  drawKeyValue(doc, "Recommendation", recommendation, PAGE_MARGIN + 16, innerY, contentWidth - 32);
-  y += wasteHeight + 20;
-
-  // --- Fabric Information card ---
-  if (materialTypeInfo) {
-    const descLines = doc.splitTextToSize(String(materialTypeInfo.description ?? "-"), contentWidth - 36);
-    const infoHeight = 66 + descLines.length * 13;
-    drawCard(doc, PAGE_MARGIN, y, contentWidth, infoHeight);
-    let infoY = drawSectionHeading(doc, "Fabric Information", PAGE_MARGIN + 16, y + 24);
-    drawKeyValue(doc, "Material Type", materialTypeInfo.type, PAGE_MARGIN + 16, infoY);
-    drawKeyValue(doc, "Common Uses", materialTypeInfo.commonUses, PAGE_MARGIN + 16 + halfWidth, infoY);
-    infoY += 34;
-    drawKeyValue(doc, "Description", materialTypeInfo.description, PAGE_MARGIN + 16, infoY, contentWidth - 32);
-    y += infoHeight + 20;
-  }
-
-  // --- Top 3 Predictions card ---
-  if (top3Predictions.length > 0) {
-    const top3Height = 32 + top3Predictions.length * 24 + 12;
-    drawCard(doc, PAGE_MARGIN, y, contentWidth, top3Height);
-    let rowY = drawSectionHeading(doc, "Top 3 Predictions", PAGE_MARGIN + 16, y + 24);
-    const barX = PAGE_MARGIN + 150;
-    const barWidth = contentWidth - 32 - 150 - 50;
-    const rankColors = [COLORS.green, [67, 160, 71], [129, 199, 132]];
-
-    top3Predictions.forEach((p, index) => {
-      doc.setFontSize(10.5);
-      doc.setFont("helvetica", "normal");
-      setTextColor(doc, COLORS.dark);
-      doc.text(String(p.material), PAGE_MARGIN + 16, rowY);
-      drawProgressBar(doc, barX, rowY - 8, barWidth, 7, p.confidence, rankColors[index] || COLORS.green);
-      doc.setFont("helvetica", "bold");
-      setTextColor(doc, COLORS.gray);
-      doc.text(`${p.confidence}%`, PAGE_MARGIN + contentWidth - 16, rowY, { align: "right" });
-      rowY += 24;
-    });
-  }
+  return y;
 }
 
-/**
- * Stamps a consistent footer (divider line, brand name, "Page X of Y") on
- * every page of the document. Must be called AFTER all pages have been
- * added, since the total page count isn't known until then.
- */
-function finalizeDocument(doc) {
-  const totalPages = doc.internal.getNumberOfPages();
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
-  const footerY = pageHeight - 28;
 
-  for (let pageNumber = 1; pageNumber <= totalPages; pageNumber += 1) {
-    doc.setPage(pageNumber);
+// ============================================================================
+// THREE-COLUMN TABLE
+// ============================================================================
 
-    setDraw(doc, COLORS.border);
-    doc.line(PAGE_MARGIN, footerY - 12, pageWidth - PAGE_MARGIN, footerY - 12);
+function drawThreeColumnTable(
+  doc,
+  rows,
+  startY
+) {
+  const x =
+    PAGE_MARGIN;
 
-    doc.setFontSize(8.5);
-    doc.setFont("helvetica", "normal");
-    setTextColor(doc, COLORS.grayMuted);
-    doc.text(BRAND_NAME, PAGE_MARGIN, footerY);
-    doc.text(`Page ${pageNumber} of ${totalPages}`, pageWidth - PAGE_MARGIN, footerY, { align: "right" });
-  }
-}
+  const width =
+    CONTENT_WIDTH;
 
-/** Small stat card used on the batch report's cover page. */
-function drawStatCard(doc, x, y, width, height, label, value) {
-  setFill(doc, COLORS.greenLight);
-  doc.roundedRect(x, y, width, height, 8, 8, "F");
+  const columns = [
+    {
+      label: "Rank",
+      width: 60,
+    },
+
+    {
+      label: "Fabric",
+      width: 300,
+    },
+
+    {
+      label: "Confidence",
+      width: width - 360,
+    },
+  ];
+
+  const headerHeight = 27;
+
+  let y = startY;
+
+  // Header
+  setFillColor(
+    doc,
+    COLORS.green
+  );
+
+  doc.rect(
+    x,
+    y,
+    width,
+    headerHeight,
+    "F"
+  );
+
+  setTextColor(
+    doc,
+    COLORS.white
+  );
+
+  doc.setFont(
+    "helvetica",
+    "bold"
+  );
 
   doc.setFontSize(8.5);
-  doc.setFont("helvetica", "bold");
-  setTextColor(doc, COLORS.gray);
-  doc.text(label.toUpperCase(), x + 14, y + 20);
 
-  doc.setFontSize(18);
-  doc.setFont("helvetica", "bold");
-  setTextColor(doc, COLORS.greenDark);
-  doc.text(String(value), x + 14, y + 42);
+  let currentX = x;
+
+  columns.forEach(
+    (column, index) => {
+      doc.text(
+        column.label,
+        currentX + 6,
+        y + 17
+      );
+
+      if (
+        index <
+        columns.length - 1
+      ) {
+        setDrawColor(
+          doc,
+          COLORS.white
+        );
+
+        doc.line(
+          currentX + column.width,
+          y,
+          currentX + column.width,
+          y + headerHeight
+        );
+      }
+
+      currentX +=
+        column.width;
+    }
+  );
+
+  y += headerHeight;
+
+  // Rows
+  rows.forEach(
+    (row, index) => {
+      const rowHeight = 27;
+
+      if (index % 2 === 0) {
+        setFillColor(
+          doc,
+          COLORS.grayLight
+        );
+
+        doc.rect(
+          x,
+          y,
+          width,
+          rowHeight,
+          "F"
+        );
+      }
+
+      setDrawColor(
+        doc,
+        COLORS.border
+      );
+
+      doc.rect(
+        x,
+        y,
+        width,
+        rowHeight
+      );
+
+      let cellX = x;
+
+      columns.forEach(
+        (
+          column,
+          columnIndex
+        ) => {
+          const value =
+            safeString(
+              row.values[columnIndex],
+              "-"
+            );
+
+          setTextColor(
+            doc,
+            COLORS.dark
+          );
+
+          doc.setFont(
+            "helvetica",
+            columnIndex === 0
+              ? "bold"
+              : "normal"
+          );
+
+          doc.setFontSize(8.5);
+
+          doc.text(
+            value,
+            cellX + 6,
+            y + 17
+          );
+
+          if (
+            columnIndex <
+            columns.length - 1
+          ) {
+            doc.line(
+              cellX + column.width,
+              y,
+              cellX + column.width,
+              y + rowHeight
+            );
+          }
+
+          cellX +=
+            column.width;
+        }
+      );
+
+      y += rowHeight;
+    }
+  );
+
+  return y;
 }
+
 
 // ============================================================================
-// NEW HELPERS — added to support the redesigned 2-page single report.
-// Nothing above this line was modified.
+// SUSTAINABILITY DATA
 // ============================================================================
 
-/**
- * Converts a raw object key like "co2_saved_kg" or "avgConfidence" into a
- * human label like "CO2 Saved Kg" / "Avg Confidence". Used so the
- * sustainability sub-objects (material_information, environmental_impact,
- * waste_scoring, recommendations, overall_sustainability) can be rendered
- * without hard-coding their exact field names, which weren't available at
- * the time this file was written — this keeps the report resilient to
- * backend/data-shape changes instead of silently dropping fields.
- */
-function formatFieldLabel(key) {
-  const spaced = String(key)
-    .replace(/_/g, " ")
-    .replace(/([a-z])([A-Z])/g, "$1 $2");
-  return spaced.replace(/\b\w/g, (c) => c.toUpperCase());
-}
+function getSustainabilityData(
+  sustainability
+) {
+  const data =
+    sustainability || {};
 
-/**
- * Flattens an arbitrarily-shaped plain object into a flat list of
- * { label, value } pairs suitable for the key/value grid renderer below.
- * - Primitives (string/number/boolean) become a single row.
- * - Arrays of primitives are joined into a comma-separated string.
- * - Arrays of objects are summarized as "N item(s)" (they're rendered in
- *   full elsewhere via drawBulletListCard, e.g. for recommendations).
- * - Nested plain objects are recursed into one level, with the parent key
- *   prefixed onto the child label (e.g. "Breakdown - Score").
- * This is what lets the redesigned cards safely display the
- * `sustainability.*` sub-objects using only the existing data, without
- * assuming field names that weren't confirmed.
- */
-function flattenEntries(obj, depth = 0, prefix = "") {
-  if (!obj || typeof obj !== "object") return [];
-  const entries = [];
+  return {
+    materialInformation:
+      data.material_information ||
+      {},
 
-  Object.entries(obj).forEach(([key, value]) => {
-    if (value === undefined || value === null || typeof value === "function") return;
-    const label = prefix + formatFieldLabel(key);
+    environmentalImpact:
+      data.environmental_impact ||
+      {},
 
-    if (Array.isArray(value)) {
-      const isObjectArray = value.some((v) => v && typeof v === "object");
-      if (isObjectArray) {
-        entries.push({ label, value: `${value.length} item(s)` });
-      } else if (value.length > 0) {
-        entries.push({ label, value: value.join(", ") });
-      }
-      return;
-    }
+    recommendations:
+      data.recommendations ||
+      {},
 
-    if (typeof value === "object") {
-      if (depth < 1) {
-        entries.push(...flattenEntries(value, depth + 1, `${label} - `));
-      } else {
-        entries.push({ label, value: "-" });
-      }
-      return;
-    }
+    wasteScoring:
+      data.waste_scoring ||
+      {},
 
-    entries.push({ label, value });
-  });
-
-  return entries;
-}
-
-/**
- * Measures + draws a responsive "white card" section containing a green
- * section heading followed by a 2-column key/value grid (falling back to
- * a full-width row for long text values). This generalizes the
- * label/value layout already used for "Waste & Recycling" / "Fabric
- * Information" in drawPredictionPage, so the new sustainability sections
- * (Material Information, Sustainability Overview, Environmental Impact,
- * Circular Economy Score) share the exact same visual language without
- * duplicating that layout math per-section.
- *
- * Returns the new `y` cursor after the card (card bottom + gap).
- */
-function drawKeyValueCard(doc, x, y, width, title, entries, gap = 20) {
-  const padding = 16;
-  const innerWidth = width - padding * 2;
-  const halfWidth = (innerWidth - 18) / 2;
-  const longValueThreshold = 42;
-
-  if (!entries || entries.length === 0) {
-    const emptyHeight = 60;
-    drawCard(doc, x, y, width, emptyHeight);
-    const headingY = drawSectionHeading(doc, title, x + padding, y + 24);
-    doc.setFontSize(9.5);
-    doc.setFont("helvetica", "italic");
-    setTextColor(doc, COLORS.grayMuted);
-    doc.text("No data available.", x + padding, headingY + 4);
-    return y + emptyHeight + gap;
-  }
-
-  // --- Pass 1: measure (no drawing) so we know the card height up front ---
-  let rows = [];
-  let i = 0;
-  while (i < entries.length) {
-    const entry = entries[i];
-    const valueText = String(entry.value ?? "-");
-    if (valueText.length > longValueThreshold) {
-      const lines = doc.splitTextToSize(valueText, innerWidth);
-      rows.push({ type: "full", height: 13 + lines.length * 13 + 10, entries: [entry] });
-      i += 1;
-    } else {
-      const next = entries[i + 1];
-      const nextIsShort = next && String(next.value ?? "-").length <= longValueThreshold;
-      if (nextIsShort) {
-        rows.push({ type: "pair", height: 34, entries: [entry, next] });
-        i += 2;
-      } else {
-        rows.push({ type: "pair", height: 34, entries: [entry] });
-        i += 1;
-      }
-    }
-  }
-
-  const headingHeight = 32;
-  const contentHeight = rows.reduce((sum, r) => sum + r.height, 0);
-  const cardHeight = headingHeight + contentHeight + padding;
-
-  // --- Pass 2: draw ---
-  drawCard(doc, x, y, width, cardHeight);
-  let rowY = drawSectionHeading(doc, title, x + padding, y + 24);
-
-  rows.forEach((row) => {
-    if (row.type === "full") {
-      drawKeyValue(doc, row.entries[0].label, row.entries[0].value, x + padding, rowY, innerWidth);
-      rowY += row.height;
-    } else {
-      drawKeyValue(doc, row.entries[0].label, row.entries[0].value, x + padding, rowY);
-      if (row.entries[1]) {
-        drawKeyValue(doc, row.entries[1].label, row.entries[1].value, x + padding + halfWidth + 18, rowY);
-      }
-      rowY += row.height;
-    }
-  });
-
-  return y + cardHeight + gap;
-}
-
-/**
- * Renders a bulleted list card — used for "Recycling Recommendation(s)",
- * which may come through as an array of strings or an array of objects
- * (e.g. { title, description } or { text }). Each item is coerced to a
- * single readable line rather than assuming one exact shape.
- */
-function drawBulletListCard(doc, x, y, width, title, items, gap = 20) {
-  const padding = 16;
-  const innerWidth = width - padding * 2 - 14; // leave room for the bullet marker
-  const list = Array.isArray(items) ? items : items ? [items] : [];
-
-  const toLine = (item) => {
-    if (typeof item === "string") return item;
-    if (item && typeof item === "object") {
-      const candidate =
-        item.text || item.recommendation || item.description || item.title || item.message;
-      if (candidate) return String(candidate);
-      return Object.values(item).filter((v) => typeof v === "string").join(" — ") || JSON.stringify(item);
-    }
-    return String(item ?? "-");
+    overallSustainability:
+      data.overall_sustainability ||
+      "-",
   };
-
-  if (list.length === 0) {
-    return drawKeyValueCard(doc, x, y, width, title, [], gap);
-  }
-
-  // --- Pass 1: measure ---
-  const wrappedLines = list.map((item) => doc.splitTextToSize(toLine(item), innerWidth));
-  const rowGap = 10;
-  const contentHeight = wrappedLines.reduce((sum, lines) => sum + lines.length * 13 + rowGap, 0);
-  const headingHeight = 32;
-  const cardHeight = headingHeight + contentHeight + padding - rowGap + 6;
-
-  // --- Pass 2: draw ---
-  drawCard(doc, x, y, width, cardHeight);
-  let rowY = drawSectionHeading(doc, title, x + padding, y + 24);
-
-  doc.setFontSize(10.5);
-  wrappedLines.forEach((lines) => {
-    setFill(doc, COLORS.green);
-    doc.circle(x + padding + 3, rowY - 4, 2.2, "F");
-    doc.setFont("helvetica", "normal");
-    setTextColor(doc, COLORS.dark);
-    doc.text(lines, x + padding + 14, rowY);
-    rowY += lines.length * 13 + rowGap;
-  });
-
-  return y + cardHeight + gap;
 }
 
-/**
- * Page 1 of the redesigned single-item report: title/date band, uploaded
- * image + prediction result, defect detection, material information, and
- * top-3 predictions — matching the first half of the current web UI.
- */
-async function drawReportPageOne(doc, params) {
+
+// ============================================================================
+// FOOTER
+// ============================================================================
+
+function addFooter(doc) {
+  const pageCount =
+    doc.internal.getNumberOfPages();
+
+  for (
+    let page = 1;
+    page <= pageCount;
+    page++
+  ) {
+    doc.setPage(page);
+
+    setDrawColor(
+      doc,
+      COLORS.border
+    );
+
+    doc.setLineWidth(0.5);
+
+    doc.line(
+      PAGE_MARGIN,
+      PAGE_HEIGHT - 31,
+      PAGE_WIDTH - PAGE_MARGIN,
+      PAGE_HEIGHT - 31
+    );
+
+    setTextColor(
+      doc,
+      COLORS.gray
+    );
+
+    doc.setFont(
+      "helvetica",
+      "normal"
+    );
+
+    doc.setFontSize(7.5);
+
+    doc.text(
+      "AI Fabric Intelligence Platform",
+      PAGE_MARGIN,
+      PAGE_HEIGHT - 17
+    );
+
+    doc.text(
+      `Page ${page} of ${pageCount}`,
+      PAGE_WIDTH - PAGE_MARGIN,
+      PAGE_HEIGHT - 17,
+      {
+        align: "right",
+      }
+    );
+  }
+}
+
+
+// ============================================================================
+// PAGE SPACE CHECK
+// ============================================================================
+
+function sectionFits(
+  currentY,
+  requiredHeight
+) {
+  return (
+    currentY +
+      requiredHeight <=
+    CONTENT_BOTTOM
+  );
+}
+
+
+// ============================================================================
+// PAGE 1
+// ============================================================================
+
+async function drawPageOne(
+  doc,
+  params
+) {
   const {
     imageFile,
     material,
@@ -550,178 +841,850 @@ async function drawReportPageOne(doc, params) {
     wasteCategory,
     recyclability,
     recommendation,
-    top3Predictions = [],
-    materialTypeInfo,
     processingTimeSeconds,
     sustainability,
   } = params;
 
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const contentWidth = pageWidth - PAGE_MARGIN * 2;
-  let y = drawHeader(doc, {
-    title: "AI Fabric Prediction Report",
-    subtitle: new Date().toLocaleString(),
-  });
+  let y =
+    drawFirstPageHeader(
+      doc,
+      "AI Fabric Prediction Report",
+      new Date().toLocaleString()
+    );
 
-  // --- Prediction Result card: image + material + confidence + recyclability ---
-  const overviewHeight = 172;
-  drawCard(doc, PAGE_MARGIN, y, contentWidth, overviewHeight);
-  const cardPadding = 18;
-  const imageSize = overviewHeight - cardPadding * 2;
+
+  // ==========================================================================
+  // IMAGE + MAIN PREDICTION
+  // ==========================================================================
+
+  const imageSize = 100;
 
   if (imageFile) {
     try {
-      const dataUrl = await fileToDataUrl(imageFile);
-      const imageFormat = imageFile.type.includes("png") ? "PNG" : "JPEG";
-      setDraw(doc, COLORS.border);
-      doc.roundedRect(PAGE_MARGIN + cardPadding - 2, y + cardPadding - 2, imageSize + 4, imageSize + 4, 6, 6, "S");
-      doc.addImage(
-        dataUrl,
-        imageFormat,
-        PAGE_MARGIN + cardPadding,
-        y + cardPadding,
-        imageSize,
-        imageSize,
-        undefined,
-        "FAST"
+      const imageData =
+        await fileToDataUrl(
+          imageFile
+        );
+
+      if (imageData) {
+        setDrawColor(
+          doc,
+          COLORS.border
+        );
+
+        doc.rect(
+          PAGE_MARGIN,
+          y,
+          imageSize,
+          imageSize
+        );
+
+        const imageFormat =
+          imageFile.type?.includes(
+            "png"
+          )
+            ? "PNG"
+            : "JPEG";
+
+        doc.addImage(
+          imageData,
+          imageFormat,
+          PAGE_MARGIN,
+          y,
+          imageSize,
+          imageSize,
+          undefined,
+          "FAST"
+        );
+
+        const textX =
+          PAGE_MARGIN +
+          imageSize +
+          20;
+
+        setTextColor(
+          doc,
+          COLORS.gray
+        );
+
+        doc.setFont(
+          "helvetica",
+          "bold"
+        );
+
+        doc.setFontSize(8.5);
+
+        doc.text(
+          "PREDICTED FABRIC",
+          textX,
+          y + 18
+        );
+
+        setTextColor(
+          doc,
+          COLORS.greenDark
+        );
+
+        doc.setFontSize(22);
+
+        doc.text(
+          safeString(
+            material,
+            "Unknown"
+          ),
+          textX,
+          y + 43
+        );
+
+        setTextColor(
+          doc,
+          COLORS.dark
+        );
+
+        doc.setFont(
+          "helvetica",
+          "normal"
+        );
+
+        doc.setFontSize(9.5);
+
+        doc.text(
+          `Confidence: ${formatNumber(
+            confidence
+          )}%`,
+          textX,
+          y + 64
+        );
+
+        if (
+          processingTimeSeconds !==
+          undefined
+        ) {
+          doc.text(
+            `Processing Time: ${formatNumber(
+              processingTimeSeconds
+            )} sec`,
+            textX,
+            y + 82
+          );
+        }
+
+        y +=
+          imageSize +
+          18;
+      }
+    } catch (error) {
+      console.warn(
+        "Unable to add image to PDF:",
+        error
       );
-    } catch {
-      // Continue without the image rather than failing the whole report.
+
+      y += 10;
     }
+  } else {
+    setTextColor(
+      doc,
+      COLORS.gray
+    );
+
+    doc.setFont(
+      "helvetica",
+      "bold"
+    );
+
+    doc.setFontSize(8.5);
+
+    doc.text(
+      "PREDICTED FABRIC",
+      PAGE_MARGIN,
+      y + 18
+    );
+
+    setTextColor(
+      doc,
+      COLORS.greenDark
+    );
+
+    doc.setFontSize(22);
+
+    doc.text(
+      safeString(
+        material,
+        "Unknown"
+      ),
+      PAGE_MARGIN,
+      y + 43
+    );
+
+    y += 65;
   }
 
-  const textX = PAGE_MARGIN + cardPadding + imageSize + 20;
-  const textWidth = contentWidth - cardPadding * 2 - imageSize - 20;
-  let textY = y + cardPadding + 16;
 
-  doc.setFontSize(20);
-  doc.setFont("helvetica", "bold");
-  setTextColor(doc, COLORS.dark);
-  doc.text(String(material ?? "-"), textX, textY);
-  textY += 26;
+  // ==========================================================================
+  // PREDICTION DETAILS
+  // ==========================================================================
 
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "bold");
-  setTextColor(doc, COLORS.grayMuted);
-  doc.text("CONFIDENCE", textX, textY);
-  doc.setFont("helvetica", "bold");
-  setTextColor(doc, COLORS.green);
-  doc.text(`${confidence}%`, textX + textWidth, textY, { align: "right" });
-  textY += 8;
-  drawProgressBar(doc, textX, textY, textWidth, 8, confidence, COLORS.green);
-  textY += 26;
+  y =
+    drawSectionTitle(
+      doc,
+      "Prediction Details",
+      y
+    );
 
-  if (typeof processingTimeSeconds === "number") {
-    doc.setFontSize(9.5);
-    doc.setFont("helvetica", "normal");
-    setTextColor(doc, COLORS.gray);
-    doc.text(`AI Processing Time: ${processingTimeSeconds.toFixed(2)} sec`, textX, textY);
-    textY += 16;
-  }
+  y =
+    drawTwoColumnTable(
+      doc,
+      [
+        {
+          label:
+            "Predicted Fabric",
+          value:
+            material,
+        },
 
-  const recTone = recyclabilityTone(recyclability);
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "bold");
-  setTextColor(doc, COLORS.grayMuted);
-  doc.text("RECYCLABILITY", textX, textY + 12);
-  drawPill(doc, String(recyclability ?? "Unknown"), textX, textY + 30, recTone);
+        {
+          label:
+            "Model Confidence",
+          value:
+            confidence !==
+            undefined
+              ? `${formatNumber(
+                  confidence
+                )}%`
+              : "-",
+        },
 
-  y += overviewHeight + 20;
+        {
+          label:
+            "AI Processing Time",
+          value:
+            processingTimeSeconds !==
+            undefined
+              ? `${formatNumber(
+                  processingTimeSeconds
+                )} sec`
+              : "-",
+        },
 
-  // --- Defect Detection card ---
-  const halfWidth = (contentWidth - 16 * 2 - 18) / 2;
-  y = drawKeyValueCard(doc, PAGE_MARGIN, y, contentWidth, "Defect Detection", [
-    { label: "Defect", value: defect ?? "None detected" },
-    { label: "Defect Confidence", value: defectConfidence != null ? `${defectConfidence}%` : "-" },
-    { label: "Waste Category", value: wasteCategory },
-    { label: "Recommendation", value: recommendation },
-  ]);
+        {
+          label:
+            "Defect",
+          value:
+            defect ||
+            "No defect detected",
+        },
 
-  // --- Material Information card (from sustainability.material_information,
-  //     falling back to materialTypeInfo already computed in the UI) ---
-  const materialInfoEntries = sustainability?.material_information
-    ? flattenEntries(sustainability.material_information)
-    : materialTypeInfo
-    ? flattenEntries(materialTypeInfo)
-    : [];
-  y = drawKeyValueCard(doc, PAGE_MARGIN, y, contentWidth, "Material Information", materialInfoEntries);
+        {
+          label:
+            "Defect Confidence",
+          value:
+            defectConfidence !==
+            undefined
+              ? `${formatNumber(
+                  defectConfidence
+                )}%`
+              : "-",
+        },
 
-  // --- Top 3 Predictions card (unchanged visual logic from the original) ---
-  if (top3Predictions.length > 0) {
-    const top3Height = 32 + top3Predictions.length * 24 + 12;
-    drawCard(doc, PAGE_MARGIN, y, contentWidth, top3Height);
-    let rowY = drawSectionHeading(doc, "Top 3 Predictions", PAGE_MARGIN + 16, y + 24);
-    const barX = PAGE_MARGIN + 150;
-    const barWidth = contentWidth - 32 - 150 - 50;
-    const rankColors = [COLORS.green, [67, 160, 71], [129, 199, 132]];
+        {
+          label:
+            "Recyclability",
+          value:
+            recyclability ||
+            "-",
+        },
 
-    top3Predictions.forEach((p, index) => {
-      doc.setFontSize(10.5);
-      doc.setFont("helvetica", "normal");
-      setTextColor(doc, COLORS.dark);
-      doc.text(String(p.material), PAGE_MARGIN + 16, rowY);
-      drawProgressBar(doc, barX, rowY - 8, barWidth, 7, p.confidence, rankColors[index] || COLORS.green);
-      doc.setFont("helvetica", "bold");
-      setTextColor(doc, COLORS.gray);
-      doc.text(`${p.confidence}%`, PAGE_MARGIN + contentWidth - 16, rowY, { align: "right" });
-      rowY += 24;
-    });
-  }
+        {
+          label:
+            "Waste Category",
+          value:
+            wasteCategory ||
+            "-",
+        },
 
-  void halfWidth; // reserved for future two-column defect layout tweaks
+        {
+          label:
+            "Recovery Recommendation",
+          value:
+            recommendation ||
+            "-",
+        },
+      ],
+      y
+    );
+
+  y += 18;
+
+
+  // ==========================================================================
+  // MATERIAL INFORMATION
+  // ==========================================================================
+
+  const {
+    materialInformation,
+  } =
+    getSustainabilityData(
+      sustainability
+    );
+
+  y =
+    drawSectionTitle(
+      doc,
+      "Material Information",
+      y
+    );
+
+  drawTwoColumnTable(
+    doc,
+    [
+      {
+        label:
+          "Fabric Class",
+        value:
+          materialInformation
+            .fabric_class ||
+          material ||
+          "-",
+      },
+
+      {
+        label:
+          "Material Type",
+        value:
+          materialInformation
+            .material_type ||
+          "-",
+      },
+
+      {
+        label:
+          "Common Uses",
+        value:
+          materialInformation
+            .common_uses ||
+          "-",
+      },
+
+      {
+        label:
+          "Material Description",
+        value:
+          materialInformation
+            .material_description ||
+          "-",
+      },
+
+      {
+        label:
+          "Sustainability Notes",
+        value:
+          materialInformation
+            .sustainability_notes ||
+          "-",
+      },
+
+      {
+        label:
+          "Notes",
+        value:
+          materialInformation
+            .notes ||
+          "-",
+      },
+    ],
+    y
+  );
 }
 
-/**
- * Page 2 of the redesigned single-item report: Sustainability Overview,
- * Environmental Impact, Circular Economy Score, and Recycling
- * Recommendation — mirroring the corresponding UI cards 1:1, using only
- * the `sustainability` object already passed into downloadPredictionPdf.
- */
-function drawReportPageTwo(doc, sustainability) {
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const contentWidth = pageWidth - PAGE_MARGIN * 2;
-  let y = drawHeader(doc, { title: "Sustainability Report", subtitle: "Page 2 of 2" });
 
-  const overall = sustainability?.overall_sustainability;
-  const environmental = sustainability?.environmental_impact;
-  const wasteScoring = sustainability?.waste_scoring;
-  const recommendations = sustainability?.recommendations;
+// ============================================================================
+// PAGE 2
+// ============================================================================
 
-  y = drawKeyValueCard(doc, PAGE_MARGIN, y, contentWidth, "Sustainability Overview", flattenEntries(overall));
-  y = drawKeyValueCard(doc, PAGE_MARGIN, y, contentWidth, "Environmental Impact", flattenEntries(environmental));
-  y = drawKeyValueCard(doc, PAGE_MARGIN, y, contentWidth, "Circular Economy Score", flattenEntries(wasteScoring));
-  drawBulletListCard(doc, PAGE_MARGIN, y, contentWidth, "Recycling Recommendation", recommendations);
+function drawPageTwo(
+  doc,
+  sustainability,
+  top3Predictions = []
+) {
+  const {
+    environmentalImpact,
+    recommendations,
+    wasteScoring,
+  } =
+    getSustainabilityData(
+      sustainability
+    );
+
+  const scoreBreakdown =
+    wasteScoring
+      .score_breakdown ||
+    {};
+
+  // --------------------------------------------------------------------------
+  // NO TITLE
+  // NO SUBTITLE
+  // NO "SUSTAINABILITY REPORT"
+  // --------------------------------------------------------------------------
+
+  let y = drawPageTwoTitle(doc);
+
+
+  // ==========================================================================
+  // TOP 3 PREDICTIONS
+  // ==========================================================================
+
+  y =
+    drawSectionTitle(
+      doc,
+      "Top 3 Predictions",
+      y
+    );
+
+  const predictions =
+    Array.isArray(
+      top3Predictions
+    )
+      ? top3Predictions
+      : [];
+
+  const predictionRows =
+    predictions
+      .slice(0, 3)
+      .map(
+        (
+          prediction,
+          index
+        ) => ({
+          values: [
+            index + 1,
+
+            prediction.material ||
+              prediction.fabric ||
+              "-",
+
+            prediction.confidence !==
+            undefined
+              ? `${formatNumber(
+                  prediction.confidence
+                )}%`
+              : "-",
+          ],
+        })
+      );
+
+  if (
+    predictionRows.length >
+    0
+  ) {
+    y =
+      drawThreeColumnTable(
+        doc,
+        predictionRows,
+        y
+      );
+  } else {
+    y =
+      drawTwoColumnTable(
+        doc,
+        [
+          {
+            label:
+              "Prediction Ranking",
+            value:
+              "No top predictions available.",
+          },
+        ],
+        y
+      );
+  }
+
+  y += 18;
+
+
+  // ==========================================================================
+  // ENVIRONMENTAL IMPACT
+  // ==========================================================================
+
+  y =
+    drawSectionTitle(
+      doc,
+      "Environmental Impact",
+      y
+    );
+
+  y =
+    drawTwoColumnTable(
+      doc,
+      [
+        {
+          // ASCII-safe: DO NOT use Unicode CO2 subscript
+          label:
+            "Estimated CO2 Saved",
+
+          value:
+            environmentalImpact
+              .estimated_co2_saved_kg !==
+              null &&
+            environmentalImpact
+              .estimated_co2_saved_kg !==
+              undefined
+              ? `${formatNumber(
+                  environmentalImpact
+                    .estimated_co2_saved_kg,
+                  3
+                )} kg`
+              : "Unavailable",
+        },
+
+        {
+          label:
+            "Estimated Water Saved",
+
+          value:
+            environmentalImpact
+              .estimated_water_saved_liters !==
+              null &&
+            environmentalImpact
+              .estimated_water_saved_liters !==
+              undefined
+              ? `${formatNumber(
+                  environmentalImpact
+                    .estimated_water_saved_liters,
+                  2
+                )} liters`
+              : "Unavailable",
+        },
+
+        {
+          label:
+            "Estimated Energy Saved",
+
+          value:
+            environmentalImpact
+              .estimated_energy_saved_mj !==
+              null &&
+            environmentalImpact
+              .estimated_energy_saved_mj !==
+              undefined
+              ? `${formatNumber(
+                  environmentalImpact
+                    .estimated_energy_saved_mj,
+                  2
+                )} MJ`
+              : "Unavailable",
+        },
+
+        {
+          label:
+            "Estimated Landfill Diversion",
+
+          value:
+            environmentalImpact
+              .estimated_landfill_diversion_kg !==
+              null &&
+            environmentalImpact
+              .estimated_landfill_diversion_kg !==
+              undefined
+              ? `${formatNumber(
+                  environmentalImpact
+                    .estimated_landfill_diversion_kg,
+                  3
+                )} kg`
+              : "Unavailable",
+        },
+
+        {
+          label:
+            "Environmental Score",
+
+          value:
+            environmentalImpact
+              .environmental_score !==
+              null &&
+            environmentalImpact
+              .environmental_score !==
+              undefined
+              ? `${environmentalImpact.environmental_score} / 100`
+              : "Unavailable",
+        },
+      ],
+      y
+    );
+
+  y += 18;
+
+
+  // ==========================================================================
+  // RECOVERY RECOMMENDATION
+  // ==========================================================================
+
+  y =
+    drawSectionTitle(
+      doc,
+      "Recovery Recommendation",
+      y
+    );
+
+  const actions =
+    recommendations
+      .recommended_actions;
+
+  let actionText = "-";
+
+  if (
+    Array.isArray(actions)
+  ) {
+    actionText =
+      actions
+        .map((action) =>
+          safeString(action)
+        )
+        .join(", ");
+  } else if (actions) {
+    actionText =
+      safeString(actions);
+  }
+
+  y =
+    drawTwoColumnTable(
+      doc,
+      [
+        {
+          label:
+            "Primary Method",
+
+          value:
+            recommendations
+              .primary_method ||
+            "-",
+        },
+
+        {
+          label:
+            "Recommended Actions",
+
+          value:
+            actionText,
+        },
+
+        {
+          label:
+            "Reuse Potential",
+
+          value:
+            recommendations
+              .reuse_potential ||
+            "-",
+        },
+
+        {
+          label:
+            "Waste Category",
+
+          value:
+            recommendations
+              .waste_category ||
+            "-",
+        },
+      ],
+      y
+    );
+
+  y += 18;
+
+
+  // ==========================================================================
+  // CIRCULAR ECONOMY SCORE
+  // ==========================================================================
+
+  y =
+    drawSectionTitle(
+      doc,
+      "Circular Economy Score",
+      y
+    );
+
+  y =
+    drawTwoColumnTable(
+      doc,
+      [
+        {
+          label:
+            "Circularity Score",
+
+          value:
+            wasteScoring
+              .circularity_score !==
+              null &&
+            wasteScoring
+              .circularity_score !==
+              undefined
+              ? `${wasteScoring.circularity_score} / 100`
+              : "Unavailable",
+        },
+
+        {
+          label:
+            "Circularity Category",
+
+          value:
+            wasteScoring
+              .circularity_category ||
+            "-",
+        },
+      ],
+      y
+    );
+
+  y += 18;
+
+
+  // ==========================================================================
+  // CIRCULARITY SCORE BREAKDOWN
+  // ==========================================================================
+
+  const breakdownRows = [
+    {
+      label:
+        "Material Recyclability",
+
+      value:
+        scoreBreakdown
+          .material_recyclability !==
+          null &&
+        scoreBreakdown
+          .material_recyclability !==
+          undefined
+          ? scoreBreakdown
+              .material_recyclability
+          : "Unavailable",
+    },
+
+    {
+      label:
+        "Material Condition",
+
+      value:
+        scoreBreakdown
+          .material_condition !==
+          null &&
+        scoreBreakdown
+          .material_condition !==
+          undefined
+          ? scoreBreakdown
+              .material_condition
+          : "Unavailable",
+    },
+
+    {
+      label:
+        "Reuse Score",
+
+      value:
+        scoreBreakdown
+          .reuse_score !==
+          null &&
+        scoreBreakdown
+          .reuse_score !==
+          undefined
+          ? scoreBreakdown
+              .reuse_score
+          : "Unavailable",
+    },
+
+    {
+      label:
+        "Environmental Benefit",
+
+      value:
+        scoreBreakdown
+          .environmental_benefit !==
+          null &&
+        scoreBreakdown
+          .environmental_benefit !==
+          undefined
+          ? scoreBreakdown
+              .environmental_benefit
+          : "Unavailable",
+    },
+
+    {
+      label:
+        "Processing Feasibility",
+
+      value:
+        scoreBreakdown
+          .processing_feasibility !==
+          null &&
+        scoreBreakdown
+          .processing_feasibility !==
+          undefined
+          ? scoreBreakdown
+              .processing_feasibility
+          : "Unavailable",
+    },
+  ];
+
+
+  // ==========================================================================
+  // CHECK IF BREAKDOWN FITS
+  // ==========================================================================
+
+  const estimatedHeight =
+    19 +
+    breakdownRows.length *
+      28;
+
+  if (
+    !sectionFits(
+      y,
+      estimatedHeight
+    )
+  ) {
+    // ------------------------------------------------------------------------
+    // PAGE 3
+    //
+    // IMPORTANT:
+    // NO "Circularity Analysis"
+    // NO extra title
+    // NO subtitle
+    // Start directly with section heading.
+    // ------------------------------------------------------------------------
+
+    doc.addPage();
+
+    y = 42;
+  }
+
+
+  // ==========================================================================
+  // CIRCULARITY SCORE BREAKDOWN TITLE
+  // ==========================================================================
+
+  y =
+    drawSectionTitle(
+      doc,
+      "Circularity Score Breakdown",
+      y
+    );
+
+
+  // ==========================================================================
+  // CIRCULARITY BREAKDOWN TABLE
+  // ==========================================================================
+
+  drawTwoColumnTable(
+    doc,
+    breakdownRows,
+    y
+  );
 }
 
+
 // ============================================================================
-// EXPORTED FUNCTIONS
+// DOWNLOAD SINGLE PREDICTION PDF
 // ============================================================================
 
-/**
- * @param {Object} params
- * @param {File} params.imageFile - the original uploaded fabric image
- * @param {string} params.material
- * @param {number} params.confidence
- * @param {string} [params.defect] - NEW: detected defect label, if any
- * @param {number} [params.defectConfidence] - NEW: defect detection confidence (%)
- * @param {string} params.wasteCategory
- * @param {string} params.recyclability
- * @param {string} params.recommendation
- * @param {Array<{material: string, confidence: number}>} params.top3Predictions
- * @param {Object} [params.materialTypeInfo] - { type, commonUses, description }
- * @param {number} [params.processingTimeSeconds]
- * @param {Object} [params.sustainability] - { material_information, overall_sustainability,
- *   environmental_impact, waste_scoring, recommendations }
- * @param {string} [params.fileName] - output filename, defaults to a generated one
- *
- * MODIFIED: now renders the redesigned 2-page sustainability report
- * (drawReportPageOne + drawReportPageTwo) instead of the single legacy
- * page. The function signature, parameter names, and the way it's called
- * from Predictions.jsx are unchanged — only two new optional params
- * (`defect`, `defectConfidence`) were added, both of which Predictions.jsx
- * already passes today. No business logic, calculation, or API/data
- * mapping was touched.
- */
 export async function downloadPredictionPdf({
   imageFile,
   material,
@@ -737,124 +1700,312 @@ export async function downloadPredictionPdf({
   sustainability,
   fileName,
 }) {
-  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const doc =
+    new jsPDF({
+      orientation:
+        "portrait",
 
-  await drawReportPageOne(doc, {
-    imageFile,
-    material,
-    confidence,
-    defect,
-    defectConfidence,
-    wasteCategory,
-    recyclability,
-    recommendation,
-    top3Predictions,
-    materialTypeInfo,
-    processingTimeSeconds,
-    sustainability,
-  });
+      unit: "pt",
+
+      format: "a4",
+    });
+
+
+  // ==========================================================================
+  // PAGE 1
+  // ==========================================================================
+
+  await drawPageOne(
+    doc,
+    {
+      imageFile,
+
+      material,
+
+      confidence,
+
+      defect,
+
+      defectConfidence,
+
+      wasteCategory,
+
+      recyclability,
+
+      recommendation,
+
+      top3Predictions,
+
+      materialTypeInfo,
+
+      processingTimeSeconds,
+
+      sustainability,
+    }
+  );
+
+
+  // ==========================================================================
+  // PAGE 2
+  // ==========================================================================
 
   doc.addPage();
-  drawReportPageTwo(doc, sustainability);
 
-  finalizeDocument(doc);
-  doc.save(fileName || `fabric_prediction_${String(material ?? "report").toLowerCase()}_${Date.now()}.pdf`);
+  drawPageTwo(
+    doc,
+    sustainability,
+    top3Predictions
+  );
+
+
+  // ==========================================================================
+  // FOOTER
+  // ==========================================================================
+
+  addFooter(doc);
+
+
+  // ==========================================================================
+  // FILE NAME
+  // ==========================================================================
+
+  const safeMaterial =
+    safeString(
+      material,
+      "fabric"
+    )
+      .toLowerCase()
+      .replace(
+        /[^a-z0-9]+/g,
+        "_"
+      );
+
+  doc.save(
+    fileName ||
+      `fabric_prediction_${safeMaterial}_${Date.now()}.pdf`
+  );
 }
 
-/**
- * Generates ONE combined PDF covering every completed prediction in a batch.
- * UNCHANGED — still uses the original single-page-per-item layout
- * (drawPredictionPage) for visual consistency with existing batch reports.
- *
- * @param {Array<Object>} items - each shaped like downloadPredictionPdf's params
- *   (imageFile, material, confidence, wasteCategory, recyclability,
- *   recommendation, top3Predictions, materialTypeInfo)
- * @param {Object} [summary] - optional aggregate stats for the cover page:
- *   { total, processed, avgConfidence, recyclableCount }
- * @param {string} [fileName]
- */
-export async function downloadBatchPredictionsReport(items, summary = {}, fileName) {
-  if (!items || items.length === 0) return;
 
-  const doc = new jsPDF({ unit: "pt", format: "a4" });
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
-  const contentWidth = pageWidth - PAGE_MARGIN * 2;
+// ============================================================================
+// BATCH PREDICTION REPORT
+// ============================================================================
 
-  // --- Cover page ---
-  let y = drawHeader(doc, { title: "Batch Prediction Report", subtitle: new Date().toLocaleString() });
-  y += 8;
+export async function downloadBatchPredictionsReport(
+  items,
+  summary = {},
+  fileName
+) {
+  const predictions =
+    Array.isArray(items)
+      ? items
+      : [];
 
-  // Summary stat cards, 4 across
-  const cardGap = 14;
-  const cardWidth = (contentWidth - cardGap * 3) / 4;
-  const cardHeight = 58;
-  const statCards = [
-    ["Total Images", summary.total ?? items.length],
-    ["Processed Images", summary.processed ?? items.length],
-    ["Avg. Confidence", summary.avgConfidence != null ? `${summary.avgConfidence}%` : "-"],
-    ["Recyclable Materials", summary.recyclableCount ?? "-"],
-  ];
-  statCards.forEach(([label, value], index) => {
-    drawStatCard(doc, PAGE_MARGIN + index * (cardWidth + cardGap), y, cardWidth, cardHeight, label, value);
-  });
-  y += cardHeight + 32;
 
-  // --- Included Predictions list ---
-  doc.setFontSize(13);
-  doc.setFont("helvetica", "bold");
-  setTextColor(doc, COLORS.dark);
-  doc.text("Included Predictions", PAGE_MARGIN, y);
-  y += 20;
+  if (
+    predictions.length ===
+    0
+  ) {
+    console.warn(
+      "No predictions available for batch PDF."
+    );
 
-  const rowHeight = 26;
-  const barX = PAGE_MARGIN + contentWidth - 150;
-  const barWidth = 90;
-
-  items.forEach((item, index) => {
-    if (y + rowHeight > pageHeight - 60) {
-      doc.addPage();
-      y = PAGE_MARGIN;
-    }
-
-    if (index % 2 === 0) {
-      setFill(doc, COLORS.grayLight);
-      doc.rect(PAGE_MARGIN, y - 15, contentWidth, rowHeight, "F");
-    }
-
-    doc.setFontSize(9.5);
-    doc.setFont("helvetica", "normal");
-    setTextColor(doc, COLORS.gray);
-    doc.text(`${index + 1}.`, PAGE_MARGIN + 8, y);
-
-    doc.setFont("helvetica", "bold");
-    setTextColor(doc, COLORS.dark);
-    const label = item.fileName || item.material;
-    const truncatedLabel = doc.splitTextToSize(String(label), 200)[0];
-    doc.text(truncatedLabel, PAGE_MARGIN + 26, y);
-
-    doc.setFont("helvetica", "normal");
-    setTextColor(doc, COLORS.gray);
-    doc.text(String(item.material), PAGE_MARGIN + 230, y);
-
-    drawProgressBar(doc, barX, y - 7, barWidth, 6, item.confidence, COLORS.green);
-    doc.setFont("helvetica", "bold");
-    setTextColor(doc, COLORS.dark);
-    doc.text(`${item.confidence}%`, PAGE_MARGIN + contentWidth, y, { align: "right" });
-
-    y += rowHeight;
-  });
-
-  // --- One detail page per item ---
-  for (let i = 0; i < items.length; i += 1) {
-    doc.addPage();
-    // eslint-disable-next-line no-await-in-loop
-    await drawPredictionPage(doc, {
-      ...items[i],
-      headerSubtitle: `Item ${i + 1} of ${items.length}`,
-    });
+    return;
   }
 
-  finalizeDocument(doc);
-  doc.save(fileName || `batch_prediction_report_${Date.now()}.pdf`);
+
+  const doc =
+    new jsPDF({
+      orientation:
+        "portrait",
+
+      unit: "pt",
+
+      format: "a4",
+    });
+
+
+  // ==========================================================================
+  // PAGE 1 HEADER
+  // ==========================================================================
+
+  let y =
+    drawFirstPageHeader(
+      doc,
+      "Batch Fabric Prediction Report",
+      new Date().toLocaleString()
+    );
+
+
+  // ==========================================================================
+  // BATCH SUMMARY
+  // ==========================================================================
+
+  y =
+    drawSectionTitle(
+      doc,
+      "Batch Summary",
+      y
+    );
+
+  y =
+    drawTwoColumnTable(
+      doc,
+      [
+        {
+          label:
+            "Total Predictions",
+
+          value:
+            summary.total ??
+            predictions.length,
+        },
+
+        {
+          label:
+            "Processed Predictions",
+
+          value:
+            summary.processed ??
+            predictions.length,
+        },
+
+        {
+          label:
+            "Average Confidence",
+
+          value:
+            summary.avgConfidence !==
+            undefined
+              ? `${formatNumber(
+                  summary.avgConfidence
+                )}%`
+              : "-",
+        },
+
+        {
+          label:
+            "Recyclable Count",
+
+          value:
+            summary.recyclableCount ??
+            "-",
+        },
+      ],
+      y
+    );
+
+  y += 18;
+
+
+  // ==========================================================================
+  // BATCH RESULTS (OVERVIEW TABLE)
+  // ==========================================================================
+
+  y =
+    drawSectionTitle(
+      doc,
+      "Prediction Results",
+      y
+    );
+
+  const rows =
+    predictions.map(
+      (
+        item,
+        index
+      ) => ({
+        values: [
+          index + 1,
+
+          item.material ||
+            "-",
+
+          item.confidence !==
+          undefined
+            ? `${formatNumber(
+                item.confidence
+              )}%`
+            : "-",
+        ],
+      })
+    );
+
+
+  drawThreeColumnTable(
+    doc,
+    rows,
+    y
+  );
+
+
+  // ==========================================================================
+  // PER-ITEM DETAIL PAGES
+  //
+  // Each item gets the SAME two-page layout as a single prediction report
+  // (drawPageOne + drawPageTwo), so the combined batch PDF carries the full
+  // defect / material / environmental / circularity detail instead of only
+  // the material + confidence summary row above.
+  // ==========================================================================
+
+  for (
+    let index = 0;
+    index < predictions.length;
+    index++
+  ) {
+    const item = predictions[index];
+
+    doc.addPage();
+
+    await drawPageOne(
+      doc,
+      {
+        imageFile: item.imageFile,
+        material: item.material,
+        confidence: item.confidence,
+        defect: item.defect,
+        defectConfidence: item.defectConfidence,
+        wasteCategory: item.wasteCategory,
+        recyclability: item.recyclability,
+        recommendation: item.recommendation,
+        processingTimeSeconds: item.processingTimeSeconds,
+        sustainability: item.sustainability,
+      }
+    );
+
+    doc.addPage();
+
+    drawPageTwo(
+      doc,
+      item.sustainability,
+      item.top3Predictions
+    );
+  }
+
+
+  // ==========================================================================
+  // FOOTER
+  // ==========================================================================
+
+  addFooter(doc);
+
+
+  // ==========================================================================
+  // SAVE
+  // ==========================================================================
+
+  doc.save(
+    fileName ||
+      `batch_fabric_prediction_report_${Date.now()}.pdf`
+  );
 }
+
+
+// ============================================================================
+// DEFAULT EXPORT
+// ============================================================================
+
+export default {
+  downloadPredictionPdf,
+  downloadBatchPredictionsReport,
+};

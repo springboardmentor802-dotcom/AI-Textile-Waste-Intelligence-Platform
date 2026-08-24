@@ -1,0 +1,97 @@
+/* AI Activity page -- reuses .kpi-card/.kpi-grid/.mfr-graph-card from
+   Dashboard.css as-is. Only addition: a couple of KPI cards here show
+   a short text value (e.g. a waste category name) instead of a number,
+   so the font-size needs to come down slightly to avoid overflow/wrap
+   on longer category names. */
+
+.ai-activity-text-value {
+  font-size: 20px !important;
+  line-height: 1.25 !important;
+  text-transform: capitalize;
+  word-break: break-word;
+}
+
+.ai-activity-note {
+  margin: 14px 2px 0;
+  color: #9aa79e;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* ---------------------------------------------------------
+   Single gold/yellow visual identity. Reuses every layout
+   class from Dashboard.css (.kpi-grid, .kpi-card, .mfr-graph-
+   card) -- only the color accents that Dashboard.css doesn't
+   already expose via CSS variables (card border, heading
+   color) are overridden here, scoped to this page only.
+---------------------------------------------------------- */
+
+/* Dashboard.css's shared .kpi-grid defaults to 4 columns.
+   This page only ever renders 3 KPI cards, so without this
+   override the row sits in the first 3 of 4 columns instead
+   of stretching evenly across the row. */
+.aa-kpi-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* Dashboard.css's .kpi-card fills with a gradient into
+   var(--p-soft) (the tinted gold wash). Override to a flat
+   white background here, keeping only the border/icon/heading
+   accents gold -- matches the clean white-card look of the
+   Recovery Insights reference. */
+/* AI Activity KPI cards — soft white → light gold shade */
+.aa-kpi-grid .kpi-card {
+  text-align: center;
+
+  border-color: var(--p-border);
+
+  background: linear-gradient(
+    135deg,
+    #ffffff 0%,
+    var(--p-soft) 100%
+  );
+}
+
+/* Icon + heading stay together on the same row */
+.aa-kpi-grid .kpi-top {
+  justify-content: flex-start;
+}
+
+/* Center KPI description */
+.ai-activity-page .kpi-card > small {
+  display: block;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 8px;
+
+  text-align: center;
+  line-height: 1.4;
+}
+/* Remove the decorative accent circle (Dashboard.css
+   .kpi-card::after) from this page's KPI cards. */
+.aa-kpi-grid .kpi-card::after {
+  display: none;
+}
+
+/* Descriptions must be centered under each KPI value. */
+.ai-activity-page .kpi-card small {
+  display: block;
+  width: 100%;
+  text-align: center;
+  line-height: 1.4;
+  margin-top: 8px;
+}
+
+.aa-graph-card {
+  background: #ffffff;
+  border-color: var(--p-border);
+}
+
+.aa-graph-card h3 {
+  color: #4A3B08;
+}
+
+.ai-activity-page .kpi-card > strong {
+  color: #3A2E06;
+}

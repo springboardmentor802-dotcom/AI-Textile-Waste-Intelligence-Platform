@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { getPredictionHistory, deletePredictionHistory } from "../services/api";
 import { exportHistoryToCsv, exportHistoryToExcel, exportHistoryToPdf } from "../utils/historyExport";
+import Topbar from "../components/Topbar";
 
 import "./History.css";
 
@@ -151,8 +152,10 @@ function History() {
   const hasRecords = filteredHistory.length > 0;
 
   return (
-    <div className="history-page">
-      <div className="history-header">
+    <div className="dash-shell">
+      <Topbar />
+      <div className="history-page">
+        <div className="history-header">
         <h1>History</h1>
         <p>Review all your previous AI fabric predictions and recycling recommendations.</p>
       </div>
@@ -414,6 +417,7 @@ function History() {
         )}
       </div>
     </div>
+  </div>
   );
 }
 

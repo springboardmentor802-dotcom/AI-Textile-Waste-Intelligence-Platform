@@ -1,246 +1,677 @@
+/* =========================================================
+   DASHBOARD
+   User-approved direction:
+   - Keep existing green sidebar/topbar
+   - White dashboard background
+   - No search redesign here
+   - Large, spacious hero with subtle leaf accents (no big badge)
+   - Light KPI cards
+   - Light, same-family action cards (soft tint, not solid dark)
+   - No unnecessary charts or old dashboard panels
+   ========================================================= */
+
 .dash-shell {
-  flex: 1;
-  background: #f8faf7;
   min-height: 100vh;
+  background: #ffffff;
+  color: #17231a;
 }
 
 .dash-page {
-  padding: 1.5rem 2rem;
-  font-family: 'Segoe UI', system-ui, sans-serif;
-}
-
-.dash-banner {
-  background: #eef6ec;
-  border-radius: 14px;
-  padding: 0.7rem 1.4rem;
-  margin-bottom: 1.5rem;
-}
-.dash-banner h2 {
-  margin: 0 0 0.1rem;
-  font-size: 1.08rem;
-  color: #1e3a24;
-}
-.dash-banner p {
-  margin: 0;
-  color: #6b7268;
-  font-size: 0.8rem;
-}
-
-.dash-error {
-  color: #c62828;
-  margin-bottom: 1rem;
-}
-
-.dash-cards {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.dash-card {
+  max-width: 1450px;
+  margin: 0 auto;
+  padding: 18px 28px 34px;
   background: #ffffff;
-  border-radius: 12px;
-  padding: 1.05rem 1.1rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-.dash-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.09);
 }
 
-.dash-card-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-}
-.dash-card-row .dash-icon-circle {
-  margin-bottom: 0;
-  flex-shrink: 0;
-}
-
-.dash-icon-circle {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #eef4ec;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 0.5rem;
-}
-
-.dash-card-label {
-  font-size: 0.78rem;
-  color: #2b2f36;
-  font-weight: 500
-  margin: 0 0 0.15rem;
-}
-
-.dash-card-value {
-  font-size: 1.35rem;
-  font-weight: 800;
-  color: #1e3a24;
-  line-height: 1.15;
-}
-.dash-card-value span {
-  font-size: 0.68rem;
-  font-weight: 500;
-  color: #8a9188;
-}
-.dash-card-value-muted {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: #9aa3ac;
-}
-
-.dash-trend {
-  font-size: 0.7rem;
-  margin-top: 0.3rem;
-  font-weight: 600;
-}
-.dash-trend-neutral {
-  color: #8a9188;
-}
-
-.dash-lower {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.dash-panel {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 1.1rem 1.2rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-}
-
-.dash-panel h3 {
-  margin: 0 0 0.85rem;
-  color: #1e3a24;
-  font-size: 0.9rem;
-}
-
-.dash-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.6rem;
-}
-.dash-actions button {
+.dash-errors {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 0.5rem;
-  padding: 0.75rem;
-  border: 1px solid #e7efe4;
-  background: #fbfdfa;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.dash-errors span {
+  padding: 10px 14px;
+  border: 1px solid #f1c4c4;
   border-radius: 10px;
-  cursor: pointer;
-  font-size: 0.78rem;
-  color: #2b2f36;
-  font-weight: 500;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-}
-.dash-actions button:hover {
-  background: #f2f8f0;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+  background: #fff7f7;
+  color: #b42318;
+  font-size: 12px;
 }
 
-.dash-action-row {
-  flex-direction: row !important;
-  align-items: center !important;
+/* HERO */
+
+.dashboard-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 42px 44px 0;
+  border: 1px solid #e3ece5;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 88% 12%, rgba(99, 176, 165, 0.16), transparent 32%),
+    radial-gradient(circle at 70% 55%, rgba(238, 212, 93, 0.10), transparent 30%),
+    linear-gradient(120deg, #fbfdfc 0%, #f2f8f4 55%, #f8f9fc 100%);
 }
 
-.dash-action-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: #eef4ec;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+.hero-leaves {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
 }
 
-.dash-chart-row {
-  display: flex;
-  align-items: center;
-  gap: 1.2rem;
+.hero-leaf {
+  position: absolute;
+  color: #63b0a5;
+  opacity: 0.55;
 }
 
-.dash-legend {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  font-size: 0.72rem;
-}
-.dash-legend li {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 0.4rem;
-  color: #2b2f36;
-}
-.dash-legend li span:last-child {
-  margin-left: auto;
-  color: #8a9188;
-}
+.leaf-one { top: 30px; right: 210px; transform: rotate(15deg); color: #63b0a5; }
+.leaf-two { top: 58px; right: 120px; transform: rotate(-10deg); color: #2f8c57; opacity: 0.7; }
+.leaf-three { top: 40px; right: 60px; transform: rotate(35deg); color: #63b0a5; opacity: 0.45; }
+.leaf-four { top: 96px; right: 168px; transform: rotate(-25deg); color: #2f8c57; opacity: 0.55; }
+.leaf-five { top: 118px; right: 84px; transform: rotate(50deg); color: #63b0a5; opacity: 0.4; }
 
-.dash-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.dash-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.8rem;
-}
-.dash-table th {
+.hero-copy {
+  position: relative;
+  z-index: 2;
+  max-width: 720px;
   text-align: left;
-  color: #8a9188;
-  font-weight: 600;
-  padding: 0.35rem 0.5rem;
-  border-bottom: 1px solid #eef3ec;
-}
-.dash-table td {
-  padding: 0.5rem 0.5rem;
-  border-bottom: 1px solid #f3f6f1;
-  color: #2b2f36;
-}
-.dash-activity-cell {
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 
-.dash-empty {
+.hero-copy h1 {
+  margin: 0;
+  color: #122016;
+  font-size: clamp(42px, 3.8vw, 58px);
+  line-height: 1.08;
+  font-weight: 800;
+  letter-spacing: -1.8px;
+  text-align: left;
+}
+
+.hero-copy h1 span {
+  color: #2f8c57;
+}
+
+.hero-copy > p {
+  max-width: 720px;
+  margin: 22px 0 0;
+  color: #536159;
+  font-size: 17px;
+  line-height: 1.65;
+  text-align: left;
+}
+
+.hero-divider {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  margin: 34px 0 28px;
+}
+
+.hero-divider span {
+  flex: 1;
+  height: 1px;
+  background: rgba(47, 140, 87, 0.35);
+}
+
+.hero-divider strong {
+  color: #1f5d3b;
+  font-size: 16px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+/* FOUR PRINCIPLES — integrated into the hero, not a separate card */
+
+.hero-principles {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: none !important;
+}
+
+.hero-principles article {
+  border: none !important;
   display: flex;
   flex-direction: column;
   align-items: center;
+  text-align: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 0 24px 28px;
+}
+
+.hero-principles article + article {
+  border-left: 1px solid rgba(47, 140, 87, 0.16) !important;
+}
+
+.hero-principles article > span {
+  display: flex;
+  align-items: center;
   justify-content: center;
-  gap: 0.4rem;
-  padding: 2rem 1rem;
+  width: 56px;
+  height: 56px;
+  flex: 0 0 40px;
+  border-radius: 50%;
+  background: #eaf5eb;
+  color: #2f8c57;
+}
+
+.hero-principles article > div {
+  width: 100%;
+  max-width: 180px;
+}
+
+.hero-principles strong {
+  display: block;
+  margin-bottom: 7px;
+  color: #17231a;
+  font-size: 17px;
+  line-height: 1.3;
+  font-weight: 750;
+}
+
+.hero-principles p {
+  margin: 0;
+  color: #536159;
+  font-size: 14px;
+  line-height: 1.55;
+  font-weight: 450;
+}
+
+/* HEADINGS */
+
+.dashboard-section {
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+.section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 14px;
+  text-align: left;
+}
+
+.section-heading h2 {
+  margin: 0;
+  text-align: left;
+  color: #17231a;
+  font-size: 22px;
+  line-height: 1.25;
+  font-weight: 700;
+}
+
+.section-heading p {
+  margin: 5px 0 0;
+  text-align: left;
+  color: #536159;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* KPI — LIGHT SHADES */
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.kpi-card {
+  position: relative;
+  min-height: 125px;
+  height: 125px;
+  overflow: hidden;
+  padding: 16px 18px;
+  border: 1px solid var(--p-border);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 92% 18%, rgba(255,255,255,0.85), transparent 28%),
+    linear-gradient(135deg, #ffffff 0%, var(--p-soft) 100%);
+  box-shadow: 0 6px 18px rgba(34, 61, 40, 0.06);
+}
+
+.kpi-card::after {
+  content: '';
+  position: absolute;
+  right: -30px;
+  bottom: -45px;
+  width: 125px;
+  height: 95px;
+  border-radius: 50%;
+  background: var(--p-accent);
+  opacity: 0.08;
+}
+
+.kpi-top {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.kpi-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--p-border);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.75);
+  color: var(--p-icon);
+}
+
+.kpi-label {
+  color: var(--p-text);
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.kpi-card > strong {
+  position: relative;
+  z-index: 1;
+  display: block;
+  margin-top: 18px;
+  color: #122016;
+  font-size: 30px;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.kpi-card > strong em {
+  margin-left: 4px;
+  color: #566158;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 650;
+}
+
+.kpi-card > small {
+  position: relative;
+  z-index: 1;
+  display: block;
+  max-width: 145px;
+  margin-top: 6px;
+  color: #566158;
+  font-size: 12px;
+  line-height: 1.35;
+  font-weight: 400;
+}
+
+/* WORK / QUICK ACTIONS — LIGHT, SAME-FAMILY SHADES */
+
+.work-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 14px;
+}
+
+.work-card {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  min-height: 156px;
+  overflow: hidden;
+  padding: 24px 26px;
+  border: 1px solid var(--p-border);
+  border-radius: 16px;
+  text-align: left;
+  cursor: pointer;
+  background: linear-gradient(135deg, #ffffff 0%, var(--p-soft) 100%);
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.work-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(28, 42, 35, 0.1);
+}
+
+.work-icon {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 58px;
+  width: 58px;
+  height: 58px;
+  border: 1px solid var(--p-border);
+  border-radius: 17px;
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--p-icon);
+}
+
+.work-content {
+  position: relative;
+  z-index: 2;
+  display: block;
+  min-width: 0;
+  max-width: 470px;
+}
+
+.work-content strong {
+  display: block;
+  margin: 2px 0 8px;
+  color: var(--p-text);
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.work-content small {
+  display: block;
+  max-width: 410px;
+  min-height: 32px;
+  color: #566158;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.work-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 9px 16px;
+  border-radius: 9px;
+  background: var(--p-button);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.work-button svg {
+  flex: 0 0 auto;
+}
+
+.work-watermark {
+  position: absolute;
+  right: 14px;
+  bottom: -16px;
+  z-index: 1;
+  color: var(--p-icon);
+  opacity: 0.07;
+}
+
+/* =========================================================
+   MANUFACTURER GRAPH SECTION (Textile Manufacturer only)
+   Additive block -- does not alter any existing selectors.
+   ========================================================= */
+
+.mfr-graph-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.mfr-graph-card {
+  padding: 20px 22px;
+  border: 1px solid #e3ece5;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 6px 18px rgba(34, 61, 40, 0.06);
+}
+
+.mfr-graph-card h3 {
+  margin: 0 0 14px;
+  color: #17231a;
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.mfr-graph-card-wide {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 800px) {
+  .mfr-graph-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 1100px) {
+  .dash-page {
+    padding: 18px 22px 30px;
+  }
+
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hero-principles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hero-principles article:nth-child(3) {
+    border: none !important;
+    border-left: none !important;
+    border-top: none !important;
+    padding-top: 16px;
+  }
+
+  .hero-principles article:nth-child(4) {
+    border: none !important;
+    border-top: none !important;
+    padding-top: 16px;
+  }
+
+  .hero-leaf {
+    display: none;
+  }
+}
+
+@media (max-width: 800px) {
+  .dashboard-hero {
+    padding: 25px 25px 0;
+  }
+
+  .hero-copy h1 {
+    font-size: 35px;
+  }
+
+  .hero-principles {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-principles article,
+  .hero-principles article:nth-child(3),
+  .hero-principles article:nth-child(4) {
+    border: none !important;
+    border-left: none !important;
+    border-top: none !important;
+    padding-top: 16px;
+  }
+
+  .hero-principles article:first-child {
+    border: none !important;
+    border-top: none !important;
+    padding-top: 0;
+  }
+
+  .work-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .dash-page {
+    padding: 14px 12px 26px;
+  }
+
+  .dashboard-hero {
+    border-radius: 15px;
+    padding: 22px 20px 0;
+  }
+
+  .hero-copy h1 {
+    font-size: 30px;
+    letter-spacing: -0.8px;
+  }
+
+  .hero-copy > p {
+    font-size: 13px;
+  }
+
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kpi-card {
+    min-height: 100px;
+  }
+
+  .work-card {
+    min-height: 118px;
+  }
+}
+/* =========================================================
+   TOPBAR OPERATOR IDENTITY
+   Add these classes to the name/role elements in Topbar.jsx:
+   .topbar-user-name and .topbar-user-role
+   ========================================================= */
+
+.topbar-user-name {
+  color: #17231a;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.topbar-user-role {
+  color: #17231a;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+/* Textile Manufacturer KPI alignment */
+.mfr-kpi-grid .kpi-card {
   text-align: center;
 }
-.dash-empty p {
-  margin: 0;
-  color: #9aa3ac;
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-.dash-empty span {
-  color: #c3ccc0;
-  font-size: 0.75rem;
+
+.mfr-kpi-grid .kpi-top {
+  justify-content: center;
 }
 
-@media (max-width: 900px) {
-  .dash-cards { grid-template-columns: repeat(2, 1fr); }
-  .dash-lower { grid-template-columns: 1fr; }
+.mfr-kpi-grid .kpi-card > strong {
+  text-align: center;
+}
+
+.mfr-kpi-grid .kpi-card > small {
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+/* =========================================================
+   ADMINISTRATOR PLATFORM ANALYTICS
+   Reuses .kpi-grid / .kpi-card (KPI numbers) and .mfr-graph-grid /
+   .mfr-graph-card (breakdown cards) as-is -- only new classes below
+   are the label + bar + count rows inside each breakdown card, and
+   the loading/empty text states. Same color/spacing tokens as the
+   rest of this file, nothing new invented.
+   ========================================================= */
+
+.admin-analytics-state {
+  padding: 24px;
+  color: #536159;
+  font-size: 13px;
+}
+
+.admin-analytics-empty {
+  margin: 4px 0 0;
+  color: #9aa79e;
+  font-size: 12px;
+}
+
+.admin-breakdown-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-breakdown-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-breakdown-label {
+  color: #374151;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-breakdown-track {
+  height: 8px;
+  border-radius: 999px;
+  background: #f0f2f0;
+  overflow: hidden;
+}
+
+.admin-breakdown-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #63b0a5, #2f8c57);
+}
+
+.admin-breakdown-count {
+  min-width: 24px;
+  text-align: right;
+  color: #17231a;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.admin-breakdown-more {
+  margin: 10px 0 0;
+  color: #9aa79e;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Administrator hero has no "Why it matters" strip below the copy,
+   so it needs its own bottom padding where .hero-principles would
+   normally have supplied it. Other roles are untouched -- this class
+   is only added to the hero for role === 'administrator'. */
+.dashboard-hero--compact {
+  padding-bottom: 40px;
+}
+
+@media (max-width: 700px) {
+  .admin-breakdown-row {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "label count"
+      "track track";
+    row-gap: 4px;
+  }
+
+  .admin-breakdown-label {
+    grid-area: label;
+  }
+
+  .admin-breakdown-count {
+    grid-area: count;
+  }
+
+  .admin-breakdown-track {
+    grid-area: track;
+  }
 }

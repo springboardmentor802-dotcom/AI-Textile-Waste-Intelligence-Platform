@@ -1,0 +1,163 @@
+/* ---------------------------------------------------------
+   Platform Analytics — single pink/magenta visual identity.
+   Reuses every layout class from Dashboard.css (.kpi-grid,
+   .kpi-card, .mfr-graph-card, .admin-breakdown-*) so no new
+   layout is introduced here -- only the color accents that
+   Dashboard.css doesn't already expose via CSS variables
+   (card border, heading color, label width, KPI alignment)
+   are overridden, scoped to this page only via .pa-graph-card
+   / .pa-kpi-grid / .platform-analytics-page.
+---------------------------------------------------------- */
+
+/* Dashboard.css's shared .kpi-grid defaults to 4 columns.
+   This page only ever renders 3 KPI cards, so without this
+   override the row sits in the first 3 of 4 columns instead
+   of stretching evenly across the row. */
+.pa-kpi-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* .mfr-graph-card hardcodes a neutral border/shadow in
+   Dashboard.css; override the border color here -- kept light
+   (var(--p-border) is a pale pink, not the strong accent used
+   for bars/headings) -- and force a flat white interior instead
+   of the tinted gradient wash, matching the clean white-card
+   look of the Recovery Insights reference. */
+.pa-graph-card {
+  border: 1px solid #7A2E52 !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 1px #7A2E52 !important;
+}
+
+.pa-graph-card h3 {
+  color: #3D0C28;
+}
+
+/* .admin-breakdown-fill (Dashboard.css) reads var(--p-accent)
+   with a teal fallback for pages that never set it. This page
+   always sets --p-accent via pinkVars(), but pin the fallback
+   here too so the bars can never render green if that value is
+   ever missing for any reason. */
+.pa-graph-card .admin-breakdown-fill {
+  background: #7A2E52 !important;
+}
+
+/* The inactive/background portion of each bar was a neutral
+   gray by default -- give it a very light pink tint here so it
+   still reads as part of the pink theme instead of a leftover
+   gray track. */
+.pa-graph-card .admin-breakdown-track {
+  background: #FBE7F0;
+}
+
+/* ---------------------------------------------------------
+   Label width fix -- Dashboard.css's default
+   .admin-breakdown-row grid (1fr / 2fr / auto) gives the label
+   column too little room, forcing aggressive truncation on
+   names like "Recycling Facility Operator". Give the label a
+   wider, still-flexible column; keep the bar in the middle and
+   the count on the right, per spec. Ellipsis + a title attribute
+   (set in the JSX) still cover the rare genuinely-long name.
+---------------------------------------------------------- */
+.pa-graph-card .admin-breakdown-row {
+  grid-template-columns: minmax(120px, 1.6fr) 1fr auto;
+}
+
+.pa-graph-card .admin-breakdown-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------
+   Expand / collapse control ("+ N more" / "Show less") for
+   Waste Category Distribution. Replaces the old static,
+   non-interactive "+ N more" text with a real button.
+---------------------------------------------------------- */
+.admin-breakdown-toggle {
+  display: inline-block;
+  margin: 10px 0 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--p-button, #7A1E49);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-breakdown-toggle:hover {
+  text-decoration: underline;
+}
+
+/* =========================================================
+   KPI CARDS
+   ========================================================= */
+
+.pa-kpi-grid .kpi-card {
+  background: linear-gradient(
+    135deg,
+    #ffffff 0%,
+    #F4E8EF 100%
+  ) !important;
+
+  border: 1px solid #DDB8CA !important;
+  color: #7A2E52 !important;
+
+  overflow: hidden;
+}
+
+/* Remove half-round decoration */
+.pa-kpi-grid .kpi-card::before,
+.pa-kpi-grid .kpi-card::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Icon - same as Manufacturer Recovery Insights */
+.pa-kpi-grid .kpi-card .kpi-icon {
+  color: #C874A2 !important;
+  background: rgba(255, 255, 255, 0.75) !important;
+  border-color: #DDB8CA !important;
+}
+
+/* KPI title - same as .mri-card-copy > span */
+.pa-kpi-grid .kpi-card .kpi-label {
+  color: #7A2E52 !important;
+}
+
+/* KPI number - same as .mri-card-copy strong */
+.platform-analytics-page .kpi-card > strong {
+  color: #122016 !important;
+}
+
+/* /100 */
+.platform-analytics-page .kpi-card > strong em {
+  color: #122016 !important;
+}
+
+/* Description - same as .mri-card-copy small */
+.pa-kpi-grid .kpi-card > small {
+  display: block;
+  width: 100%;
+  text-align: center;
+  line-height: 1.4;
+  margin-top: 8px;
+  color: #566158 !important;
+}
+
+/* Match TrendChart axis and grid lines to the pink/magenta theme */
+.pa-graph-card .recharts-cartesian-axis-line,
+.pa-graph-card .recharts-cartesian-grid-horizontal line,
+.pa-graph-card .recharts-cartesian-grid-vertical line {
+  stroke: #7A2E52 !important;
+}
+
+.pa-graph-card .recharts-cartesian-axis-tick-line {
+  stroke: #7A2E52 !important;
+}
+
+/* Optional: Make the axis labels darker for better readability */
+.pa-graph-card .recharts-cartesian-axis-tick-value {
+  fill: #3D0C28 !important;
+}

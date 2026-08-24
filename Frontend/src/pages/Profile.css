@@ -1,0 +1,302 @@
+/* =========================================================
+   PROFILE
+   Page-scoped styling only.
+   Topbar and Back to Dashboard are intentionally removed.
+   Uses the clean green/white reference palette.
+   ========================================================= */
+
+.profile-page {
+  --profile-green: #16834B;
+  --profile-dark-green: #0F5132;
+  --profile-light-green: #EAF6EF;
+  --profile-border: #CFE5D8;
+  --profile-text: #12251B;
+  --profile-muted: #52665B;
+
+  --p-soft: var(--profile-light-green);
+  --p-border: var(--profile-border);
+  --p-icon: var(--profile-green);
+  --p-accent: var(--profile-green);
+  --p-button: var(--profile-green);
+}
+
+.profile-card {
+  position: relative;
+  max-width: 560px;
+  overflow: hidden;
+  padding: 24px 26px;
+  border: 1px solid var(--profile-border);
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 6px 18px rgba(15, 81, 50, 0.06);
+}
+
+.profile-card-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 18px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--p-border);
+}
+
+.profile-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  flex-shrink: 0;
+  border: 1px solid var(--profile-border);
+  border-radius: 50%;
+  background: var(--profile-light-green);
+  color: var(--profile-green);
+}
+
+.profile-name {
+  color: var(--profile-text);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.profile-role-badge {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--profile-green);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* ALERTS (success / error) */
+
+.profile-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.profile-alert-success {
+  border: 1px solid #b7ddc4;
+  background: #f0faf3;
+  color: #1f7a45;
+}
+
+.profile-alert-error {
+  border: 1px solid #f1c4c4;
+  background: #fff7f7;
+  color: #b42318;
+}
+
+/* FORM FIELDS */
+
+.profile-form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.profile-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profile-field-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--profile-dark-green);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.profile-input {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--p-border);
+  border-radius: 10px;
+  background: #ffffff;
+  color: var(--profile-text);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.profile-input:focus {
+  outline: none;
+  border-color: var(--p-accent);
+  box-shadow: 0 0 0 3px rgba(22, 131, 75, 0.10);
+}
+
+.profile-input-error {
+  border-color: #e08a8a;
+}
+
+.profile-input-readonly {
+  background: #f3f8f5;
+  color: var(--profile-muted);
+  cursor: not-allowed;
+}
+
+.profile-field-error {
+  color: #b42318;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ACTIONS */
+
+.profile-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 22px;
+}
+
+.profile-save-btn {
+  padding: 10px 22px;
+  border: none;
+  border-radius: 10px;
+  background: var(--p-button);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+.profile-save-btn:hover:not(:disabled) {
+  filter: brightness(0.93);
+}
+
+.profile-save-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   PAGE-SCOPED DARK MODE
+   Applied only when the Appearance preference (persisted in
+   Setting.jsx via localStorage) is "dark" AND the wrapping
+   element carries .appearance-dark. Scoped entirely to
+   .profile-page's own descendants -- never touches
+   .dash-shell/.dash-page globally, Sidebar, Topbar, or any
+   other page, per the approved page-scoped-only requirement.
+   ========================================================= */
+
+.profile-page.appearance-dark {
+  --dark-bg: #1b2420;
+  --dark-card-bg: #212b26;
+  --dark-border: #3a453f;
+  --dark-text: #eef3ef;
+  --dark-muted: #a7b3ac;
+}
+
+.profile-page.appearance-dark .section-heading h2 {
+  color: var(--dark-text);
+}
+
+.profile-page.appearance-dark .section-heading p {
+  color: var(--dark-muted);
+}
+
+.profile-page.appearance-dark .profile-card {
+  border-color: var(--dark-border);
+  background: linear-gradient(135deg, var(--dark-card-bg) 0%, var(--dark-bg) 100%);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+}
+
+.profile-page.appearance-dark .profile-card-header {
+  border-bottom-color: var(--dark-border);
+}
+
+.profile-page.appearance-dark .profile-avatar {
+  border-color: var(--dark-border);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.profile-page.appearance-dark .profile-name {
+  color: var(--dark-text);
+}
+
+.profile-page.appearance-dark .profile-field-label {
+  color: var(--dark-muted);
+}
+
+.profile-page.appearance-dark .profile-input {
+  border-color: var(--dark-border);
+  background: #17201c;
+  color: var(--dark-text);
+}
+
+.profile-page.appearance-dark .profile-input-readonly {
+  background: #1c2521;
+  color: var(--dark-muted);
+}
+
+.profile-page.appearance-dark .profile-alert-success {
+  border-color: #2f6b47;
+  background: #16261c;
+  color: #7fd8a0;
+}
+
+.profile-page.appearance-dark .profile-alert-error {
+  border-color: #7a3a3a;
+  background: #2a1a1a;
+  color: #f0a0a0;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .profile-card {
+    max-width: 100%;
+    padding: 20px 18px;
+  }
+
+  .profile-card-header {
+    gap: 12px;
+  }
+
+  .profile-avatar {
+    width: 46px;
+    height: 46px;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-actions {
+    justify-content: stretch;
+  }
+
+  .profile-save-btn {
+    width: 100%;
+  }
+}
+
+/* Reference green styling for Profile headings. */
+.profile-page .section-heading h2 {
+  color: #000000;
+  font-weight: 800;
+}
+
+.profile-page .section-heading p {
+  color: var(--profile-muted);
+}
+

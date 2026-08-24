@@ -7,14 +7,16 @@ function Register() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState('recycling_facility_operator');
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
+
     try {
-      await registerUser(fullName, email, password);
+      await registerUser(fullName, email, password, role);
       navigate('/login');
     } catch (err) {
       setError(err.message);
@@ -39,6 +41,7 @@ function Register() {
 
           <form className="auth-form" onSubmit={handleSubmit}>
             <label>Full Name</label>
+
             <input
               type="text"
               value={fullName}
@@ -48,6 +51,7 @@ function Register() {
             />
 
             <label>Email</label>
+
             <input
               type="email"
               value={email}
@@ -57,6 +61,7 @@ function Register() {
             />
 
             <label>Password</label>
+
             <input
               type="password"
               value={password}
@@ -64,6 +69,26 @@ function Register() {
               placeholder="Create a password"
               required
             />
+
+            <label>Role</label>
+
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              required
+            >
+              <option value="recycling_facility_operator">
+                Recycling Facility Operator
+              </option>
+
+              <option value="sustainability_manager">
+                Sustainability Manager
+              </option>
+
+              <option value="textile_manufacturer">
+                Textile Manufacturer
+              </option>
+            </select>
 
             {error && <p className="auth-error">{error}</p>}
 
@@ -73,6 +98,7 @@ function Register() {
           </form>
 
           <div className="auth-switch-divider" />
+
           <p className="auth-switch">
             Already have an account? <Link to="/login">Sign in</Link>
           </p>

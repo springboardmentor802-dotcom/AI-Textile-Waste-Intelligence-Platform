@@ -3,12 +3,14 @@ import json
 import logging
 import os
 import uuid
+from collections import Counter, defaultdict
 from pathlib import Path
+from statistics import mean
 from typing import Any, Dict
 
 import numpy as np
 import tensorflow as tf
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile
 from PIL import Image, UnidentifiedImageError
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -20,6 +22,10 @@ from routes.auth import get_current_user
 # --- Milestone 3: Sustainability Intelligence integration ---
 from knowledge_base.loader import get_material
 from services.sustainability_engine import generate_sustainability_report
+
+# --- Alert & Notification System integration ---
+from services.notification_service import create_notification
+from services.waste_scoring_engine import CATEGORY_EXCELLENT, CATEGORY_HIGH
 
 logger = logging.getLogger(__name__)
 
@@ -112,6 +118,7 @@ def preprocess_image(image_bytes: bytes) -> np.ndarray:
 
 @router.post("/predict")
 async def predict_fabric_type(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -260,6 +267,11 @@ async def predict_fabric_type(
         recyclability=material_info.recyclability_type,
         recommendation=recommendation_text,
         image_path=image_path,
+        # Milestone 4: persist the numeric sustainability outputs so the
+        # Dashboard can compute historical analytics (average circularity
+        # score, environmental summary) without re-running the pipeline.
+        circularity_score=sustainability_report["waste_scoring"].get("circularity_score"),
+        environmental_impact=sustainability_report["environmental_impact"],
     )
 
     try:
@@ -274,6 +286,50 @@ async def predict_fabric_type(
             detail="Failed to save prediction results."
         ) from exc
 
+    # --- Alert & Notification System ---
+    # Only create notifications AFTER the prediction row is successfully
+    # committed above, and only on a genuinely successful prediction -
+    # any exception before this point (bad image, model failure, DB
+    # failure) already returned/raised and never reaches here.
+
+    # A. AI Prediction Completed
+    create_notification(
+        db=db,
+        user_id=current_user.id,
+        title="AI Prediction Completed",
+        message="Textile material classification has been completed successfully.",
+        notification_type="ai_prediction",
+        severity="success",
+        related_entity_type="prediction",
+        related_entity_id=prediction.id,
+        background_tasks=background_tasks,
+    )
+
+    # C. Recycling Opportunity
+    # Reuses the existing Waste Scoring Engine's own category thresholds
+    # (CATEGORY_HIGH / CATEGORY_EXCELLENT) rather than inventing a new
+    # scoring rule - if this prediction's circularity_category is one of
+    # those two documented high-recovery tiers, it's a recycling
+    # opportunity.
+    circularity_category = sustainability_report.get("waste_scoring", {}).get(
+        "circularity_category"
+    )
+    if circularity_category in (CATEGORY_HIGH, CATEGORY_EXCELLENT):
+        create_notification(
+            db=db,
+            user_id=current_user.id,
+            title="Recycling Opportunity",
+            message=(
+                f"High recovery potential detected for {material}. "
+                "Review the recommended recycling strategy."
+            ),
+            notification_type="recycling_opportunity",
+            severity="success",
+            related_entity_type="prediction",
+            related_entity_id=prediction.id,
+            background_tasks=background_tasks,
+        )
+
     # Response (Milestone 3)
 
     return {
@@ -283,7 +339,182 @@ async def predict_fabric_type(
         "defect": defect_name,
         "defect_confidence": defect_confidence,
 
+        # Expose the curated material/recovery fields at the top level too.
+        # These are already used for persistence above and are consumed by
+        # the Prediction page and PDF export.
+        "waste_category": material_info.waste_category,
+        "recyclability": material_info.recyclability_type,
+        "recommendation": recommendation_text,
+
         "top_3_predictions": top_3_predictions,
 
         "sustainability": sustainability_report,
+    }
+
+
+@router.get("/dashboard/stats")
+def get_dashboard_stats(
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> Dict[str, Any]:
+    """Return real, historical prediction analytics for the authenticated user.
+
+    All data comes directly from that user's `Prediction` rows - no
+    dummy/placeholder values. Fields sourced from the sustainability
+    pipeline (`circularity_score`, `environmental_impact`) may be
+    partially or fully unavailable for predictions made before Milestone
+    4's schema change; those rows are simply excluded from the relevant
+    averages/summaries rather than being backfilled.
+
+    Security: query is filtered by `Prediction.user_id == current_user.id`
+    - no other user's data is ever read or returned.
+    """
+    predictions = (
+        db.query(Prediction)
+        .filter(Prediction.user_id == current_user.id)
+        .all()
+    )
+
+    total_predictions = len(predictions)
+
+    empty_environmental_summary = {
+        "total_co2_saved_kg": None,
+        "total_water_saved_liters": None,
+        "total_energy_saved_mj": None,
+        "total_landfill_diversion_kg": None,
+        "average_environmental_score": None,
+        "predictions_with_environmental_data": 0,
+    }
+
+    if total_predictions == 0:
+        return {
+            "total_predictions": 0,
+            "most_predicted_fabric": None,
+            "average_confidence": None,
+            "average_circularity_score": None,
+            "fabric_distribution": [],
+            "waste_category_distribution": [],
+            "sustainability_environmental_summary": empty_environmental_summary,
+        }
+
+    material_counts = Counter(p.material for p in predictions)
+    waste_category_counts = Counter(p.waste_category for p in predictions)
+
+    most_predicted_fabric = material_counts.most_common(1)[0][0]
+    average_confidence = round(mean(p.confidence for p in predictions), 2)
+
+    circularity_scores = [
+        p.circularity_score for p in predictions if p.circularity_score is not None
+    ]
+    average_circularity_score = (
+        round(mean(circularity_scores), 2) if circularity_scores else None
+    )
+
+    fabric_distribution = [
+        {"material": material, "count": count}
+        for material, count in material_counts.most_common()
+    ]
+    waste_category_distribution = [
+        {"waste_category": category, "count": count}
+        for category, count in waste_category_counts.most_common()
+    ]
+
+        # ---------------------------------------------------------
+    # Monthly sustainability trends
+    # ---------------------------------------------------------
+
+    daily_data = defaultdict(lambda: {
+        "circularity_scores": [],
+        "co2_saved": [],
+        "landfill_diversion": [],
+    })
+
+    for prediction in predictions:
+        if not prediction.created_at:
+            continue
+
+        day_key = prediction.created_at.strftime("%Y-%m-%d")
+        day_label = prediction.created_at.strftime("%b %d")
+
+        daily_data[day_key]["day"] = day_label
+
+        # Circularity Score
+        if prediction.circularity_score is not None:
+            daily_data[day_key]["circularity_scores"].append(
+                prediction.circularity_score
+            )
+
+        # Environmental Impact
+        if prediction.environmental_impact:
+            co2 = prediction.environmental_impact.get(
+                "estimated_co2_saved_kg"
+            )
+
+            landfill = prediction.environmental_impact.get(
+                "estimated_landfill_diversion_kg"
+            )
+
+            if co2 is not None:
+                daily_data[day_key]["co2_saved"].append(co2)
+
+            if landfill is not None:
+                daily_data[day_key]["landfill_diversion"].append(
+                    landfill
+                )
+
+    sustainability_trend = []
+
+    for day_key in sorted(daily_data.keys()):
+        data = daily_data[day_key]
+
+        sustainability_trend.append({
+            "day": data["day"],
+
+            "circularity_score": (
+                round(mean(data["circularity_scores"]), 2)
+                if data["circularity_scores"]
+                else None
+            ),
+
+            "co2_saved_kg": (
+                round(sum(data["co2_saved"]), 3)
+                if data["co2_saved"]
+                else None
+            ),
+
+            "landfill_diversion_kg": (
+                round(sum(data["landfill_diversion"]), 3)
+                if data["landfill_diversion"]
+                else None
+            ),
+        })
+
+    env_records = [p.environmental_impact for p in predictions if p.environmental_impact]
+
+    def _sum_field(field: str):
+        values = [r.get(field) for r in env_records if r.get(field) is not None]
+        return round(sum(values), 3) if values else None
+
+    def _avg_field(field: str):
+        values = [r.get(field) for r in env_records if r.get(field) is not None]
+        return round(mean(values), 2) if values else None
+
+    sustainability_environmental_summary = {
+        "total_co2_saved_kg": _sum_field("estimated_co2_saved_kg"),
+        "total_water_saved_liters": _sum_field("estimated_water_saved_liters"),
+        "total_energy_saved_mj": _sum_field("estimated_energy_saved_mj"),
+        "total_landfill_diversion_kg": _sum_field("estimated_landfill_diversion_kg"),
+        "average_environmental_score": _avg_field("environmental_score"),
+        "predictions_with_environmental_data": len(env_records),
+    }
+
+    return {
+        "total_predictions": total_predictions,
+        "most_predicted_fabric": most_predicted_fabric,
+        "average_confidence": average_confidence,
+        "average_circularity_score": average_circularity_score,
+        "fabric_distribution": fabric_distribution,
+        "waste_category_distribution": waste_category_distribution,
+        "sustainability_environmental_summary": sustainability_environmental_summary,
+        "sustainability_trend": sustainability_trend,
     }

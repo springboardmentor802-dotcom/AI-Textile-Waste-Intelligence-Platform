@@ -1,0 +1,104 @@
+:root {
+  --donut-size: 200px;
+}
+
+.donut-chart {
+  display: grid;
+  grid-template-columns: var(--donut-size) minmax(0, 1fr);
+  align-items: center;
+  gap: 22px;
+  width: 100%;
+  min-height: var(--donut-size);
+}
+
+.donut-visual {
+  position: relative;
+  width: var(--donut-size);
+  height: var(--donut-size);
+  flex-shrink: 0;
+}
+
+.donut-visual svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.donut-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.donut-center strong {
+  color: #17231a;
+  font-size: 24px;
+  line-height: 1;
+  font-weight: 800;
+}
+
+.donut-center span {
+  margin-top: 5px;
+  color: #6b756e;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.donut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.donut-legend-row {
+  display: grid;
+  grid-template-columns: 9px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.donut-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.donut-name {
+  color: #3d4d43;
+  font-size: 11px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.donut-legend-row strong {
+  color: #17231a;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.donut-legend-row small {
+  color: #7b867e;
+  font-size: 10px;
+  min-width: 30px;
+  text-align: right;
+}
+
+@media (max-width: 700px) {
+  .donut-chart {
+    grid-template-columns: 145px minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .donut-visual {
+    width: 145px;
+    height: 145px;
+  }
+}

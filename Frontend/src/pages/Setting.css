@@ -1,0 +1,487 @@
+/* =========================================================
+   SETTINGS
+   Same visual language as Profile.css (soft-tint card, teal
+   palette). Stacked cards: Change Password (expandable form),
+   Notifications (local preference toggle), Appearance
+   (Light/Dark, page-scoped only), Log Out.
+   ========================================================= */
+
+.settings-card {
+  position: relative;
+  max-width: 640px;
+  overflow: hidden;
+  padding: 6px 22px;
+  margin-bottom: 16px;
+  border: 1px solid var(--p-border);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 92% 12%, rgba(255, 255, 255, 0.85), transparent 30%),
+    linear-gradient(135deg, #ffffff 0%, var(--p-soft) 100%);
+  box-shadow: 0 6px 18px rgba(34, 61, 40, 0.06);
+}
+
+.settings-card:last-child {
+  margin-bottom: 0;
+}
+
+/* ROW (clickable header for Change Password, static for others) */
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.settings-row-static {
+  cursor: default;
+}
+
+.settings-row-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border: 1px solid var(--p-border);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.75);
+  color: var(--p-icon);
+}
+
+.settings-row-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.settings-row-title {
+  color: #17231a;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.settings-row-desc {
+  color: #536159;
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+
+/* TOGGLE SWITCH (Notifications) */
+
+.settings-toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 1px solid var(--p-border);
+  border-radius: 999px;
+  background: #d9e0dc;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.settings-toggle-on {
+  background: var(--p-accent);
+  border-color: var(--p-accent);
+}
+
+.settings-toggle-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s ease;
+}
+
+.settings-toggle-on .settings-toggle-knob {
+  transform: translateX(20px);
+}
+
+.settings-inline-saved {
+  padding-bottom: 14px;
+  margin-top: -6px;
+  color: var(--p-text);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* APPEARANCE OPTIONS */
+
+.settings-appearance-options {
+  display: flex;
+  gap: 10px;
+  padding-bottom: 16px;
+}
+
+.settings-appearance-btn {
+  padding: 8px 20px;
+  border: 1px solid var(--p-border);
+  border-radius: 10px;
+  background: #ffffff;
+  color: #17231a;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.settings-appearance-active {
+  background: var(--p-button);
+  border-color: var(--p-button);
+  color: #ffffff;
+}
+
+/* CHANGE PASSWORD FORM */
+
+.settings-password-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-bottom: 20px;
+}
+
+.settings-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settings-field-label {
+  color: #536159;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.settings-input {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--p-border);
+  border-radius: 10px;
+  background: #ffffff;
+  color: #17231a;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.settings-input:focus {
+  outline: none;
+  border-color: var(--p-accent);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.04);
+}
+
+.settings-input-error {
+  border-color: #e08a8a;
+}
+
+.settings-field-error {
+  color: #b42318;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.settings-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.settings-primary-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  background: var(--p-button);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+.settings-primary-btn:hover:not(:disabled) {
+  filter: brightness(0.93);
+}
+
+.settings-primary-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* ALERTS */
+
+.settings-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.settings-alert-success {
+  border: 1px solid #b7ddc4;
+  background: #f0faf3;
+  color: #1f7a45;
+}
+
+.settings-alert-error {
+  border: 1px solid #f1c4c4;
+  background: #fff7f7;
+  color: #b42318;
+}
+
+/* LOGOUT BUTTON */
+
+.settings-logout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 9px 18px;
+  border: none;
+  border-radius: 10px;
+  background: var(--p-button);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+.settings-logout-btn:hover {
+  filter: brightness(0.93);
+}
+
+/* =========================================================
+   PAGE-SCOPED DARK MODE
+   Applied only when the Appearance preference is "dark" AND
+   the wrapping element carries .appearance-dark. Scoped
+   entirely to .settings-page's own descendants -- never
+   touches .dash-shell/.dash-page globally, Sidebar, Topbar,
+   or any other page, per the approved page-scoped-only
+   requirement.
+   ========================================================= */
+
+.settings-page.appearance-dark {
+  --dark-bg: #1b2420;
+  --dark-card-bg: #212b26;
+  --dark-border: #3a453f;
+  --dark-text: #eef3ef;
+  --dark-muted: #a7b3ac;
+}
+
+.settings-page.appearance-dark .section-heading h2 {
+  color: var(--dark-text);
+}
+
+.settings-page.appearance-dark .section-heading p {
+  color: var(--dark-muted);
+}
+
+.settings-page.appearance-dark .settings-card {
+  border-color: var(--dark-border);
+  background: linear-gradient(135deg, var(--dark-card-bg) 0%, var(--dark-bg) 100%);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+}
+
+.settings-page.appearance-dark .settings-row-icon {
+  border-color: var(--dark-border);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.settings-page.appearance-dark .settings-row-title {
+  color: var(--dark-text);
+}
+
+.settings-page.appearance-dark .settings-row-desc {
+  color: var(--dark-muted);
+}
+
+.settings-page.appearance-dark .settings-field-label {
+  color: var(--dark-muted);
+}
+
+.settings-page.appearance-dark .settings-input {
+  border-color: var(--dark-border);
+  background: #17201c;
+  color: var(--dark-text);
+}
+
+.settings-page.appearance-dark .settings-appearance-btn {
+  border-color: var(--dark-border);
+  background: #17201c;
+  color: var(--dark-text);
+}
+
+.settings-page.appearance-dark .settings-toggle {
+  border-color: var(--dark-border);
+  background: #2b3530;
+}
+
+.settings-page.appearance-dark .settings-alert-success {
+  border-color: #2f6b47;
+  background: #16261c;
+  color: #7fd8a0;
+}
+
+.settings-page.appearance-dark .settings-alert-error {
+  border-color: #7a3a3a;
+  background: #2a1a1a;
+  color: #f0a0a0;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .settings-card {
+    max-width: 100%;
+    padding: 4px 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .settings-row {
+    flex-wrap: wrap;
+  }
+
+  .settings-toggle,
+  .settings-logout-btn {
+    margin-left: 52px;
+  }
+
+  .settings-form-actions {
+    justify-content: stretch;
+  }
+
+  .settings-primary-btn {
+    width: 100%;
+  }
+
+  .settings-appearance-options {
+    flex-wrap: wrap;
+  }
+
+  .settings-appearance-btn {
+    flex: 1;
+    min-width: 90px;
+  }
+}
+
+
+/* =========================================================
+   SETTINGS — GREEN REFERENCE THEME
+   Visual-only overrides. Functionality and dark mode remain
+   unchanged.
+   ========================================================= */
+
+/* Main page heading */
+.settings-page .section-heading h2 {
+  color: #000000;
+  font-weight: 800;
+}
+
+.settings-page .section-heading p {
+  color: #52665B;
+}
+
+/* Clean white cards with soft green borders */
+.settings-page .settings-card {
+  border-color: #CFE5D8;
+  background: #FFFFFF;
+  box-shadow: 0 6px 18px rgba(15, 81, 50, 0.06);
+}
+
+/* Green icon treatment */
+.settings-page .settings-row-icon {
+  border-color: #CFE5D8;
+  background: #EAF6EF;
+  color: #16834B;
+}
+
+/* Card text */
+.settings-page .settings-row-title {
+  color: #12251B;
+}
+
+.settings-page .settings-row-desc {
+  color: #52665B;
+}
+
+/* Notification toggle */
+.settings-page .settings-toggle {
+  border-color: #CFE5D8;
+}
+
+.settings-page .settings-toggle-on {
+  background: #16834B;
+  border-color: #16834B;
+}
+
+/* Appearance buttons */
+.settings-page .settings-appearance-btn {
+  border-color: #CFE5D8;
+  background: #FFFFFF;
+  color: #12251B;
+}
+
+.settings-page .settings-appearance-active {
+  background: #16834B;
+  border-color: #16834B;
+  color: #FFFFFF;
+}
+
+/* Password form */
+.settings-page .settings-field-label {
+  color: #397052;
+}
+
+.settings-page .settings-input {
+  border-color: #CFE5D8;
+  background: #FFFFFF;
+  color: #12251B;
+}
+
+.settings-page .settings-input:focus {
+  border-color: #16834B;
+  box-shadow: 0 0 0 3px rgba(22, 131, 75, 0.10);
+}
+
+/* Save/password/logout buttons */
+.settings-page .settings-primary-btn,
+.settings-page .settings-logout-btn {
+  background: #16834B;
+}
+
+.settings-page .settings-primary-btn:hover:not(:disabled),
+.settings-page .settings-logout-btn:hover {
+  filter: brightness(0.93);
+}
+
+/* Saved notification */
+.settings-page .settings-inline-saved {
+  color: #16834B;
+}

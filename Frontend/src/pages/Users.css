@@ -1,0 +1,227 @@
+.users-page {
+  padding: 24px;
+}
+
+.users-header {
+  margin-bottom: 24px;
+}
+
+.users-header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 4px 0;
+  letter-spacing: -0.01em;
+}
+
+.users-header p {
+  color: #6b7280;
+  margin: 0;
+  font-size: 14px;
+}
+
+/* --- Table card (same tokens as History.css) --- */
+.users-table-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.users-table-wrap {
+  overflow-x: auto;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.users-table thead th {
+  text-align: left;
+  color: #9ca3af;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 14px 20px;
+  border-bottom: 1px solid #eef1ee;
+  white-space: nowrap;
+}
+
+.users-table tbody td {
+  padding: 14px 20px;
+  border-bottom: 1px solid #f5f6f5;
+  vertical-align: middle;
+  color: #374151;
+}
+
+.users-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.users-table tbody tr {
+  transition: background 0.15s ease;
+}
+
+.users-table tbody tr:hover {
+  background: #fafbfa;
+}
+
+.users-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.users-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e8f2f0;
+  color: #4a8c93;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.users-name {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.users-email {
+  color: #6b7280;
+}
+
+/* --- Role badges --- */
+.user-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.user-badge-admin {
+  background: #f4e8ef;
+  color: #7a2e52;
+}
+
+.user-badge-manager {
+  background: #eeeaf5;
+  color: #4a3b6b;
+}
+
+.user-badge-manufacturer {
+  background: #faf4d9;
+  color: #6b551a;
+}
+
+.user-badge-operator {
+  background: #e8f2f0;
+  color: #1f4b4e;
+}
+
+.user-badge-neutral {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+/* --- Empty / error states --- */
+.users-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 6px;
+  padding: 64px 24px;
+}
+
+.users-state-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.users-state-icon-error {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.users-state-title {
+  margin: 0;
+  font-weight: 600;
+  color: #374151;
+  font-size: 14px;
+}
+
+.users-state-subtitle {
+  margin: 0;
+  color: #9ca3af;
+  font-size: 13px;
+  max-width: 320px;
+}
+
+.users-retry-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #2e7d32;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 12px;
+  transition: background 0.2s ease;
+}
+
+.users-retry-btn:hover {
+  background: #256428;
+}
+
+/* --- Loading skeleton cells --- */
+.users-skeleton-cell {
+  height: 14px;
+  width: 80%;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #f0f2f0 25%, #e6e9e6 37%, #f0f2f0 63%);
+  background-size: 400% 100%;
+  animation: users-shimmer 1.4s ease infinite;
+}
+
+@keyframes users-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .users-skeleton-cell {
+    animation-duration: 0.001ms !important;
+  }
+}
+
+/* --- Responsive --- */
+@media (max-width: 700px) {
+  .users-table thead th,
+  .users-table tbody td {
+    padding: 10px 12px;
+  }
+}

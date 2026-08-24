@@ -1,4 +1,12 @@
+# Environment variables / secrets
+.env
+
+# Python virtual environment
 venv/
+
+# Python cache
 __pycache__/
 *.pyc
-.env
+
+# Uploaded prediction images / user data
+uploads/

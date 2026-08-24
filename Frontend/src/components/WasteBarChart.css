@@ -1,0 +1,105 @@
+.waste-bar-chart {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+
+.waste-bar-chart-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  width: 100%;
+  height: 100%;
+}
+
+.waste-bar-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+}
+
+.waste-bar-track {
+  position: relative;
+  width: 100%;
+  max-width: 42px;
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  background: #f5f2e6;
+  border-radius: 8px 8px 4px 4px;
+  overflow: visible;
+}
+
+.waste-bar-fill {
+  position: relative;
+  width: 100%;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  overflow: visible;
+  transition: height 0.25s ease, filter 0.2s ease, box-shadow 0.2s ease;
+}
+
+.waste-bar-badge {
+  position: absolute;
+  top: -13px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 26px;
+  padding: 3px 7px;
+
+  background: #ffffff;
+  border: 1.5px solid currentColor;
+  border-radius: 999px;
+
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+
+  pointer-events: none;
+  box-shadow: 0 2px 6px rgba(18, 32, 22, 0.12);
+}
+
+.waste-bar-fill-active {
+  filter: brightness(1.1);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.waste-bar-label {
+  margin-top: 8px;
+  color: #566158;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.3;
+  max-width: 72px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .waste-bar-chart-bars {
+    gap: 8px;
+  }
+
+  .waste-bar-label {
+    font-size: 10px;
+  }
+
+  .waste-bar-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+    top: -12px;
+  }
+}

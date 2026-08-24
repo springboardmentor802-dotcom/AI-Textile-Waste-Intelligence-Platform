@@ -1,51 +1,490 @@
+/* =========================================
+   TOPBAR
+   ========================================= */
+
 .topbar {
+  height: 64px;
+  width: 100%;
+  background: #ffffff;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 2rem 1rem 2.25rem;
-  background: #ffffff;
-  border-bottom: 1px solid #e7efe4;
-  font-family: 'Segoe UI', system-ui, sans-serif;
+
+  padding: 0 28px;
+
+  border-bottom: 1px solid #e5ebe6;
+
+  box-sizing: border-box;
 }
+
+
+/* =========================================
+   PAGE TITLE
+   ========================================= */
 
 .topbar h1 {
-  font-size: 1.15rem;
-  color: #1e3a24;
   margin: 0;
+
+  color: #17231a;
+  font-size: 18px;
+  font-weight: 600;
+
+  line-height: 1.2;
 }
 
+
+/* =========================================
+   RIGHT SIDE
+   ========================================= */
+
 .topbar-right {
+  margin-left: auto;
+
   display: flex;
   align-items: center;
-  gap: 1.25rem;
+  justify-content: flex-end;
+
+  gap: 22px;
 }
+
+
+/* =========================================
+   NOTIFICATION WRAPPER
+   ========================================= */
+
+.notification-wrapper {
+  position: relative;
+}
+
+
+/* =========================================
+   NOTIFICATION BUTTON
+   ========================================= */
+
+.topbar-notification {
+  position: relative;
+
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  background: transparent;
+
+  color: #17231a;
+
+  cursor: pointer;
+
+  border-radius: 50%;
+
+  transition: background 0.2s ease;
+}
+
+.topbar-notification:hover {
+  background: #f1f7f2;
+}
+
+.topbar-notification svg {
+  display: block;
+}
+
+
+/* =========================================
+   NOTIFICATION BADGE
+   ========================================= */
+
+.notification-badge {
+  position: absolute;
+
+  top: -1px;
+  right: -1px;
+
+  min-width: 17px;
+  height: 17px;
+
+  padding: 0 4px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #2f8f3a;
+  color: #ffffff;
+
+  border-radius: 50%;
+
+  font-size: 9px;
+  font-weight: 700;
+
+  line-height: 1;
+}
+
+
+/* =========================================
+   NOTIFICATION DROPDOWN
+   ========================================= */
+
+.notification-dropdown {
+  position: absolute;
+
+  top: 48px;
+  right: -8px;
+
+  width: 350px;
+
+  background: #ffffff;
+
+  border: 1px solid #e2e9e3;
+
+  border-radius: 14px;
+
+  box-shadow: 0 12px 35px rgba(23, 35, 26, 0.14);
+
+  overflow: hidden;
+
+  z-index: 1000;
+}
+
+
+/* =========================================
+   DROPDOWN HEADER
+   ========================================= */
+
+.notification-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 16px 18px;
+
+  border-bottom: 1px solid #edf1ee;
+}
+
+.notification-header h3 {
+  margin: 0;
+
+  color: #17231a;
+
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.notification-header span {
+  display: block;
+
+  margin-top: 3px;
+
+  color: #737b75;
+
+  font-size: 11px;
+}
+
+
+.notification-close {
+  width: 30px;
+  height: 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  background: transparent;
+
+  color: #6b7280;
+
+  border-radius: 50%;
+
+  cursor: pointer;
+}
+
+.notification-close:hover {
+  background: #f2f5f3;
+  color: #17231a;
+}
+
+
+/* =========================================
+   NOTIFICATION LIST
+   ========================================= */
+
+.notification-list {
+  max-height: 310px;
+
+  overflow-y: auto;
+}
+
+
+/* =========================================
+   NOTIFICATION ITEM
+   ========================================= */
+
+.notification-item {
+  display: flex;
+
+  gap: 12px;
+
+  padding: 15px 18px;
+
+  border-bottom: 1px solid #f0f2f1;
+
+  cursor: pointer;
+
+  transition: background 0.2s ease;
+}
+
+.notification-item:hover {
+  background: #f8fbf8;
+}
+
+
+.notification-dot {
+  width: 8px;
+  height: 8px;
+
+  flex-shrink: 0;
+
+  margin-top: 5px;
+
+  background: #2f8f3a;
+
+  border-radius: 50%;
+}
+
+
+.notification-content {
+  min-width: 0;
+}
+
+.notification-content strong {
+  display: block;
+
+  color: #17231a;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.notification-content p {
+  margin: 4px 0;
+
+  color: #626b65;
+
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.notification-content span {
+  color: #929993;
+
+  font-size: 10px;
+}
+
+
+/* =========================================
+   NO NOTIFICATIONS
+   ========================================= */
+
+.no-notifications {
+  padding: 30px 20px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  color: #8a938d;
+}
+
+.no-notifications p {
+  margin: 8px 0 0;
+
+  font-size: 12px;
+}
+
+
+/* =========================================
+   VIEW ALL
+   ========================================= */
+
+.view-all-notifications {
+  width: 100%;
+
+  padding: 13px;
+
+  border: none;
+
+  background: #f5faf5;
+
+  color: #287d32;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: background 0.2s ease;
+}
+
+.view-all-notifications:hover {
+  background: #eaf5eb;
+}
+
+
+/* =========================================
+   USER SECTION
+   ========================================= */
 
 .topbar-user {
   display: flex;
   align-items: center;
-  gap: 10px;
+
+  flex-shrink: 0;
 }
 
-.topbar-avatar {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: #2e7d32;
-  color: #fff;
+
+.topbar-user-info {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 0.78rem;
+  flex-direction: column;
+  align-items: flex-start;
+
+  gap: 3px;
 }
+
+
+/* =========================================
+   OPERATOR NAME
+   ========================================= */
 
 .topbar-name {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #1e3a24;
+  margin: 0;
+
+  color: #111827;
+
+  font-size: 16px;
+  font-weight: 700;
+
+  line-height: 1.2;
+
+  white-space: nowrap;
 }
 
+
+/* =========================================
+   OPERATOR ROLE
+   ========================================= */
+
 .topbar-role {
-  font-size: 0.72rem;
-  color: #8a9188;
+  margin: 0;
+
+  color: #4b5563;
+
+  font-size: 12px;
+  font-weight: 500;
+
+  line-height: 1.2;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+
+@media (max-width: 900px) {
+
+  .topbar {
+    padding: 0 20px;
+  }
+
+  .topbar-right {
+    gap: 14px;
+  }
+
+  .topbar-name {
+    font-size: 15px;
+  }
+
+  .topbar-role {
+    font-size: 11px;
+  }
+
+  .notification-dropdown {
+    width: 320px;
+  }
+}
+
+
+@media (max-width: 600px) {
+
+  .topbar {
+    height: 58px;
+    padding: 0 14px;
+  }
+
+  .topbar h1 {
+    font-size: 16px;
+  }
+
+  .topbar-right {
+    gap: 8px;
+  }
+
+  .topbar-name {
+    font-size: 14px;
+  }
+
+  .topbar-role {
+    font-size: 10px;
+  }
+
+  .topbar-notification {
+    width: 32px;
+    height: 32px;
+  }
+
+  .notification-dropdown {
+    position: fixed;
+
+    top: 65px;
+    left: 12px;
+    right: 12px;
+
+    width: auto;
+  }
+}
+
+/* Profile page: remove only the Topbar separator */
+.topbar.topbar-profile {
+  border-bottom: none;
+}
+
+
+/* =========================================
+   UNREAD / READ NOTIFICATION STATE
+   ========================================= */
+
+.notification-item-unread {
+  background: #f5faf5;
+}
+
+.notification-item-unread:hover {
+  background: #eef7ef;
+}
+
+.notification-dot-read {
+  background: #d5dbd6;
+}
+
+.view-all-notifications:disabled {
+  color: #a7b0a9;
+  cursor: default;
+}
+
+.view-all-notifications:disabled:hover {
+  background: #f5faf5;
 }

@@ -31,6 +31,7 @@ import {
 import { predictFabric } from "../services/api";
 import { downloadPredictionPdf, downloadBatchPredictionsReport } from "../utils/pdfReport";
 import { getMaterialTypeInfo } from "../data/materialInfo";
+import { normalizeRecyclability } from "../utils/reportHelpers";
 import "./BatchPrediction.css";
 
 const DONUT_COLORS = ["#2e7d32", "#7c3aed", "#3b82f6", "#d6336c", "#f59e0b", "#0891b2"];
@@ -154,10 +155,16 @@ function BatchPrediction() {
     await runWithConcurrency(
       items,
       async (item) => {
+        const startTime = performance.now();
         try {
           const data = await predictFabric(item.file);
+          const elapsedSeconds = (performance.now() - startTime) / 1000;
           setItems((prev) =>
-            prev.map((i) => (i.id === item.id ? { ...i, status: "done", result: data } : i))
+            prev.map((i) =>
+              i.id === item.id
+                ? { ...i, status: "done", result: data, processingTimeSeconds: elapsedSeconds }
+                : i
+            )
           );
         } catch {
           failedCount += 1;
@@ -185,10 +192,16 @@ function BatchPrediction() {
 
   const handleRetryItem = useCallback(async (item) => {
     setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, status: "pending" } : i)));
+    const startTime = performance.now();
     try {
       const data = await predictFabric(item.file);
+      const elapsedSeconds = (performance.now() - startTime) / 1000;
       setItems((prev) =>
-        prev.map((i) => (i.id === item.id ? { ...i, status: "done", result: data } : i))
+        prev.map((i) =>
+          i.id === item.id
+            ? { ...i, status: "done", result: data, processingTimeSeconds: elapsedSeconds }
+            : i
+        )
       );
     } catch {
       setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, status: "error" } : i)));
@@ -208,7 +221,9 @@ function BatchPrediction() {
       processed > 0
         ? completedItems.reduce((sum, i) => sum + i.result.confidence, 0) / processed
         : 0;
-    const recyclableCount = completedItems.filter((i) => i.result.recyclability === "High").length;
+    const recyclableCount = completedItems.filter(
+      (i) => normalizeRecyclability(i.result.recyclability) === "High"
+    ).length;
 
     return {
       total,
@@ -247,7 +262,9 @@ function BatchPrediction() {
   const sustainabilityInsights = useMemo(() => {
     if (completedItems.length === 0) return null;
 
-    const highRecyclability = completedItems.filter((i) => i.result.recyclability === "High").length;
+    const highRecyclability = completedItems.filter(
+      (i) => normalizeRecyclability(i.result.recyclability) === "High"
+    ).length;
     const recyclabilityScore = Math.round((highRecyclability / completedItems.length) * 100);
 
     return {
@@ -265,11 +282,15 @@ function BatchPrediction() {
       imageFile: item.file,
       material: item.result.material,
       confidence: item.result.confidence,
+      defect: item.result.defect,
+      defectConfidence: item.result.defect_confidence,
       wasteCategory: item.result.waste_category,
       recyclability: item.result.recyclability,
       recommendation: item.result.recommendation,
       top3Predictions: item.result.top_3_predictions,
       materialTypeInfo: getMaterialTypeInfo(item.result.material),
+      processingTimeSeconds: item.processingTimeSeconds,
+      sustainability: item.result.sustainability,
       fileName: `fabric_prediction_${item.file.name.split(".")[0]}.pdf`,
     });
   }, []);
@@ -284,11 +305,15 @@ function BatchPrediction() {
         fileName: item.file.name,
         material: item.result.material,
         confidence: item.result.confidence,
+        defect: item.result.defect,
+        defectConfidence: item.result.defect_confidence,
         wasteCategory: item.result.waste_category,
         recyclability: item.result.recyclability,
         recommendation: item.result.recommendation,
         top3Predictions: item.result.top_3_predictions,
         materialTypeInfo: getMaterialTypeInfo(item.result.material),
+        processingTimeSeconds: item.processingTimeSeconds,
+        sustainability: item.result.sustainability,
       }));
       await downloadBatchPredictionsReport(reportItems, {
         total: summary.total,

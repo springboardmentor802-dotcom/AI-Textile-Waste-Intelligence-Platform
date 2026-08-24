@@ -3,11 +3,13 @@ import {
   LayoutDashboard, Package, BrainCircuit, FileBarChart, History,
   Users as UsersIcon, User, Settings as SettingsIcon, LogOut, Recycle
 } from 'lucide-react';
-import { logoutUser } from '../services/api';
+import { logoutUser, getCurrentUser } from '../services/api';
 import './Sidebar.css';
 
 function Sidebar() {
   const navigate = useNavigate();
+  const user = getCurrentUser();
+  const isAdministrator = user?.role === 'administrator';
 
   function handleLogout() {
     logoutUser();
@@ -40,13 +42,15 @@ function Sidebar() {
         <NavLink to="/reports" className="sidebar-link">
           <FileBarChart size={19} strokeWidth={1.8} /> Reports
         </NavLink>
-        <NavLink to="/users" className="sidebar-link">
-          <UsersIcon size={19} strokeWidth={1.8} /> Users
-        </NavLink>
+        {isAdministrator && (
+          <NavLink to="/users" className="sidebar-link">
+            <UsersIcon size={19} strokeWidth={1.8} /> Users
+          </NavLink>
+        )}
         <NavLink to="/profile" className="sidebar-link">
           <User size={19} strokeWidth={1.8} /> Profile
         </NavLink>
-        <NavLink to="/settings" className="sidebar-link">
+        <NavLink to="/setting" className="sidebar-link">
           <SettingsIcon size={19} strokeWidth={1.8} /> Settings
         </NavLink>
       </nav>

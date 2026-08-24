@@ -16,24 +16,27 @@
 
 /* Header */
 .predictions-header {
-  margin-bottom: 28px;
-  animation: pred-fade-in-up 0.35s var(--pred-ease) both;
+  margin-bottom: 20px;
+  text-align: left;
 }
 
 .predictions-header h1 {
-  font-size: 32px;
-  font-weight: 700;
-  color: #111827;
-  margin: 0 0 12px 0;
-  letter-spacing: -0.02em;
+  margin: 0 0 5px 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: #101B16;
+  letter-spacing: 0;
+  text-align: left;
 }
 
 .predictions-header p {
-  color: #64748b;
   margin: 0;
-  font-size: 15px;
-  line-height: 1.7;
+  color: #68766D;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: left;
 }
+
 
 /* Tabs */
 .pred-tabs {

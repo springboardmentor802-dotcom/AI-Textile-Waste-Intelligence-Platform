@@ -1,0 +1,127 @@
+.gbar-chart {
+  position: relative;
+  width: 100%;
+}
+
+.gbar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.gbar-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #566158;
+}
+
+.gbar-legend-item i {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+/* Row that holds the y-axis labels alongside the plot area
+   (gridlines + bars). Extra top padding leaves room for the
+   value label sitting above the tallest bar. */
+.gbar-body {
+  width: 100%;
+  overflow: hidden;
+}
+
+
+.gbar-plot {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+
+
+.gbar-groups {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  height: 170px;
+  width: 100%;
+}
+
+.gbar-group {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+}
+
+.gbar-bars {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 6px;
+  width: auto;
+}
+
+.gbar-bar-col {
+  flex: 0 0 16px;
+  width: 16px;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+
+.gbar-bar-track {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  background: transparent;
+  border-radius: 5px 5px 2px 2px;
+}
+
+
+
+.gbar-bar-fill {
+  width: 100%;
+  border-radius: 5px 5px 0 0;
+  cursor: pointer;
+  transition: height 0.25s ease, filter 0.2s ease, box-shadow 0.2s ease;
+}
+
+.gbar-bar-fill-active {
+  filter: brightness(1.1);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.gbar-group-label {
+  margin-top: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #566158;
+  text-align: center;
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .gbar-groups {
+    gap: 10px;
+  }
+
+
+  .gbar-group-label {
+    font-size: 10px;
+  }
+}

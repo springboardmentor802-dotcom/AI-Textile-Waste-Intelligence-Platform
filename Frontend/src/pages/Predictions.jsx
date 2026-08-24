@@ -19,6 +19,7 @@ import EnvironmentalImpactCard from "../components/prediction/EnvironmentalImpac
 import CircularityScoreCard from "../components/prediction/CircularityScoreCard";
 import MaterialInformationCard from "../components/prediction/MaterialInformationCard";
 import RecommendationCard from "../components/prediction/RecommendationCard";
+import Topbar from "../components/Topbar";
 import "./Predictions.css";
 
 function Predictions() {
@@ -103,7 +104,10 @@ function Predictions() {
   }, [result, selectedFile, processingTime]);
 
   return (
-    <main className="predictions-page">
+    <div className="dash-shell">
+      <Topbar />
+
+      <main className="predictions-page">
       <div className="predictions-header">
         <h1>AI Fabric Prediction</h1>
         <p>Upload a fabric image to identify material type, detect defects, and receive sustainability recommendations.</p>
@@ -277,6 +281,7 @@ function Predictions() {
 
       {activeTab === "batch" && <BatchPrediction />}
     </main>
+  </div>
   );
 }
 

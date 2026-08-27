@@ -653,18 +653,18 @@ const Analysis = () => {
       {/* ═══ PAGE HEADER ══════════════════════════════════════════════════════ */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <Sparkles className="w-6 h-6 text-emerald-500" />
+          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <Sparkles className="w-7 h-7 text-emerald-500" />
             AI Fabric Prediction Engine
           </h1>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mt-0.5">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
             Module 3 &amp; 4 — Computer Vision · Material Classification · Waste Scoring
           </p>
         </div>
         {analysisResult && (
           <button
             onClick={downloadPDFReport}
-            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-white text-sm font-semibold rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm hover:bg-white dark:hover:bg-slate-700 text-slate-800 dark:text-white text-sm font-semibold rounded-xl border border-white/40 dark:border-slate-700 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
           >
             <Download className="w-4 h-4" /> Export PDF Report
           </button>
@@ -672,7 +672,7 @@ const Analysis = () => {
       </div>
 
       {/* ═══ TABS ═════════════════════════════════════════════════════════════ */}
-      <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700/60 rounded-xl w-fit">
+      <div className="flex gap-1 p-1 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border border-white/40 dark:border-slate-700/60 rounded-2xl w-fit shadow-sm">
         {[
           { id: 'single', label: 'Single Image',   Icon: ImagePlus },
           { id: 'batch',  label: 'Batch Analysis', Icon: BarChart3 },
@@ -680,10 +680,10 @@ const Analysis = () => {
           <button
             key={id}
             onClick={() => setActiveTab(id)}
-            className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+            className={`flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
               activeTab === id
-                ? 'bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-sm border border-slate-200/60 dark:border-transparent'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/60'
+                ? 'bg-gradient-to-r from-emerald-500/10 to-teal-500/10 text-emerald-700 dark:text-emerald-400 shadow-sm border border-emerald-500/20'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-white/60 dark:hover:bg-slate-800/60'
             }`}
           >
             <Icon className="w-4 h-4" />
@@ -694,7 +694,7 @@ const Analysis = () => {
 
       {/* ═══ BATCH TAB ════════════════════════════════════════════════════════ */}
       {activeTab === 'batch' && (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-md">
+        <div className="glass-card rounded-2xl border border-white/40 dark:border-slate-700/50 transition-all duration-300">
           <BatchAnalysis addToast={addToast} />
         </div>
       )}
@@ -707,10 +707,10 @@ const Analysis = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
             {/* LEFT: Image Upload Card */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-md p-6 flex flex-col gap-5">
+            <div className="glass-card rounded-2xl p-6 flex flex-col gap-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl">
               <div className="flex items-center justify-between">
                 <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">Textile Image Upload</h2>
-                <span className="text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded-full font-semibold border border-emerald-500/20">
+                <span className="text-xs bg-gradient-to-r from-emerald-500/10 to-teal-500/10 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded-full font-semibold border border-emerald-500/20">
                   JPG · PNG · WebP
                 </span>
               </div>
@@ -721,7 +721,7 @@ const Analysis = () => {
                 className={`relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed cursor-pointer transition-all duration-200 min-h-52
                   ${previewUrl
                     ? 'border-emerald-500/50 bg-emerald-500/10'
-                    : 'border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40 hover:border-emerald-500/60 hover:bg-slate-100 dark:hover:bg-slate-800/80'
+                    : 'border-slate-300 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/40 hover:border-emerald-500/60 hover:bg-slate-100/80 dark:hover:bg-slate-800/80'
                   }`}
               >
                 {previewUrl ? (
@@ -732,7 +732,7 @@ const Analysis = () => {
                   />
                 ) : (
                   <div className="flex flex-col items-center gap-3 py-10 px-6 text-center">
-                    <div className="w-14 h-14 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center border border-slate-200 dark:border-slate-700">
+                    <div className="w-14 h-14 bg-white/60 dark:bg-slate-800 rounded-2xl flex items-center justify-center border border-slate-200 dark:border-slate-700 shadow-sm">
                       <UploadCloud className="w-7 h-7 text-slate-500 dark:text-slate-400" />
                     </div>
                     <div>
@@ -753,7 +753,7 @@ const Analysis = () => {
 
               {/* File name chip */}
               {selectedFile && (
-                <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                <div className="flex items-center gap-2 px-3 py-2 bg-white/60 dark:bg-slate-800 rounded-lg border border-white/40 dark:border-slate-700">
                   <Layers className="w-4 h-4 text-slate-500 dark:text-slate-400 shrink-0" />
                   <span className="text-xs text-slate-700 dark:text-slate-300 truncate flex-1 font-medium">{selectedFile.name}</span>
                   <span className="text-xs text-slate-500 dark:text-slate-400 shrink-0">
@@ -770,7 +770,7 @@ const Analysis = () => {
                   className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all shadow-sm ${
                     !selectedFile || loading
                       ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700 cursor-not-allowed'
-                      : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-900/30'
+                      : 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:opacity-90 active:scale-95 text-white shadow-lg shadow-emerald-500/25'
                   }`}
                 >
                   {loading
@@ -781,7 +781,7 @@ const Analysis = () => {
                 <button
                   onClick={handleReset}
                   disabled={!selectedFile && !analysisResult}
-                  className="flex items-center gap-2 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 text-sm font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 text-sm font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <RotateCcw className="w-4 h-4" /> Reset
                 </button>
@@ -789,7 +789,7 @@ const Analysis = () => {
             </div>
 
             {/* RIGHT: Prediction Result Card */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-md p-6 flex flex-col gap-5">
+            <div className="glass-card rounded-2xl p-6 flex flex-col gap-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl">
               <div className="flex items-center justify-between">
                 <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">Prediction Result</h2>
                 {processingTime && (
@@ -874,7 +874,7 @@ const Analysis = () => {
 
           {/* ── SECTION 2: Material Information Card ── */}
           {analysisResult && matInfo && (
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-md p-6">
+            <div className="glass-card rounded-2xl p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl">
               <div className="flex items-start justify-between mb-5">
                 <div>
                   <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
@@ -918,7 +918,7 @@ const Analysis = () => {
             <div className="space-y-5">
 
               {/* Score Card — 3 columns */}
-              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-md p-6">
+              <div className="glass-card rounded-2xl p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl">
                 <div className="flex items-center gap-2 mb-6">
                   <Award className="w-5 h-5 text-amber-500" />
                   <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">Circular Economy Score</h2>
@@ -1004,7 +1004,7 @@ const Analysis = () => {
               </div>
 
               {/* Recommendation Card */}
-              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-md p-6">
+              <div className="glass-card rounded-2xl p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl">
                 <div className="flex items-center gap-2 mb-5">
                   <Recycle className="w-5 h-5 text-emerald-500" />
                   <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">Recycling Recommendations</h2>

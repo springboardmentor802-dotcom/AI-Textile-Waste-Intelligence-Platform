@@ -69,7 +69,7 @@ function SustainabilityCard({ item }) {
   const cat    = item.circularity_category || 'Uncategorised';
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 flex flex-col overflow-hidden">
+    <div className="glass-card rounded-2xl border border-white/40 dark:border-slate-800/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden">
 
       {/* ── Card header: Batch ID badge + Fabric type ── */}
       <div className="px-5 pt-5 pb-4 flex items-start justify-between gap-3">
@@ -154,8 +154,8 @@ function StatBar({ items }) {
         { label: 'High Recovery',   value: excellent,    color: 'text-blue-600 dark:text-blue-400' },
         { label: 'Low Priority',    value: low,          color: 'text-rose-600 dark:text-rose-400' },
       ].map(({ label, value, color }) => (
-        <div key={label} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3.5 shadow-sm">
-          <p className={`text-2xl font-extrabold ${color}`}>{value}</p>
+        <div key={label} className="glass-card border border-white/40 dark:border-slate-800/50 rounded-2xl px-4 py-3.5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+          <p className={`text-2xl font-extrabold tracking-tight ${color}`}>{value}</p>
           <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">{label}</p>
         </div>
       ))}
@@ -389,7 +389,7 @@ export default function SustainabilityDataset() {
               placeholder="Search fabric, category, or batch ID…"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 text-sm border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+              className="w-full pl-9 pr-4 py-2 text-sm border border-white/40 dark:border-slate-700 rounded-xl bg-white/70 dark:bg-slate-900/50 backdrop-blur-sm text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
             />
           </div>
           {/* Sort */}
@@ -414,20 +414,20 @@ export default function SustainabilityDataset() {
         /* Loading skeleton */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4 animate-pulse">
+            <div key={i} className="glass-card rounded-2xl border border-white/40 dark:border-slate-800/50 p-5 space-y-4 animate-pulse">
               <div className="flex justify-between">
-                <div className="h-5 w-32 bg-slate-100 dark:bg-slate-800 rounded-lg" />
-                <div className="h-5 w-10 bg-slate-100 dark:bg-slate-800 rounded-lg" />
+                <div className="h-5 w-32 bg-slate-200/80 dark:bg-slate-800 rounded-lg" />
+                <div className="h-5 w-10 bg-slate-200/80 dark:bg-slate-800 rounded-lg" />
               </div>
-              <div className="h-2.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full" />
-              <div className="h-4 w-24 bg-slate-100 dark:bg-slate-800 rounded-full" />
+              <div className="h-2.5 w-full bg-slate-200/80 dark:bg-slate-800 rounded-full" />
+              <div className="h-4 w-24 bg-slate-200/80 dark:bg-slate-800 rounded-full" />
             </div>
           ))}
         </div>
       ) : items.length === 0 ? (
         /* Empty state */
         <div className="flex flex-col items-center justify-center py-24 text-center gap-4">
-          <div className="w-20 h-20 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center justify-center">
+          <div className="w-20 h-20 glass-card border border-white/40 dark:border-slate-800/50 rounded-2xl flex items-center justify-center">
             <Leaf className="w-10 h-10 text-slate-400 dark:text-slate-500" />
           </div>
           <div>

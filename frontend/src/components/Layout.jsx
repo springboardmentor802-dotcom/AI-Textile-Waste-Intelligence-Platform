@@ -18,29 +18,34 @@ export default function Layout() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-slate-950 transition-colors duration-200">
+    <div className="flex h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
       {/* Module 11: Global Toast Notification Stack */}
       <ToastNotification />
 
-      {/* Sidebar */}
-      <aside className="w-64 bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-700/50 flex flex-col transition-colors duration-200">
-        <div className="h-16 flex items-center gap-2 px-6 border-b border-gray-100 dark:border-slate-700/50">
-          <Leaf className="w-6 h-6 text-green-600 dark:text-emerald-400" />
-          <span className="font-bold text-lg text-gray-900 dark:text-slate-100">
-            TextileWaste<span className="text-green-600 dark:text-emerald-400">.AI</span>
+      {/* ── Sidebar ── */}
+      <aside className="glass-sidebar w-64 flex flex-col transition-colors duration-200 z-20">
+        {/* Logo */}
+        <div className="h-16 flex items-center gap-2.5 px-6 border-b border-white/30 dark:border-slate-800/60">
+          <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center shadow-sm shadow-emerald-500/30">
+            <Leaf className="w-4 h-4 text-white" />
+          </div>
+          <span className="font-extrabold text-lg tracking-tight text-slate-900 dark:text-white">
+            Textile<span className="text-transparent bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text">.AI</span>
           </span>
         </div>
-        <nav className="flex-1 px-3 py-4 space-y-1">
+
+        {/* Nav */}
+        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
           {menu.map((item) => {
             const active = location.pathname === item.path;
             return (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`block px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                   active
-                    ? 'bg-green-50 dark:bg-emerald-900/30 text-green-700 dark:text-emerald-400'
-                    : 'text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800'
+                    ? 'bg-gradient-to-r from-emerald-500/10 to-teal-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 shadow-sm'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-white/60 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-100'
                 }`}
               >
                 {item.label}
@@ -48,33 +53,52 @@ export default function Layout() {
             );
           })}
         </nav>
+
+        {/* Footer hint */}
+        <div className="px-4 py-3 border-t border-white/30 dark:border-slate-800/60">
+          <p className="text-[10px] text-slate-400 dark:text-slate-600 font-medium tracking-wide text-center">
+            AI Textile Waste Platform © 2026
+          </p>
+        </div>
       </aside>
 
-      {/* Main area */}
+      {/* ── Main area ── */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-16 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700/50 flex items-center justify-between px-6 transition-colors duration-200">
-          <span className="text-sm text-gray-500 dark:text-slate-400">Facility Overview</span>
+        {/* Header */}
+        <header className="glass-header h-16 flex items-center justify-between px-6 transition-colors duration-200 z-10">
+          <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Facility Overview</span>
           <div className="flex items-center gap-3">
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-full text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+              className="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/60 transition-all duration-200"
               title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             >
               {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
-            <span className="text-sm font-medium text-gray-700 dark:text-slate-200">{user.name}</span>
-            <span className="text-xs bg-green-100 dark:bg-emerald-900/40 text-green-700 dark:text-emerald-400 px-2 py-1 rounded-full">
+
+            {/* Divider */}
+            <div className="w-px h-5 bg-slate-200 dark:bg-slate-700" />
+
+            {/* User name */}
+            <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{user.name}</span>
+
+            {/* Role badge */}
+            <span className="text-xs bg-gradient-to-r from-emerald-500/10 to-teal-500/10 text-emerald-700 dark:text-emerald-400 px-2.5 py-1 rounded-full font-semibold border border-emerald-500/20">
               {user.role}
             </span>
+
+            {/* Logout */}
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1 text-sm text-gray-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400"
+              className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200 px-2 py-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
             >
               <LogOut className="w-4 h-4" /> Logout
             </button>
           </div>
         </header>
+
+        {/* Page content */}
         <main className="flex-1 overflow-y-auto p-6">
           <Outlet />
         </main>

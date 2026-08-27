@@ -165,18 +165,21 @@ const InventoryDashboard = () => {
 
   return (
     <div className="p-4 space-y-6">
-      <div className="flex justify-between items-center bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700/60 shadow-lg">
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">My Inventory Dashboard</h1>
+      <div className="flex justify-between items-center glass-card p-5 rounded-2xl">
+        <div>
+          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">My Inventory Dashboard</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mt-0.5">Manage and scan your textile waste batches</p>
+        </div>
         <div className="space-x-3">
           <button
             onClick={() => { setShowAiModal(true); setAiResult(null); setSelectedFile(null); }}
-            className="bg-purple-600 text-white px-5 py-2 rounded-lg shadow hover:bg-purple-500 transition font-medium"
+            className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-5 py-2.5 rounded-xl shadow shadow-purple-500/25 hover:opacity-90 active:scale-95 transition-all duration-200 font-semibold text-sm"
           >
             📸 AI Image Scanner
           </button>
           <button
             onClick={() => { setShowForm(!showForm); setEditItem(null); setFormData({ fabric_type: '', source: 'Pre-consumer', quantity_kg: '', color: '', condition: 'Good' }); }}
-            className="bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-500 transition font-medium"
+            className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-5 py-2.5 rounded-xl shadow shadow-emerald-500/25 hover:opacity-90 active:scale-95 transition-all duration-200 font-semibold text-sm"
           >
             {showForm ? 'Cancel' : '+ Add Inventory'}
           </button>
@@ -184,33 +187,33 @@ const InventoryDashboard = () => {
       </div>
 
       {showForm && (
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 border-t-4 border-t-blue-500">
-          <h3 className="font-semibold mb-4 text-slate-900 dark:text-slate-200">{editItem ? `Edit Batch #${editItem.batch_id}` : 'Add New Inventory'}</h3>
+        <div className="glass-card p-6 rounded-2xl border-t-4 border-t-emerald-500">
+          <h3 className="font-bold text-lg mb-4 text-slate-900 dark:text-slate-200">{editItem ? `Edit Batch #${editItem.batch_id}` : 'Add New Inventory'}</h3>
           <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
-            <input type="text" placeholder="Fabric Type (e.g. Cotton)" required className="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 p-2.5 rounded-lg focus:outline-none focus:border-blue-500" value={formData.fabric_type} onChange={e => setFormData({...formData, fabric_type: e.target.value})} />
-            <input type="number" placeholder="Quantity (kg)" required className="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 p-2.5 rounded-lg focus:outline-none focus:border-blue-500" value={formData.quantity_kg} onChange={e => setFormData({...formData, quantity_kg: e.target.value})} />
-            <input type="text" placeholder="Color" required className="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 p-2.5 rounded-lg focus:outline-none focus:border-blue-500" value={formData.color} onChange={e => setFormData({...formData, color: e.target.value})} />
-            <select className="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-200 p-2.5 rounded-lg focus:outline-none focus:border-blue-500" value={formData.source} onChange={e => setFormData({...formData, source: e.target.value})}>
+            <input type="text" placeholder="Fabric Type (e.g. Cotton)" required className="bg-white/60 dark:bg-slate-900 border border-white/40 dark:border-slate-700 text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 p-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition" value={formData.fabric_type} onChange={e => setFormData({...formData, fabric_type: e.target.value})} />
+            <input type="number" placeholder="Quantity (kg)" required className="bg-white/60 dark:bg-slate-900 border border-white/40 dark:border-slate-700 text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 p-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition" value={formData.quantity_kg} onChange={e => setFormData({...formData, quantity_kg: e.target.value})} />
+            <input type="text" placeholder="Color" required className="bg-white/60 dark:bg-slate-900 border border-white/40 dark:border-slate-700 text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 p-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition" value={formData.color} onChange={e => setFormData({...formData, color: e.target.value})} />
+            <select className="bg-white/60 dark:bg-slate-900 border border-white/40 dark:border-slate-700 text-slate-900 dark:text-slate-200 p-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition cursor-pointer" value={formData.source} onChange={e => setFormData({...formData, source: e.target.value})}>
               <option className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-200">Pre-consumer</option>
               <option className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-200">Post-consumer</option>
               <option className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-200">Manufacturing Scrap</option>
             </select>
-            <select className="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-200 p-2.5 rounded-lg focus:outline-none focus:border-blue-500" value={formData.condition} onChange={e => setFormData({...formData, condition: e.target.value})}>
+            <select className="bg-white/60 dark:bg-slate-900 border border-white/40 dark:border-slate-700 text-slate-900 dark:text-slate-200 p-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition cursor-pointer" value={formData.condition} onChange={e => setFormData({...formData, condition: e.target.value})}>
               <option className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-200">Good</option>
               <option className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-200">Torn</option>
               <option className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-200">Stained</option>
             </select>
-            <button type="submit" className="col-span-2 bg-emerald-600 text-white p-2.5 rounded-lg font-bold hover:bg-emerald-500 transition">
+            <button type="submit" className="col-span-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:opacity-90 active:scale-95 text-white p-2.5 rounded-xl font-bold transition-all duration-200 shadow shadow-emerald-500/25">
               {editItem ? 'Update Item' : 'Save to Database'}
             </button>
           </form>
         </div>
       )}
 
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div className="glass-card rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold uppercase tracking-wider">
+            <tr className="bg-gradient-to-r from-slate-50/80 to-slate-100/60 dark:from-slate-900/80 dark:to-slate-800/60 text-slate-500 dark:text-slate-400 border-b border-white/30 dark:border-slate-800/50 text-xs font-semibold uppercase tracking-wider">
               <th className="p-4">ID</th>
               <th className="p-4">Fabric Type</th>
               <th className="p-4">Color</th>
@@ -219,17 +222,17 @@ const InventoryDashboard = () => {
               <th className="p-4">Actions</th>
             </tr>
           </thead>
-          <tbody className="bg-white dark:bg-slate-900 divide-y divide-slate-200 dark:divide-slate-800 text-slate-900 dark:text-slate-200">
+          <tbody className="divide-y divide-white/20 dark:divide-slate-800/60 text-slate-900 dark:text-slate-200">
             {inventory.length === 0 ? (
               <tr>
-                <td colSpan="6" className="p-4 text-center text-slate-500 dark:text-slate-400">
+                <td colSpan="6" className="p-8 text-center text-slate-500 dark:text-slate-400 text-sm">
                   No data found. Add some inventory!
                 </td>
               </tr>
             ) : (
               inventory.map((item) => (
-                <tr key={item.batch_id} className="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                  <td className="p-4 text-slate-500 dark:text-slate-400">#{item.batch_id}</td>
+                <tr key={item.batch_id} className="hover:bg-emerald-50/40 dark:hover:bg-emerald-900/10 transition-colors duration-150">
+                  <td className="p-4 text-slate-500 dark:text-slate-400 font-mono text-sm">#{item.batch_id}</td>
                   <td className="p-4 font-semibold text-slate-900 dark:text-slate-100">{item.fabric_type}</td>
                   <td className="p-4 text-slate-700 dark:text-slate-300">{item.color}</td>
                   <td className="p-4 text-slate-700 dark:text-slate-300">{item.quantity_kg}</td>
@@ -239,9 +242,9 @@ const InventoryDashboard = () => {
                     </span>
                   </td>
                   <td className="p-4 space-x-3">
-                    <button onClick={() => handleView(item.batch_id)} className="text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 font-medium transition-colors">View</button>
-                    <button onClick={() => handleEdit(item)} className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-300 font-medium transition-colors">Edit</button>
-                    <button onClick={() => handleDelete(item.batch_id)} className="text-rose-600 dark:text-rose-400 hover:text-rose-500 dark:hover:text-rose-300 font-medium transition-colors">Delete</button>
+                    <button onClick={() => handleView(item.batch_id)} className="text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 font-semibold transition-colors text-sm">View</button>
+                    <button onClick={() => handleEdit(item)} className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-300 font-semibold transition-colors text-sm">Edit</button>
+                    <button onClick={() => handleDelete(item.batch_id)} className="text-rose-600 dark:text-rose-400 hover:text-rose-500 dark:hover:text-rose-300 font-semibold transition-colors text-sm">Delete</button>
                   </td>
                 </tr>
               ))
@@ -252,18 +255,18 @@ const InventoryDashboard = () => {
 
       {/* View Modal */}
       {viewItem && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl p-6 w-full max-w-md">
-            <h3 className="text-lg font-bold mb-4 text-slate-900 dark:text-slate-100">Inventory Details — #{viewItem.batch_id}</h3>
-            <div className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
-              <p><span className="font-medium text-slate-900 dark:text-slate-100">Fabric Type:</span> {viewItem.fabric_type}</p>
-              <p><span className="font-medium text-slate-900 dark:text-slate-100">Source:</span> {viewItem.source}</p>
-              <p><span className="font-medium text-slate-900 dark:text-slate-100">Quantity:</span> {viewItem.quantity_kg} kg</p>
-              <p><span className="font-medium text-slate-900 dark:text-slate-100">Color:</span> {viewItem.color}</p>
-              <p><span className="font-medium text-slate-900 dark:text-slate-100">Condition:</span> {viewItem.condition}</p>
-              <p><span className="font-medium text-slate-900 dark:text-slate-100">Collected On:</span> {viewItem.collection_date}</p>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="glass-dropdown rounded-2xl shadow-2xl p-6 w-full max-w-md animate-fade-in">
+            <h3 className="text-lg font-extrabold mb-4 text-slate-900 dark:text-slate-100 tracking-tight">Inventory Details — #{viewItem.batch_id}</h3>
+            <div className="space-y-2.5 text-sm text-slate-600 dark:text-slate-300">
+              <p><span className="font-semibold text-slate-900 dark:text-slate-100">Fabric Type:</span> {viewItem.fabric_type}</p>
+              <p><span className="font-semibold text-slate-900 dark:text-slate-100">Source:</span> {viewItem.source}</p>
+              <p><span className="font-semibold text-slate-900 dark:text-slate-100">Quantity:</span> {viewItem.quantity_kg} kg</p>
+              <p><span className="font-semibold text-slate-900 dark:text-slate-100">Color:</span> {viewItem.color}</p>
+              <p><span className="font-semibold text-slate-900 dark:text-slate-100">Condition:</span> {viewItem.condition}</p>
+              <p><span className="font-semibold text-slate-900 dark:text-slate-100">Collected On:</span> {viewItem.collection_date}</p>
             </div>
-            <button onClick={() => setViewItem(null)} className="mt-5 w-full bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-100 py-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition font-medium border border-slate-200 dark:border-slate-600">Close</button>
+            <button onClick={() => setViewItem(null)} className="mt-5 w-full bg-slate-100/80 dark:bg-slate-700/80 text-slate-800 dark:text-slate-100 py-2.5 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 transition-all duration-200 font-semibold border border-slate-200/60 dark:border-slate-600">Close</button>
           </div>
         </div>
       )}
@@ -272,9 +275,9 @@ const InventoryDashboard = () => {
       {/* AI IMAGE SCANNER MODAL */}
       {/* ========================================== */}
       {showAiModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl p-6 w-full max-w-lg">
-            <h3 className="text-xl font-bold mb-4 text-slate-900 dark:text-slate-100 flex items-center gap-2">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="glass-dropdown rounded-2xl shadow-2xl p-6 w-full max-w-lg animate-fade-in">
+            <h3 className="text-xl font-extrabold mb-4 text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
               📸 AI Textile Waste Scanner
             </h3>
             
@@ -282,47 +285,46 @@ const InventoryDashboard = () => {
               type="file" 
               accept="image/*"
               onChange={(e) => setSelectedFile(e.target.files[0])}
-              className="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-200 p-3 w-full rounded-lg mb-4 text-sm focus:outline-none focus:border-purple-500"
+              className="bg-white/60 dark:bg-slate-900 border border-white/40 dark:border-slate-700 text-slate-900 dark:text-slate-200 p-3 w-full rounded-xl mb-4 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50"
             />
 
             <button 
               onClick={handleAiScan}
               disabled={aiLoading}
-              className="w-full bg-purple-600 text-white py-2.5 rounded-lg font-bold hover:bg-purple-500 disabled:bg-purple-900/50 disabled:text-purple-400 transition"
+              className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 hover:opacity-90 active:scale-95 text-white py-2.5 rounded-xl font-bold disabled:opacity-50 transition-all duration-200 shadow shadow-purple-500/25"
             >
               {aiLoading ? '🧠 Analyzing AI Models...' : '🚀 Scan with AI'}
             </button>
 
-            {/* AI RESULT DISPLAY CARDS (WITH MULTI-KEY FALLBACK) */}
             {aiResult && (
-              <div className="mt-6 bg-slate-50 dark:bg-slate-900/90 p-4 rounded-xl border border-purple-500/30">
-                <h4 className="font-bold text-purple-600 dark:text-purple-300 mb-3 text-center border-b border-slate-200 dark:border-slate-700/80 pb-2">AI Scan Results</h4>
+              <div className="mt-6 bg-white/50 dark:bg-slate-900/80 backdrop-blur-sm p-4 rounded-2xl border border-white/40 dark:border-purple-500/30">
+                <h4 className="font-bold text-purple-600 dark:text-purple-300 mb-3 text-center border-b border-slate-200/60 dark:border-slate-700/80 pb-2">AI Scan Results</h4>
                 
                 <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 p-3 rounded-lg shadow-sm">
+                  <div className="glass-card border border-white/40 dark:border-slate-700/60 p-3 rounded-xl">
                     <span className="font-bold text-slate-500 dark:text-slate-400 block text-xs mb-1">Fabric Type:</span>
                     <span className="text-base font-semibold text-blue-600 dark:text-blue-400">
                       {aiResult.material || aiResult.fabric_type || aiResult.fabric || aiResult.detected_material || "Unknown"}
                     </span>
                   </div>
 
-                  <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 p-3 rounded-lg shadow-sm">
+                  <div className="glass-card border border-white/40 dark:border-slate-700/60 p-3 rounded-xl">
                     <span className="font-bold text-slate-500 dark:text-slate-400 block text-xs mb-1">Condition / Defect:</span>
                     <span className="text-base font-semibold text-rose-600 dark:text-rose-400">
                       {aiResult.detected_defect || aiResult.condition || aiResult.defect || aiResult.damage_type || "Unknown"}
                     </span>
                   </div>
 
-                  <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 p-3 rounded-lg shadow-sm col-span-2">
+                  <div className="glass-card border border-white/40 dark:border-slate-700/60 p-3 rounded-xl col-span-2">
                     <span className="font-bold text-slate-500 dark:text-slate-400 block text-xs mb-1">Circularity Score:</span>
                     <span className="text-base font-bold text-emerald-600 dark:text-emerald-400">
                       {aiResult.circularity_score || aiResult.score || "75"}/100
                     </span>
                   </div>
 
-                  <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 p-3 rounded-lg shadow-sm col-span-2">
+                  <div className="glass-card border border-white/40 dark:border-slate-700/60 p-3 rounded-xl col-span-2">
                     <span className="font-bold text-slate-500 dark:text-slate-400 block text-xs mb-1">Recommended Strategy:</span>
-                    <span className="font-medium text-purple-600 dark:text-purple-300">
+                    <span className="font-semibold text-purple-600 dark:text-purple-300">
                       {aiResult.recommended_strategy || aiResult.strategy || aiResult.recycling_strategy || "Mechanical Recycling"}
                     </span>
                   </div>
@@ -332,7 +334,7 @@ const InventoryDashboard = () => {
 
             <button 
               onClick={() => setShowAiModal(false)} 
-              className="mt-5 w-full bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 py-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition font-medium border border-slate-200 dark:border-slate-600"
+              className="mt-5 w-full bg-slate-100/80 dark:bg-slate-700/80 text-slate-800 dark:text-slate-200 py-2.5 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 transition-all duration-200 font-semibold border border-slate-200/60 dark:border-slate-600"
             >
               Close Scanner
             </button>

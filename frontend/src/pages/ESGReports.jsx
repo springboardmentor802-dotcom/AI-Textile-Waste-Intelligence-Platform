@@ -274,10 +274,10 @@ export default function ESGReports() {
       {/* ── Page header with Export button ────────────────────────────── */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-slate-100 flex items-center gap-2">
-            <Leaf className="text-green-600" /> Sustainability &amp; ESG Reports
+          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <Leaf className="w-7 h-7 text-emerald-500" /> Sustainability &amp; ESG Reports
           </h1>
-          <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
             Module 7, 8 &amp; 9: Real-time Environmental Impact &amp; Weighted Circularity Benchmarking
           </p>
         </div>
@@ -287,7 +287,7 @@ export default function ESGReports() {
           id="esg-export-btn"
           onClick={handleExportPDF}
           disabled={exportingPDF || !!error}
-          className="flex items-center gap-2 bg-green-600 hover:bg-green-500 disabled:bg-green-300 disabled:cursor-not-allowed text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all duration-200"
+          className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:opacity-90 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow-sm shadow-emerald-500/25 transition-all duration-200"
         >
           {exportingPDF ? (
             <>
@@ -303,9 +303,8 @@ export default function ESGReports() {
         </button>
       </div>
 
-      {/* ── CRITICAL: This div is the html2canvas capture target ──────── */}
-      {/* Everything inside here will appear in the exported PDF.          */}
-      <div id="esg-report-content" className="space-y-6 bg-slate-50 dark:bg-slate-950 rounded-2xl p-4">
+      {/* ── CRITICAL: This div is the capture target ─────────────────────── */}
+      <div id="esg-report-content" className="space-y-6 bg-slate-50/50 dark:bg-slate-950/50 backdrop-blur-sm rounded-2xl p-4">
 
         {error ? (
           <div className="bg-red-50 p-4 rounded-lg flex items-center gap-3 text-red-600">
@@ -318,75 +317,77 @@ export default function ESGReports() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-2">
 
               {/* CO₂ Saved */}
-              <div className="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700/50 flex flex-col items-center text-center">
-                <div className="bg-green-100 dark:bg-green-900/40 p-3 rounded-full mb-4">
-                  <TrendingUp className="w-6 h-6 text-green-600 dark:text-green-400" />
+              <div className="glass-card p-6 rounded-2xl flex flex-col items-center text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-xl group">
+                <div className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 p-3 rounded-xl mb-4 border border-emerald-500/10 group-hover:scale-110 transition-transform duration-300">
+                  <TrendingUp className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
                 </div>
-                <h3 className="text-gray-500 dark:text-slate-400 font-medium text-sm">CO₂ Emissions Saved</h3>
-                <p className="text-3xl font-bold text-gray-900 dark:text-slate-100 mt-2">
+                <h3 className="text-slate-500 dark:text-slate-400 font-medium text-sm">CO₂ Emissions Saved</h3>
+                <p className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-2">
                   {metrics?.total_co2_saved_kg || 0}{' '}
-                  <span className="text-lg text-gray-500 dark:text-slate-400 font-normal">kg</span>
+                  <span className="text-lg text-slate-500 dark:text-slate-400 font-normal">kg</span>
                 </p>
-                <span className="text-xs text-green-600 dark:text-emerald-400 font-medium mt-1">↑ Carbon Footprint Reduced</span>
+                <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold mt-1">↑ Carbon Footprint Reduced</span>
               </div>
 
               {/* Water Conservation */}
-              <div className="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700/50 flex flex-col items-center text-center">
-                <div className="bg-blue-100 dark:bg-blue-900/40 p-3 rounded-full mb-4">
+              <div className="glass-card p-6 rounded-2xl flex flex-col items-center text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-xl group">
+                <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 p-3 rounded-xl mb-4 border border-blue-500/10 group-hover:scale-110 transition-transform duration-300">
                   <Droplets className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 </div>
-                <h3 className="text-gray-500 dark:text-slate-400 font-medium text-sm">Water Conservation</h3>
-                <p className="text-3xl font-bold text-gray-900 dark:text-slate-100 mt-2">
+                <h3 className="text-slate-500 dark:text-slate-400 font-medium text-sm">Water Conservation</h3>
+                <p className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-2">
                   {metrics?.total_water_saved_liters || 0}{' '}
-                  <span className="text-lg text-gray-500 dark:text-slate-400 font-normal">L</span>
+                  <span className="text-lg text-slate-500 dark:text-slate-400 font-normal">L</span>
                 </p>
-                <span className="text-xs text-blue-600 dark:text-blue-400 font-medium mt-1">↑ High Industry Benchmark</span>
+                <span className="text-xs text-blue-600 dark:text-blue-400 font-semibold mt-1">↑ High Industry Benchmark</span>
               </div>
 
               {/* Energy Saved */}
-              <div className="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700/50 flex flex-col items-center text-center">
-                <div className="bg-yellow-100 dark:bg-amber-900/40 p-3 rounded-full mb-4">
-                  <Zap className="w-6 h-6 text-yellow-600 dark:text-amber-400" />
+              <div className="glass-card p-6 rounded-2xl flex flex-col items-center text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-xl group">
+                <div className="bg-gradient-to-br from-amber-500/10 to-yellow-500/10 p-3 rounded-xl mb-4 border border-amber-500/10 group-hover:scale-110 transition-transform duration-300">
+                  <Zap className="w-6 h-6 text-amber-600 dark:text-amber-400" />
                 </div>
-                <h3 className="text-gray-500 dark:text-slate-400 font-medium text-sm">Energy Saved</h3>
-                <p className="text-3xl font-bold text-gray-900 dark:text-slate-100 mt-2">
+                <h3 className="text-slate-500 dark:text-slate-400 font-medium text-sm">Energy Saved</h3>
+                <p className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-2">
                   {metrics?.total_energy_saved_kwh || 0}{' '}
-                  <span className="text-lg text-gray-500 dark:text-slate-400 font-normal">kWh</span>
+                  <span className="text-lg text-slate-500 dark:text-slate-400 font-normal">kWh</span>
                 </p>
-                <span className="text-xs text-yellow-600 dark:text-amber-400 font-medium mt-1">↑ Resource Recovery</span>
+                <span className="text-xs text-amber-600 dark:text-amber-400 font-semibold mt-1">↑ Resource Recovery</span>
               </div>
 
               {/* Landfill Diverted */}
-              <div className="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700/50 flex flex-col items-center text-center">
-                <div className="bg-purple-100 dark:bg-purple-900/40 p-3 rounded-full mb-4">
+              <div className="glass-card p-6 rounded-2xl flex flex-col items-center text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-xl group">
+                <div className="bg-gradient-to-br from-purple-500/10 to-indigo-500/10 p-3 rounded-xl mb-4 border border-purple-500/10 group-hover:scale-110 transition-transform duration-300">
                   <Recycle className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                 </div>
-                <h3 className="text-gray-500 dark:text-slate-400 font-medium text-sm">Landfill Diverted</h3>
-                <p className="text-3xl font-bold text-gray-900 dark:text-slate-100 mt-2">
+                <h3 className="text-slate-500 dark:text-slate-400 font-medium text-sm">Landfill Diverted</h3>
+                <p className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-2">
                   {metrics?.total_landfill_diverted_kg || 0}{' '}
-                  <span className="text-lg text-gray-500 dark:text-slate-400 font-normal">kg</span>
+                  <span className="text-lg text-slate-500 dark:text-slate-400 font-normal">kg</span>
                 </p>
-                <span className="text-xs text-purple-600 dark:text-purple-400 font-medium mt-1">
+                <span className="text-xs text-purple-600 dark:text-purple-400 font-semibold mt-1">
                   Rate: {metrics?.waste_diversion_rate || '94.5%'}
                 </span>
               </div>
             </div>
 
-            {/* ── Circularity Score Panel ────────────────────────────────── */}
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700/50">
+            {/* ── Circularity Score Panel ─────────────────────────────────────────── */}
+            <div className="glass-card p-6 rounded-2xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl">
               <div className="flex items-center gap-2 mb-4">
-                <Award className="text-yellow-600 w-6 h-6" />
-                <h2 className="text-lg font-bold text-gray-800 dark:text-slate-100">
+                <div className="p-1.5 rounded-lg bg-gradient-to-br from-amber-500/10 to-yellow-500/10">
+                  <Award className="text-amber-500 w-5 h-5" />
+                </div>
+                <h2 className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">
                   Overall Circularity Score (Weighted Model — Module 9)
                 </h2>
               </div>
 
               <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                 <div className="text-center md:text-left">
-                  <span className="text-5xl font-extrabold text-green-600 dark:text-emerald-400">{avgScore}</span>
-                  <span className="text-2xl text-gray-400 dark:text-slate-500"> / 100</span>
-                  <p className="text-sm text-gray-600 dark:text-slate-400 mt-1">
-                    Category: <strong className="text-green-700 dark:text-emerald-400">{category}</strong>
+                  <span className="text-5xl font-extrabold text-transparent bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text">{avgScore}</span>
+                  <span className="text-2xl text-slate-400 dark:text-slate-500"> / 100</span>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                    Category: <strong className="text-emerald-600 dark:text-emerald-400">{category}</strong>
                   </p>
                 </div>
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Recycle, CheckCircle, Loader2, AlertCircle, FileSpreadsheet, Download } from 'lucide-react';
+import { Recycle, CheckCircle, Loader2, AlertCircle, FileSpreadsheet } from 'lucide-react';
 import axios from 'axios';
 import * as XLSX from 'xlsx'; // GAP-10 FIX: Excel export
 import { useToast } from '../context/ToastContext'; // GAP-10 FIX: Toast notifications
@@ -112,22 +112,43 @@ export default function RecyclingOpportunities() {
     }
   };
 
-  if (loading) return <div className="flex justify-center items-center h-64"><Loader2 className="w-8 h-8 animate-spin text-green-600" /></div>;
+  const getScoreBadgeClass = (score) => {
+    const s = Number(score);
+    if (s >= 70) return 'text-emerald-600 dark:text-emerald-400';
+    if (s >= 55) return 'text-amber-600 dark:text-amber-400';
+    return 'text-rose-600 dark:text-rose-400';
+  };
+
+  const getConditionBadgeClass = (condition) => {
+    const c = (condition || '').toLowerCase();
+    if (c === 'good') return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20';
+    if (c.includes('torn') || c.includes('damage')) return 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20';
+    return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20';
+  };
+
+  if (loading) return (
+    <div className="flex justify-center items-center h-64 gap-3 text-slate-400">
+      <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+    </div>
+  );
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
+    <div className="space-y-6">
+      {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-            <Recycle className="text-green-600" /> Recycling Opportunities
+          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <Recycle className="w-7 h-7 text-emerald-500" /> Recycling Opportunities
           </h1>
-          <p className="text-sm text-gray-500 mt-1">Live data fetched from AI Analysis Backend — Module 6</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
+            Live data fetched from AI Analysis Backend — Module 6
+          </p>
         </div>
 
         {/* GAP-10 FIX: Excel Export Button */}
         <button
           onClick={handleExportExcel}
-          className="flex items-center gap-2 bg-green-700 hover:bg-green-600 text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all duration-200"
+          className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:opacity-90 active:scale-95 text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow shadow-emerald-500/25 transition-all duration-200"
         >
           <FileSpreadsheet className="w-4 h-4" />
           Export to Excel
@@ -135,48 +156,51 @@ export default function RecyclingOpportunities() {
       </div>
 
       {error ? (
-        <div className="bg-red-50 p-4 rounded-lg flex items-center gap-3 text-red-600">
-          <AlertCircle className="w-5 h-5" />
+        <div className="glass-card rounded-2xl p-5 flex items-center gap-3 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+          <AlertCircle className="w-5 h-5 shrink-0" />
           <p>{error}</p>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+        <div className="glass-card rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-gray-50 text-gray-600 text-sm border-b border-gray-200">
-                <th className="p-4 font-semibold">Batch ID</th>
-                <th className="p-4 font-semibold">Material</th>
-                <th className="p-4 font-semibold">Condition</th>
-                <th className="p-4 font-semibold">Circularity Score</th>
-                <th className="p-4 font-semibold">Recovery Category</th>
-                <th className="p-4 font-semibold">Recommended Action</th>
+              <tr className="bg-gradient-to-r from-slate-50/80 to-slate-100/60 dark:from-slate-900/80 dark:to-slate-800/60 text-slate-500 dark:text-slate-400 border-b border-white/30 dark:border-slate-800/50 text-xs font-semibold uppercase tracking-wider">
+                <th className="p-4">Batch ID</th>
+                <th className="p-4">Material</th>
+                <th className="p-4">Condition</th>
+                <th className="p-4">Circularity Score</th>
+                <th className="p-4">Recovery Category</th>
+                <th className="p-4">Recommended Action</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-white/20 dark:divide-slate-800/60 text-slate-900 dark:text-slate-200">
               {opportunities.length > 0 ? (
                 opportunities.map((item) => (
-                  <tr key={item.batch_id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <td className="p-4 text-gray-500 text-sm font-mono">#{item.batch_id}</td>
-                    <td className="p-4 font-medium text-gray-800">{item.fabric_type || 'N/A'}</td>
+                  <tr
+                    key={item.batch_id}
+                    className="hover:bg-emerald-50/40 dark:hover:bg-emerald-900/10 transition-colors duration-150"
+                  >
+                    <td className="p-4 text-slate-500 dark:text-slate-400 text-sm font-mono">#{item.batch_id}</td>
+                    <td className="p-4 font-semibold text-slate-900 dark:text-slate-100">{item.fabric_type || 'N/A'}</td>
                     <td className="p-4">
-                      <span className={`px-2 py-1 rounded text-xs font-semibold ${item.condition === 'Good' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${getConditionBadgeClass(item.condition)}`}>
                         {item.condition || 'N/A'}
                       </span>
                     </td>
                     <td className="p-4">
-                      <span className={`font-bold text-sm ${Number(item.circularity_score) >= 70 ? 'text-green-600' : Number(item.circularity_score) >= 55 ? 'text-amber-600' : 'text-red-600'}`}>
+                      <span className={`font-bold text-sm ${getScoreBadgeClass(item.circularity_score)}`}>
                         {Number(item.circularity_score || 0).toFixed(1)} / 100
                       </span>
                     </td>
-                    <td className="p-4 text-sm text-gray-600">{item.circularity_category || 'N/A'}</td>
-                    <td className="p-4 text-blue-600 font-medium flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4" /> {item.strategy || 'Not yet analyzed'}
+                    <td className="p-4 text-sm text-slate-600 dark:text-slate-400">{item.circularity_category || 'N/A'}</td>
+                    <td className="p-4 text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-2 text-sm">
+                      <CheckCircle className="w-4 h-4 shrink-0" /> {item.strategy || 'Not yet analyzed'}
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="6" className="p-8 text-center text-gray-500">
+                  <td colSpan="6" className="p-8 text-center text-slate-500 dark:text-slate-400 text-sm">
                     No recycling records found in the database. Scan an item first!
                   </td>
                 </tr>

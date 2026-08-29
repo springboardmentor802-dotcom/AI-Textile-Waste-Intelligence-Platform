@@ -91,18 +91,20 @@ function Login() {
 
   }
 
-  catch(error){
+  catch (error) {
 
-    console.log(
-      error.response
-    );
+  console.log("LOGIN ERROR:", error);
+  console.log("STATUS:", error.response?.status);
+  console.log("DATA:", error.response?.data);
+  console.log("MESSAGE:", error.message);
 
+  setError(
+    error.response?.data?.detail ||
+    error.message ||
+    "Login failed"
+  );
 
-    setError(
-      "Invalid username or password"
-    );
-
-  }
+}
 
 
 

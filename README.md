@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 # Textile Waste Intelligence Platform — Milestone 1
 
 A containerized full-stack platform for tracking textile waste batches through sorting, processing, and recycling, with role-based access control. Built as a foundation for a Milestone 2 computer-vision fiber-classification module.
@@ -68,3 +69,7 @@ Tests spin up a local SQLite database and cover registration/login, JWT auth, an
 =======
 # AI-Textile-Waste-Intelligence-Platform
 >>>>>>> 9cd98e3c95689224340f206384f2dc3dc95ad7d4
+=======
+# AI-Textile-Waste-Intelligence-Platform
+Infosys Springboard Internship Project - AI Textile Waste Intelligence Platform
+>>>>>>> c8518ef4088297f615bf37d1201ab57e9678813a
